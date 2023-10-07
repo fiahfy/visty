@@ -1,0 +1,25 @@
+name: Create Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 20
+      - run: yarn
+      - run: yarn build
+      - run: yarn release -ml -c.snap.publish=github
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # clear disk space because building nsis is failing
+      - run: rm -rf dist
+      - run: yarn release -w
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
