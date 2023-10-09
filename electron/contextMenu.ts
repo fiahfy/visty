@@ -49,11 +49,6 @@ const registerContextMenu = () => {
             }
           },
         },
-        search: params.selectionText.trim().length > 0 && {
-          accelerator: 'CommandOrControl+F',
-          click: () => send({ type: 'search' }),
-          label: `Search for “${params.selectionText.trim()}”`,
-        },
       }
 
       const actionCreators: {
@@ -78,7 +73,6 @@ const registerContextMenu = () => {
       const template = [
         ...actions,
         defaultActions.separator,
-        defaultActions.search,
         defaultActions.cut,
         defaultActions.copy,
         defaultActions.paste,

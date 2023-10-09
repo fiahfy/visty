@@ -4,25 +4,13 @@ import {
   Menu,
   MenuItemConstructorOptions,
   app,
+  dialog,
   ipcMain,
   shell,
 } from 'electron'
 
-type State = {
-  canBack: boolean
-  canForward: boolean
-  inspectorHidden: boolean
-  isEditable: boolean
-  navigatorHidden: boolean
-  orderBy:
-    | 'name'
-    | 'dateLastOpened'
-    | 'dateModified'
-    | 'dateCreated'
-    | 'size'
-    | 'rating'
-  viewMode: 'list' | 'thumbnail'
-}
+// eslint-disable-next-line @typescript-eslint/ban-types
+type State = {}
 
 export type ApplicationMenuParams = Partial<State>
 
@@ -32,18 +20,10 @@ const send = (message: any) => {
   activeWindow?.webContents.send('message-send', message)
 }
 
-const registerApplicationMenu = () => {
+const registerApplicationMenu = (createWindow: (filePath: string) => void) => {
   const isMac = process.platform === 'darwin'
 
-  let state: State = {
-    canBack: false,
-    canForward: false,
-    inspectorHidden: false,
-    isEditable: false,
-    navigatorHidden: false,
-    orderBy: 'name',
-    viewMode: 'list',
-  }
+  let state: State = {}
 
   const update = () => {
     // @see https://www.electronjs.org/docs/latest/api/menu#examples
@@ -78,23 +58,18 @@ const registerApplicationMenu = () => {
         label: 'File',
         submenu: [
           {
-            accelerator: 'CmdOrCtrl+N',
-            click: () => send({ type: 'newWindow' }),
-            label: 'New Window',
+            accelerator: 'CmdOrCtrl+O',
+            click: async () => {
+              const { filePaths } = await dialog.showOpenDialog({
+                properties: ['openFile'],
+              })
+              const filePath = filePaths[0]
+              createWindow(filePath)
+            },
+            label: 'Open File...',
           },
+          { type: 'separator' },
           ...[isMac ? { role: 'close' } : { role: 'quit' }],
-          { type: 'separator' },
-          {
-            accelerator: 'CmdOrCtrl+Backspace',
-            click: () => send({ type: 'moveToTrash' }),
-            label: 'Move to Trash',
-          },
-          { type: 'separator' },
-          {
-            accelerator: 'CmdOrCtrl+F',
-            click: () => send({ type: 'find' }),
-            label: 'Find',
-          },
         ],
       } as MenuItemConstructorOptions,
       // { role: 'editMenu' }
@@ -104,129 +79,21 @@ const registerApplicationMenu = () => {
           { role: 'undo' },
           { role: 'redo' },
           { type: 'separator' },
-
-          ...(state.isEditable
-            ? [
-                { role: 'cut' },
-                { role: 'copy' },
-                { role: 'paste' },
-                { role: 'selectAll' },
-              ]
-            : [
-                // TODO: implement
-                {
-                  accelerator: 'CmdOrCtrl+X',
-                  click: () => undefined,
-                  enabled: false,
-                  label: 'Cut',
-                },
-                {
-                  accelerator: 'CmdOrCtrl+C',
-                  click: () => send({ type: 'copy' }),
-                  label: 'Copy',
-                },
-                {
-                  accelerator: 'CmdOrCtrl+V',
-                  click: () => send({ type: 'paste' }),
-                  label: 'Paste',
-                },
-                {
-                  accelerator: 'CmdOrCtrl+A',
-                  click: () => send({ type: 'selectAll' }),
-                  label: 'Select All',
-                },
-              ]),
+          { role: 'cut' },
+          { role: 'copy' },
+          { role: 'paste' },
+          { role: 'selectAll' },
         ],
       } as MenuItemConstructorOptions,
       // { role: 'viewMenu' }
       {
         label: 'View',
         submenu: [
-          ...[
-            {
-              accelerator: 'CmdOrCtrl+1',
-              label: 'as List',
-              viewMode: 'list',
-            },
-            {
-              accelerator: 'CmdOrCtrl+2',
-              label: 'as Thumbnail',
-              viewMode: 'thumbnail',
-            },
-          ].map((menu) => ({
-            ...menu,
-            checked: menu.viewMode === state.viewMode,
-            click: () =>
-              send({
-                type: 'changeViewMode',
-                data: { viewMode: menu.viewMode },
-              }),
-            type: 'checkbox',
-          })),
-          { type: 'separator' },
-          {
-            label: 'Sort By',
-            submenu: [
-              { label: 'Name', orderBy: 'name' },
-              { label: 'Date Last Opened', orderBy: 'dateLastOpened' },
-              { label: 'Date Modified', orderBy: 'dateModified' },
-              { label: 'Date Created', orderBy: 'dateCreated' },
-              { label: 'Size', orderBy: 'size' },
-              { label: 'Rating', orderBy: 'rating' },
-            ].map((menu) => ({
-              ...menu,
-              checked: menu.orderBy === state.orderBy,
-              click: () =>
-                send({ type: 'sort', data: { orderBy: menu.orderBy } }),
-              type: 'checkbox',
-            })),
-          },
-          { type: 'separator' },
-          {
-            label: state.navigatorHidden ? 'Show Navigator' : 'Hide Navigator',
-            click: () =>
-              send({
-                type: 'changeSidebarHidden',
-                data: {
-                  variant: 'primary',
-                  hidden: !state.navigatorHidden,
-                },
-              }),
-          },
-          {
-            label: state.inspectorHidden ? 'Show Inspector' : 'Hide Inspector',
-            click: () =>
-              send({
-                type: 'changeSidebarHidden',
-                data: {
-                  variant: 'secondary',
-                  hidden: !state.inspectorHidden,
-                },
-              }),
-          },
-          { type: 'separator' },
           { role: 'reload' },
           { role: 'forceReload' },
           { role: 'toggleDevTools' },
           { type: 'separator' },
           { role: 'togglefullscreen' },
-        ],
-      } as MenuItemConstructorOptions,
-      {
-        label: 'Go',
-        submenu: [
-          {
-            accelerator: 'CmdOrCtrl+[',
-            click: () => send({ type: 'back' }),
-            enabled: state.canBack,
-            label: 'Back',
-          },
-          {
-            accelerator: 'CmdOrCtrl+]',
-            click: () => send({ type: 'forward' }),
-            enabled: state.canForward,
-            label: 'Forward',
-          },
         ],
       } as MenuItemConstructorOptions,
       // { role: 'windowMenu' }

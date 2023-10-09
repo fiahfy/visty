@@ -6,6 +6,7 @@ import registerContextMenu from './contextMenu'
 import createFullscreenManager from './fullscreen'
 import registerHandlers from './handlers'
 import createWindowManager from './window'
+import { pathToFileURL } from 'node:url'
 
 // The built directory structure
 //
@@ -32,7 +33,7 @@ app.whenReady().then(async () => {
       ...state,
       minHeight: 350,
       minWidth: 550,
-      titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : 'default',
+      titleBarStyle: 'default',
       webPreferences: {
         preload: join(__dirname, 'preload.js'),
         webSecurity: !VITE_DEV_SERVER_URL,
@@ -55,19 +56,14 @@ app.whenReady().then(async () => {
 
   const windowManager = createWindowManager(baseCreateWindow)
 
-  const createWindow = () => {
-    const directory = app.getPath('home')
-    windowManager.create({ directory })
+  const createWindow = (filePath: string) => {
+    const fileUrl = pathToFileURL(filePath).href
+    windowManager.create({ filePath, fileUrl })
   }
 
-  registerApplicationMenu()
+  registerApplicationMenu(createWindow)
   registerContextMenu()
   registerHandlers()
-
-  const browserWindows = await windowManager.restore()
-  if (browserWindows.length === 0) {
-    createWindow()
-  }
 
   // Quit when all windows are closed, except on macOS. There, it's common
   // for applications and their menu bar to stay active until the user quits
@@ -82,7 +78,7 @@ app.whenReady().then(async () => {
     // On OS X it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0) {
-      createWindow()
+      // noop
     }
   })
 

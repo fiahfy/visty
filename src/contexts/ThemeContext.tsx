@@ -1,11 +1,11 @@
-import { CssBaseline, Theme, useMediaQuery } from '@mui/material'
+import { CssBaseline, Theme } from '@mui/material'
 import {
   ThemeProvider as MuiThemeProvider,
   createTheme,
 } from '@mui/material/styles'
 import { ReactNode, createContext, useEffect, useMemo } from 'react'
-import { useAppSelector } from '~/store'
-import { selectTheme } from '~/store/settings'
+// import { useAppSelector } from '~/store'
+// import { selectTheme } from '~/store/settings'
 
 export const ThemeContext = createContext<
   | {
@@ -19,16 +19,17 @@ type Props = { children: ReactNode }
 export const ThemeProvider = (props: Props) => {
   const { children } = props
 
-  const themeSetting = useAppSelector(selectTheme)
+  // const themeSetting = useAppSelector(selectTheme)
 
-  const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)')
+  // const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)')
 
-  const mode =
-    themeSetting === 'system'
-      ? prefersDarkMode
-        ? 'dark'
-        : 'light'
-      : themeSetting
+  // const mode =
+  //   themeSetting === 'system'
+  //     ? prefersDarkMode
+  //       ? 'dark'
+  //       : 'light'
+  //     : themeSetting
+  const mode = 'dark'
 
   useEffect(() => {
     if (mode === 'dark') {

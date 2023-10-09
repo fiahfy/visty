@@ -8,8 +8,8 @@ const useMessageListener = () => {
     // const removeListener = window.electronAPI.message.addListener((message) => {
     //   const { type, data } = message
     //   switch (type) {
-    //     case 'dummy':
-    //     return dispatch(add(data.path))
+    //     case 'open':
+    //       return dispatch(open(data.path))
     //   }
     // })
     // return () => removeListener()

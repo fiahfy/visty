@@ -26,7 +26,11 @@ export interface IElectronAPI {
   }
   window: {
     restore: () => Promise<
-      | { index: number; params: { directory?: string }; restored: boolean }
+      | {
+          index: number
+          params: { filePath: string; fileUrl: string }
+          restored: boolean
+        }
       | undefined
     >
     open: (params: { directory: string }) => Promise<void>
