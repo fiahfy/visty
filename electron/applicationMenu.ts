@@ -89,6 +89,14 @@ const registerApplicationMenu = (createWindow: (filePath: string) => void) => {
       {
         label: 'View',
         submenu: [
+          // TODO: implement
+          {
+            checked: true,
+            click: () => undefined,
+            label: 'Actual Size',
+            type: 'checkbox',
+          },
+          { type: 'separator' },
           { role: 'reload' },
           { role: 'forceReload' },
           { role: 'toggleDevTools' },

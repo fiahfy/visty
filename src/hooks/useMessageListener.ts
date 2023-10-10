@@ -1,18 +1,19 @@
 import { useEffect } from 'react'
 import { useAppDispatch } from '~/store'
+import { change } from '~/store/window'
 
 const useMessageListener = () => {
   const dispatch = useAppDispatch()
 
   useEffect(() => {
-    // const removeListener = window.electronAPI.message.addListener((message) => {
-    //   const { type, data } = message
-    //   switch (type) {
-    //     case 'open':
-    //       return dispatch(open(data.path))
-    //   }
-    // })
-    // return () => removeListener()
+    const removeListener = window.electronAPI.message.addListener((message) => {
+      const { type, data } = message
+      switch (type) {
+        case 'changeFile':
+          return dispatch(change(data.file))
+      }
+    })
+    return () => removeListener()
   }, [dispatch])
 }
 

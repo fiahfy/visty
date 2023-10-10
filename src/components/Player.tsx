@@ -15,43 +15,102 @@ import {
   Toolbar,
   Typography,
 } from '@mui/material'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import {
+  DragEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import NoTransitionSlider from '~/components/mui/NoTransitionSlider'
-import { useAppSelector } from '~/store'
-import { selectFileUrl } from '~/store/window'
+import useTitle from '~/hooks/useTitle'
+import { useAppDispatch, useAppSelector } from '~/store'
+import {
+  selectDefaultMuted,
+  selectDefaultVolume,
+  setDefaultMuted,
+  setDefaultVolume,
+} from '~/store/settings'
+import { selectFile } from '~/store/window'
 import { formatDuration } from '~/utils/formatter'
 
 const Player = () => {
-  const fileUrl = useAppSelector(selectFileUrl)
+  const defaultMuted = useAppSelector(selectDefaultMuted)
+  const defaultVolume = useAppSelector(selectDefaultVolume)
+  const file = useAppSelector(selectFile)
+  const dispatch = useAppDispatch()
 
   const [toolbarHidden, setToolbarHidden] = useState(false)
   const [hovered, setHovered] = useState(false)
+  const [fullscreen, setFullscreen] = useState(false)
+
   const [paused, setPaused] = useState(true)
   const [duration, setDuration] = useState(100)
   const [currentTime, setCurrentTime] = useState(0)
+  const [muted, setMuted] = useState(false)
   const [volume, setVolume] = useState(0)
-  const [storedValue, setStoredValue] = useState(0)
-  const [fullscreen, setFullscreen] = useState(false)
+
+  const title = useMemo(() => file?.name ?? '', [file])
+
+  useTitle(title)
 
   const videoRef = useRef<HTMLVideoElement>(null)
   const timer = useRef<number>()
 
+  const volumeValue = useMemo(() => (muted ? 0 : volume), [muted, volume])
+
   const PlayIcon = useMemo(() => (paused ? PlayArrowIcon : PauseIcon), [paused])
 
   const VolumeIcon = useMemo(() => {
-    if (volume > 0.5) {
+    if (volumeValue > 0.5) {
       return VolumeUpIcon
-    } else if (volume > 0) {
+    } else if (volumeValue > 0) {
       return VolumeDownIcon
     } else {
       return VolumeOffIcon
     }
-  }, [volume])
+  }, [volumeValue])
 
   const FullscreenIcon = useMemo(
     () => (fullscreen ? FullscreenExitIcon : FullscreenEnterIcon),
     [fullscreen],
   )
+
+  useEffect(() => {
+    ;(async () => {
+      const video = videoRef.current
+      if (!video) {
+        return
+      }
+
+      await new Promise<void>((resolve) =>
+        video.addEventListener('loadedmetadata', () => resolve()),
+      )
+
+      await window.electronAPI.changeOriginalSize({
+        width: video.videoWidth,
+        height: video.videoHeight,
+      })
+
+      video.volume = defaultMuted ? 0 : defaultVolume
+
+      let requestId: number
+      const callback = () => {
+        if (video.readyState < 1) {
+          return
+        }
+        setPaused(video.paused)
+        setCurrentTime(video.currentTime)
+        setDuration(video.duration)
+        setVolume(video.volume)
+        requestId = requestAnimationFrame(callback)
+      }
+      requestId = requestAnimationFrame(callback)
+
+      return () => cancelAnimationFrame(requestId)
+    })()
+  }, [defaultMuted, defaultVolume, file])
 
   const clearTimer = useCallback(() => window.clearTimeout(timer.current), [])
 
@@ -67,6 +126,26 @@ const Player = () => {
     [clearTimer, paused],
   )
 
+  const handleDragOver = useCallback((e: DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    e.dataTransfer.dropEffect = 'move'
+  }, [])
+
+  const handleDrop = useCallback((e: DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    const paths = Array.from(e.dataTransfer.files).map(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (file) => (file as any).path,
+    ) as string[]
+    const path = paths[0]
+    if (!path) {
+      return
+    }
+    window.electronAPI.openFile(path)
+  }, [])
+
   const handleMouseMove = useCallback(
     () => resetTimer(hovered),
     [hovered, resetTimer],
@@ -81,80 +160,67 @@ const Player = () => {
     resetTimer(false)
   }, [resetTimer])
 
-  const handleClickPlay = () => {
+  const handleClickPlay = useCallback(() => {
     const video = videoRef.current
     if (!video) {
       return
     }
     video.paused ? video.play() : video.pause()
-  }
-
-  const handleChangeCurrentTime = (_e: Event, value: number | number[]) => {
-    const video = videoRef.current
-    if (!video) {
-      return
-    }
-    console.log('change', value)
-    video.currentTime = value as number
-  }
-
-  const handleChangeVolume = (_e: Event, value: number | number[]) => {
-    const video = videoRef.current
-    if (!video) {
-      return
-    }
-    video.volume = value as number
-    setStoredValue(value as number)
-  }
-
-  const handleClickMute = () => {
-    const video = videoRef.current
-    if (!video) {
-      return
-    }
-    video.volume = volume > 0 ? 0 : storedValue
-  }
-
-  useEffect(() => {
-    const video = videoRef.current
-    if (!video) {
-      return
-    }
-
-    setVolume(video.volume)
-
-    const handlePause = () => setPaused(true)
-    const handlePlay = () => setPaused(false)
-    const handleDurationchange = () => setDuration(video.duration)
-    const handleTimeupdate = () => setCurrentTime(video.currentTime)
-    const handleVolumechange = () => setVolume(video.volume)
-    video.addEventListener('pause', handlePause)
-    video.addEventListener('play', handlePlay)
-    video.addEventListener('durationchange', handleDurationchange)
-    video.addEventListener('timeupdate', handleTimeupdate)
-    video.addEventListener('volumechange', handleVolumechange)
-
-    return () => {
-      video.removeEventListener('pause', handlePause)
-      video.removeEventListener('play', handlePlay)
-      video.removeEventListener('durationchange', handleDurationchange)
-      video.removeEventListener('timeupdate', handleTimeupdate)
-      video.removeEventListener('volumechange', handleVolumechange)
-    }
   }, [])
+
+  const handleChangeCurrentTime = useCallback(
+    (_e: Event, value: number | number[]) => {
+      const video = videoRef.current
+      if (!video) {
+        return
+      }
+      video.currentTime = value as number
+    },
+    [],
+  )
+
+  const handleChangeVolume = useCallback(
+    (_e: Event, value: number | number[]) => {
+      const video = videoRef.current
+      if (!video) {
+        return
+      }
+      const volume = value as number
+      video.volume = volume
+      setVolume(volume)
+      dispatch(setDefaultVolume(volume))
+      dispatch(setDefaultMuted(volume === 0))
+    },
+    [dispatch],
+  )
+
+  const handleClickMute = useCallback(() => {
+    const video = videoRef.current
+    if (!video) {
+      return
+    }
+    setMuted((muted) => {
+      const newMuted = !muted
+      dispatch(setDefaultMuted(newMuted))
+      return newMuted
+    })
+  }, [dispatch])
 
   return (
     <Box
+      onDragOver={handleDragOver}
+      onDrop={handleDrop}
       onMouseMove={handleMouseMove}
       sx={{
         cursor: toolbarHidden ? 'none' : undefined,
         display: 'flex',
+        width: '100%',
       }}
     >
       <video
         onClick={handleClickPlay}
         ref={videoRef}
-        src={fileUrl}
+        src={file?.url}
         style={{ background: 'black', width: '100%' }}
       />
       <Box
@@ -205,7 +271,7 @@ const Player = () => {
           />
           <Toolbar disableGutters sx={{ px: 1 }} variant="dense">
             <Typography noWrap sx={{ mx: 1 }} variant="body2">
-              test
+              {title}
             </Typography>
           </Toolbar>
         </AppBar>
@@ -255,7 +321,7 @@ const Player = () => {
             <IconButton
               onClick={handleClickMute}
               size="small"
-              title={volume > 0 ? 'Mute' : 'Unmute'}
+              title={muted ? 'Unmute' : 'Mute'}
             >
               <VolumeIcon fontSize="small" />
             </IconButton>
@@ -269,7 +335,7 @@ const Player = () => {
                 mx: 1,
                 width: (theme) => theme.spacing(10),
               }}
-              value={volume}
+              value={volumeValue}
             />
             <Typography noWrap sx={{ mx: 1 }} variant="body2">
               {formatDuration(currentTime)} / {formatDuration(duration)}

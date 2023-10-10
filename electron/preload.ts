@@ -3,6 +3,9 @@ import { ApplicationMenuParams } from './applicationMenu'
 import { ContextMenuParams } from './contextMenu'
 
 contextBridge.exposeInMainWorld('electronAPI', {
+  changeOriginalSize: (size: { height: number; width: number }) =>
+    ipcRenderer.invoke('change-original-size', size),
+  openFile: (filePath: string) => ipcRenderer.invoke('open-file', filePath),
   applicationMenu: {
     update: (params: ApplicationMenuParams) =>
       ipcRenderer.invoke('application-menu-update', params),
@@ -37,7 +40,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   },
   window: {
     restore: () => ipcRenderer.invoke('window-restore'),
-    open: (params: { directory: string }) =>
+    open: (params: { file: { name: string; path: string; url: string } }) =>
       ipcRenderer.invoke('window-open', params),
   },
 })

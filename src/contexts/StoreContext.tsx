@@ -39,10 +39,14 @@ export const StoreProvider = (props: Props) => {
       if (!data) {
         return
       }
-      const { index, params, restored } = data
+      const {
+        index,
+        params: { file },
+        restored,
+      } = data
       dispatch(set(index))
       if (!restored) {
-        dispatch(initialize({ index, ...params }))
+        dispatch(initialize({ index, file }))
       }
       setInitialized(true)
     })()

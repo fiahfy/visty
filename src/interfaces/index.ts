@@ -5,6 +5,8 @@
 // import User from 'path/to/interfaces';
 
 export interface IElectronAPI {
+  changeOriginalSize: (size: { height: number; width: number }) => Promise<void>
+  openFile: (filePath: string) => Promise<void>
   applicationMenu: {
     update: (params: ApplicationMenuParams) => Promise<void>
   }
@@ -28,7 +30,7 @@ export interface IElectronAPI {
     restore: () => Promise<
       | {
           index: number
-          params: { filePath: string; fileUrl: string }
+          params: { file: { name: string; path: string; url: string } }
           restored: boolean
         }
       | undefined
@@ -54,6 +56,7 @@ export type ContextMenuParams = {
 }
 
 export type Settings = {
-  shouldShowHiddenFiles: boolean
-  theme: 'light' | 'dark' | 'system'
+  defaultLoop: boolean
+  defaultMuted: boolean
+  defaultVolume: number
 }

@@ -1,6 +1,6 @@
 import { BrowserWindow, app } from 'electron'
 import { State } from 'electron-window-state'
-import { join } from 'node:path'
+import { basename, join } from 'node:path'
 import registerApplicationMenu from './applicationMenu'
 import registerContextMenu from './contextMenu'
 import createFullscreenManager from './fullscreen'
@@ -57,8 +57,12 @@ app.whenReady().then(async () => {
   const windowManager = createWindowManager(baseCreateWindow)
 
   const createWindow = (filePath: string) => {
-    const fileUrl = pathToFileURL(filePath).href
-    windowManager.create({ filePath, fileUrl })
+    const file = {
+      name: basename(filePath),
+      path: filePath,
+      url: pathToFileURL(filePath).href,
+    }
+    windowManager.create({ file })
   }
 
   registerApplicationMenu(createWindow)

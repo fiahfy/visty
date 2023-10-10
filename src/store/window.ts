@@ -1,10 +1,12 @@
 import { PayloadAction, createSelector, createSlice } from '@reduxjs/toolkit'
 import { AppState, AppThunk } from '~/store'
+import { selectWindowIndex } from '~/store/windowIndex'
+
+type File = { name: string; path: string; url: string }
 
 // eslint-disable-next-line @typescript-eslint/ban-types
 type WindowState = {
-  filePath: string
-  fileUrl: string
+  file?: File
 }
 
 type State = {
@@ -12,8 +14,7 @@ type State = {
 }
 
 const defaultState: WindowState = {
-  filePath: '',
-  fileUrl: '',
+  file: undefined,
 }
 
 const initialState: State = {}
@@ -26,17 +27,15 @@ export const windowSlice = createSlice({
       state,
       action: PayloadAction<{
         index: number
-        filePath: string
-        fileUrl: string
+        file: File
       }>,
     ) {
-      const { index, filePath, fileUrl } = action.payload
+      const { index, file } = action.payload
       return {
         ...state,
         [index]: {
           ...defaultState,
-          filePath,
-          fileUrl,
+          file,
         },
       }
     },
@@ -55,15 +54,21 @@ export const selectWindow = (state: AppState) => {
   return windowState ?? defaultState
 }
 
-export const selectFilePath = createSelector(
-  selectWindow,
-  (window) => window.filePath,
-)
+export const selectFile = createSelector(selectWindow, (window) => window.file)
 
-export const selectFileUrl = createSelector(
-  selectWindow,
-  (window) => window.fileUrl,
-)
+export const change =
+  (file: File): AppThunk =>
+  async (dispatch, getState) => {
+    const { initialize } = windowSlice.actions
+    const index = selectWindowIndex(getState())
+    dispatch(
+      initialize({
+        index,
+        file,
+      }),
+    )
+    dispatch(updateApplicationMenu())
+  }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const updateApplicationMenu = (): AppThunk => async (_, _getState) => {}
