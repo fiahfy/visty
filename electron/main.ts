@@ -33,7 +33,7 @@ app.whenReady().then(async () => {
       ...state,
       minHeight: 350,
       minWidth: 550,
-      titleBarStyle: 'default',
+      titleBarStyle: process.platform === 'darwin' ? 'hidden' : 'default',
       webPreferences: {
         preload: join(__dirname, 'preload.js'),
         webSecurity: !VITE_DEV_SERVER_URL,

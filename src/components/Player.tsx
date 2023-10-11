@@ -25,6 +25,7 @@ import {
 } from 'react'
 import NoTransitionSlider from '~/components/mui/NoTransitionSlider'
 import useTitle from '~/hooks/useTitle'
+import useTrafficLights from '~/hooks/useTrafficLights'
 import { useAppDispatch, useAppSelector } from '~/store'
 import {
   selectDefaultMuted,
@@ -51,9 +52,11 @@ const Player = () => {
   const [muted, setMuted] = useState(false)
   const [volume, setVolume] = useState(0)
 
-  const title = useMemo(() => file?.name ?? '', [file])
+  const title = useMemo(() => file.name, [file])
 
   useTitle(title)
+
+  const { visible } = useTrafficLights()
 
   const videoRef = useRef<HTMLVideoElement>(null)
   const timer = useRef<number>()
@@ -76,6 +79,10 @@ const Player = () => {
     () => (fullscreen ? FullscreenExitIcon : FullscreenEnterIcon),
     [fullscreen],
   )
+
+  useEffect(() => {
+    window.electronAPI.setTrafficLightsHidden(toolbarHidden)
+  }, [toolbarHidden])
 
   useEffect(() => {
     ;(async () => {
@@ -125,6 +132,8 @@ const Player = () => {
     },
     [clearTimer, paused],
   )
+
+  useEffect(() => resetTimer(hovered), [hovered, paused, resetTimer])
 
   const handleDragOver = useCallback((e: DragEvent) => {
     e.preventDefault()
@@ -187,7 +196,6 @@ const Player = () => {
       }
       const volume = value as number
       video.volume = volume
-      setVolume(volume)
       dispatch(setDefaultVolume(volume))
       dispatch(setDefaultMuted(volume === 0))
     },
@@ -201,10 +209,11 @@ const Player = () => {
     }
     setMuted((muted) => {
       const newMuted = !muted
+      video.volume = newMuted ? 0 : defaultVolume
       dispatch(setDefaultMuted(newMuted))
       return newMuted
     })
-  }, [dispatch])
+  }, [defaultVolume, dispatch])
 
   return (
     <Box
@@ -220,7 +229,7 @@ const Player = () => {
       <video
         onClick={handleClickPlay}
         ref={videoRef}
-        src={file?.url}
+        src={file.url}
         style={{ background: 'black', width: '100%' }}
       />
       <Box
@@ -251,26 +260,25 @@ const Player = () => {
           />
         </Box>
       </Box>
-      <Fade in={!toolbarHidden}>
+      <Fade in={visible && !toolbarHidden}>
         <AppBar
-          color="transparent"
+          color="default"
           component="div"
           elevation={0}
+          enableColorOnDark
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
+          sx={{ WebkitAppRegion: 'drag' }}
         >
-          <Box
+          <Toolbar
+            disableGutters
             sx={{
-              background:
-                'linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0))',
-              height: (theme) => theme.spacing(25),
-              inset: '0 0 auto',
-              pointerEvents: 'none',
-              position: 'absolute',
+              justifyContent: 'center',
+              minHeight: (theme) => `${theme.spacing(3.5)}!important`,
+              px: visible ? 8.5 : 1,
             }}
-          />
-          <Toolbar disableGutters sx={{ px: 1 }} variant="dense">
-            <Typography noWrap sx={{ mx: 1 }} variant="body2">
+          >
+            <Typography mt={0.25} noWrap variant="caption">
               {title}
             </Typography>
           </Toolbar>

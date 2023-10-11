@@ -6,6 +6,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   changeOriginalSize: (size: { height: number; width: number }) =>
     ipcRenderer.invoke('change-original-size', size),
   openFile: (filePath: string) => ipcRenderer.invoke('open-file', filePath),
+  setTrafficLightsHidden: (hidden: boolean) =>
+    ipcRenderer.invoke('set-traffic-lights-hidden', hidden),
   applicationMenu: {
     update: (params: ApplicationMenuParams) =>
       ipcRenderer.invoke('application-menu-update', params),

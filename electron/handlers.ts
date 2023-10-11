@@ -24,6 +24,16 @@ const registerHandlers = () => {
     }
     event.sender.send('message-send', { type: 'changeFile', data: { file } })
   })
+  ipcMain.handle(
+    'set-traffic-lights-hidden',
+    (event: IpcMainInvokeEvent, hidden: boolean) => {
+      const browserWindow = BrowserWindow.fromWebContents(event.sender)
+      if (!browserWindow) {
+        return
+      }
+      browserWindow.setWindowButtonVisibility(!hidden)
+    },
+  )
 }
 
 export default registerHandlers

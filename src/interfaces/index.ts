@@ -7,6 +7,7 @@
 export interface IElectronAPI {
   changeOriginalSize: (size: { height: number; width: number }) => Promise<void>
   openFile: (filePath: string) => Promise<void>
+  setTrafficLightsHidden: (hidden: boolean) => Promise<void>
   applicationMenu: {
     update: (params: ApplicationMenuParams) => Promise<void>
   }

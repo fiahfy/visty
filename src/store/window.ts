@@ -54,7 +54,10 @@ export const selectWindow = (state: AppState) => {
   return windowState ?? defaultState
 }
 
-export const selectFile = createSelector(selectWindow, (window) => window.file)
+export const selectFile = createSelector(
+  selectWindow,
+  (window) => window.file ?? { name: '', path: '', url: '' },
+)
 
 export const change =
   (file: File): AppThunk =>
