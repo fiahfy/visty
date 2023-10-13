@@ -1,12 +1,12 @@
 import { BrowserWindow, app } from 'electron'
 import { State } from 'electron-window-state'
 import { basename, join } from 'node:path'
+import { pathToFileURL } from 'node:url'
 import registerApplicationMenu from './applicationMenu'
 import registerContextMenu from './contextMenu'
 import createFullscreenManager from './fullscreen'
 import registerHandlers from './handlers'
 import createWindowManager from './window'
-import { pathToFileURL } from 'node:url'
 
 // The built directory structure
 //
@@ -68,6 +68,14 @@ app.whenReady().then(async () => {
   registerApplicationMenu(createWindow)
   registerContextMenu()
   registerHandlers()
+
+  await windowManager.restore()
+
+  const path = process.argv[1]
+  if (path && path !== '.') {
+    // TODO: check file
+    createWindow(path)
+  }
 
   // Quit when all windows are closed, except on macOS. There, it's common
   // for applications and their menu bar to stay active until the user quits

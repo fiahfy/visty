@@ -36,8 +36,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
     },
   },
   node: {
-    basename: (path: string) => ipcRenderer.invoke('node-basename', path),
-    dirname: (path: string) => ipcRenderer.invoke('node-dirname', path),
     isDarwin: () => ipcRenderer.invoke('node-is-darwin'),
   },
   window: {

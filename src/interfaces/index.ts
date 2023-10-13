@@ -23,8 +23,6 @@ export interface IElectronAPI {
     addListener: (callback: (message: any) => void) => () => void
   }
   node: {
-    basename: (path: string) => Promise<string>
-    dirname: (path: string) => Promise<string>
     isDarwin: () => Promise<boolean>
   }
   window: {

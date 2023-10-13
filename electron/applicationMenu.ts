@@ -1,5 +1,4 @@
 import {
-  BrowserWindow,
   IpcMainInvokeEvent,
   Menu,
   MenuItemConstructorOptions,
@@ -13,12 +12,6 @@ import {
 type State = {}
 
 export type ApplicationMenuParams = Partial<State>
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const send = (message: any) => {
-  const activeWindow = BrowserWindow.getFocusedWindow()
-  activeWindow?.webContents.send('message-send', message)
-}
 
 const registerApplicationMenu = (createWindow: (filePath: string) => void) => {
   const isMac = process.platform === 'darwin'
@@ -35,12 +28,6 @@ const registerApplicationMenu = (createWindow: (filePath: string) => void) => {
               label: app.name,
               submenu: [
                 { role: 'about' },
-                { type: 'separator' },
-                {
-                  accelerator: 'CmdOrCtrl+,',
-                  click: () => send({ type: 'goToSettings' }),
-                  label: 'Preferences...',
-                },
                 { type: 'separator' },
                 { role: 'services' },
                 { type: 'separator' },
@@ -95,6 +82,12 @@ const registerApplicationMenu = (createWindow: (filePath: string) => void) => {
             click: () => undefined,
             label: 'Actual Size',
             type: 'checkbox',
+          },
+          { type: 'separator' },
+          // TODO: implement
+          {
+            click: () => undefined,
+            label: 'Loop',
           },
           { type: 'separator' },
           { role: 'reload' },

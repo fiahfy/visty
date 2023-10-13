@@ -1,6 +1,6 @@
 import { BrowserWindow, IpcMainInvokeEvent, ipcMain } from 'electron'
-import { basename } from 'path'
-import { pathToFileURL } from 'url'
+import { basename } from 'node:path'
+import { pathToFileURL } from 'node:url'
 
 const registerHandlers = () => {
   ipcMain.handle('node-is-darwin', () => process.platform === 'darwin')

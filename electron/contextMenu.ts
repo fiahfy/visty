@@ -23,9 +23,6 @@ const registerContextMenu = () => {
   ipcMain.handle(
     'context-menu-show',
     (event: IpcMainInvokeEvent, params: ContextMenuParams) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const send = (message: any) => event.sender.send('message-send', message)
-
       const defaultActions = {
         separator: { type: 'separator' as const },
         cut: params.isEditable && {
@@ -56,12 +53,6 @@ const registerContextMenu = () => {
           data: ContextMenuItemOption['data'],
         ) => MenuItemConstructorOptions
       } = {
-        settings: () => ({
-          accelerator: 'CmdOrCtrl+,',
-          click: () => send({ type: 'goToSettings' }),
-          label: 'Settings',
-        }),
-
         separator: () => defaultActions.separator,
       }
 

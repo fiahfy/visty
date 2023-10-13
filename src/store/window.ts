@@ -4,7 +4,6 @@ import { selectWindowIndex } from '~/store/windowIndex'
 
 type File = { name: string; path: string; url: string }
 
-// eslint-disable-next-line @typescript-eslint/ban-types
 type WindowState = {
   file?: File
 }
