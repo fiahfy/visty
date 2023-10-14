@@ -23,6 +23,7 @@ import {
   useRef,
   useState,
 } from 'react'
+import FadeAndScale from '~/components/mui/FadeAndScale'
 import NoTransitionSlider from '~/components/mui/NoTransitionSlider'
 import useTitle from '~/hooks/useTitle'
 import useTrafficLight from '~/hooks/useTrafficLight'
@@ -42,7 +43,8 @@ const Player = () => {
   const file = useAppSelector(selectFile)
   const dispatch = useAppDispatch()
 
-  const [toolbarHidden, setToolbarHidden] = useState(false)
+  const [iconVisible, setIconVisible] = useState(false)
+  const [toolbarVisible, setToolbarVisible] = useState(false)
   const [hovered, setHovered] = useState(false)
   const [fullscreen, setFullscreen] = useState(false)
 
@@ -65,6 +67,11 @@ const Player = () => {
 
   const PlayIcon = useMemo(() => (paused ? PlayArrowIcon : PauseIcon), [paused])
 
+  const ActionIcon = useMemo(
+    () => (paused ? PauseIcon : PlayArrowIcon),
+    [paused],
+  )
+
   const VolumeIcon = useMemo(() => {
     if (volumeValue > 0.5) {
       return VolumeUpIcon
@@ -81,8 +88,14 @@ const Player = () => {
   )
 
   useEffect(() => {
-    window.electronAPI.trafficLight.setVisible(!toolbarHidden)
-  }, [toolbarHidden])
+    window.electronAPI.trafficLight.setVisible(toolbarVisible)
+  }, [toolbarVisible])
+
+  useEffect(() => {
+    setIconVisible(true)
+    const timer = setTimeout(() => setIconVisible(false), 50)
+    return () => clearTimeout(timer)
+  }, [paused])
 
   useEffect(() => {
     ;(async () => {
@@ -123,12 +136,12 @@ const Player = () => {
 
   const resetTimer = useCallback(
     (hovered: boolean) => {
-      setToolbarHidden(false)
+      setToolbarVisible(true)
       clearTimer()
       if (hovered || paused) {
         return
       }
-      timer.current = window.setTimeout(() => setToolbarHidden(true), 2000)
+      timer.current = window.setTimeout(() => setToolbarVisible(false), 2000)
     },
     [clearTimer, paused],
   )
@@ -221,7 +234,7 @@ const Player = () => {
       onDrop={handleDrop}
       onMouseMove={handleMouseMove}
       sx={{
-        cursor: toolbarHidden ? 'none' : undefined,
+        cursor: toolbarVisible ? undefined : 'none',
         display: 'flex',
         width: '100%',
       }}
@@ -232,34 +245,38 @@ const Player = () => {
         src={file.url}
         style={{ background: 'black', width: '100%' }}
       />
-      <Box
-        sx={{
-          alignItems: 'center',
-          display: 'flex',
-          inset: 0,
-          justifyContent: 'center',
-          pointerEvents: 'none',
-          position: 'absolute',
-        }}
-      >
+      {currentTime < duration && (
         <Box
           sx={{
-            display: 'inline-block',
-            backgroundColor: 'black',
-            borderRadius: '50%',
-            opacity: 0.7,
-            p: 1,
+            alignItems: 'center',
+            display: 'flex',
+            inset: 0,
+            justifyContent: 'center',
+            pointerEvents: 'none',
+            position: 'absolute',
           }}
         >
-          <PlayIcon
-            sx={(theme) => ({
-              height: theme.spacing(6),
-              verticalAlign: 'bottom',
-              width: theme.spacing(6),
-            })}
-          />
+          <FadeAndScale in={iconVisible} timeout={300}>
+            <Box
+              sx={{
+                display: 'inline-block',
+                backgroundColor: 'black',
+                borderRadius: '50%',
+                opacity: 0.7,
+                p: 1,
+              }}
+            >
+              <ActionIcon
+                sx={(theme) => ({
+                  height: theme.spacing(6),
+                  verticalAlign: 'bottom',
+                  width: theme.spacing(6),
+                })}
+              />
+            </Box>
+          </FadeAndScale>
         </Box>
-      </Box>
+      )}
       <Fade in={visible}>
         <AppBar
           color="default"
@@ -284,7 +301,7 @@ const Player = () => {
           </Toolbar>
         </AppBar>
       </Fade>
-      <Fade in={!toolbarHidden}>
+      <Fade in={toolbarVisible}>
         <AppBar
           color="transparent"
           component="div"
