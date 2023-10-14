@@ -3,39 +3,27 @@
 // example, to import the interface below do:
 //
 // import User from 'path/to/interfaces';
+import { Operations as TrafficLightOperations } from 'electron-traffic-light/preload'
+import { Operations as WindowOperations } from 'electron-window/preload'
 
 export interface IElectronAPI {
   changeOriginalSize: (size: { height: number; width: number }) => Promise<void>
   openFile: (filePath: string) => Promise<void>
-  setTrafficLightsHidden: (hidden: boolean) => Promise<void>
+  setTrafficLightHidden: (hidden: boolean) => Promise<void>
   applicationMenu: {
     update: (params: ApplicationMenuParams) => Promise<void>
   }
   contextMenu: {
     show: (params: ContextMenuParams) => Promise<void>
   }
-  fullscreen: {
-    addListener: (callback: (fullscreen: boolean) => void) => () => void
-    isEntered: () => Promise<boolean>
-  }
   message: {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     addListener: (callback: (message: any) => void) => () => void
   }
-  node: {
-    isDarwin: () => Promise<boolean>
-  }
-  window: {
-    restore: () => Promise<
-      | {
-          index: number
-          params: { file: { name: string; path: string; url: string } }
-          restored: boolean
-        }
-      | undefined
-    >
-    open: (params: { directory: string }) => Promise<void>
-  }
+  trafficLight: TrafficLightOperations
+  window: WindowOperations<{
+    file: { name: string; path: string; url: string }
+  }>
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -51,7 +51,9 @@ const registerApplicationMenu = (createWindow: (filePath: string) => void) => {
                 properties: ['openFile'],
               })
               const filePath = filePaths[0]
-              createWindow(filePath)
+              if (filePath) {
+                createWindow(filePath)
+              }
             },
             label: 'Open File...',
           },

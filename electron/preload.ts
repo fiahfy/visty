@@ -1,4 +1,6 @@
 import { IpcRendererEvent, contextBridge, ipcRenderer } from 'electron'
+import { exposeOperations as exposeTrafficLightOperations } from 'electron-traffic-light/preload'
+import { exposeOperations as exposeWindowOperations } from 'electron-window/preload'
 import { ApplicationMenuParams } from './applicationMenu'
 import { ContextMenuParams } from './contextMenu'
 
@@ -6,8 +8,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   changeOriginalSize: (size: { height: number; width: number }) =>
     ipcRenderer.invoke('change-original-size', size),
   openFile: (filePath: string) => ipcRenderer.invoke('open-file', filePath),
-  setTrafficLightsHidden: (hidden: boolean) =>
-    ipcRenderer.invoke('set-traffic-lights-hidden', hidden),
+  setTrafficLightHidden: (hidden: boolean) =>
+    ipcRenderer.invoke('set-traffic-light-hidden', hidden),
   applicationMenu: {
     update: (params: ApplicationMenuParams) =>
       ipcRenderer.invoke('application-menu-update', params),
@@ -15,15 +17,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
   contextMenu: {
     show: (params: ContextMenuParams) =>
       ipcRenderer.invoke('context-menu-show', params),
-  },
-  fullscreen: {
-    addListener: (callback: (fullscreen: boolean) => void) => {
-      const listener = (_event: IpcRendererEvent, fullscreen: boolean) =>
-        callback(fullscreen)
-      ipcRenderer.on('fullscreen-send', listener)
-      return () => ipcRenderer.removeListener('fullscreen-send', listener)
-    },
-    isEntered: () => ipcRenderer.invoke('fullscreen-is-entered'),
   },
   message: {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -35,12 +28,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
       return () => ipcRenderer.removeListener('message-send', listener)
     },
   },
-  node: {
-    isDarwin: () => ipcRenderer.invoke('node-is-darwin'),
-  },
-  window: {
-    restore: () => ipcRenderer.invoke('window-restore'),
-    open: (params: { file: { name: string; path: string; url: string } }) =>
-      ipcRenderer.invoke('window-open', params),
-  },
+  trafficLight: exposeTrafficLightOperations(),
+  window: exposeWindowOperations(),
 })

@@ -3,7 +3,6 @@ import { basename } from 'node:path'
 import { pathToFileURL } from 'node:url'
 
 const registerHandlers = () => {
-  ipcMain.handle('node-is-darwin', () => process.platform === 'darwin')
   ipcMain.handle(
     'change-original-size',
     (event: IpcMainInvokeEvent, size: { height: number; width: number }) => {
@@ -25,7 +24,7 @@ const registerHandlers = () => {
     event.sender.send('message-send', { type: 'changeFile', data: { file } })
   })
   ipcMain.handle(
-    'set-traffic-lights-hidden',
+    'set-traffic-light-hidden',
     (event: IpcMainInvokeEvent, hidden: boolean) => {
       const browserWindow = BrowserWindow.fromWebContents(event.sender)
       if (!browserWindow) {

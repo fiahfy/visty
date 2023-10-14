@@ -7,15 +7,15 @@ import ReactDOM from 'react-dom/client'
 import App from '~/App'
 import { StoreProvider } from '~/contexts/StoreContext'
 import { ThemeProvider } from '~/contexts/ThemeContext'
-import { TrafficLightsProvider } from '~/contexts/TrafficLightsContext'
+import { TrafficLightProvider } from '~/contexts/TrafficLightContext'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <StoreProvider>
       <ThemeProvider>
-        <TrafficLightsProvider>
+        <TrafficLightProvider>
           <App />
-        </TrafficLightsProvider>
+        </TrafficLightProvider>
       </ThemeProvider>
     </StoreProvider>
   </React.StrictMode>,

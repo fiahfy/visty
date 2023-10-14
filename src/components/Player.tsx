@@ -25,7 +25,7 @@ import {
 } from 'react'
 import NoTransitionSlider from '~/components/mui/NoTransitionSlider'
 import useTitle from '~/hooks/useTitle'
-import useTrafficLights from '~/hooks/useTrafficLights'
+import useTrafficLight from '~/hooks/useTrafficLight'
 import { useAppDispatch, useAppSelector } from '~/store'
 import {
   selectDefaultMuted,
@@ -56,7 +56,7 @@ const Player = () => {
 
   useTitle(title)
 
-  const { visible } = useTrafficLights()
+  const { visible } = useTrafficLight()
 
   const videoRef = useRef<HTMLVideoElement>(null)
   const timer = useRef<number>()
@@ -81,7 +81,7 @@ const Player = () => {
   )
 
   useEffect(() => {
-    window.electronAPI.setTrafficLightsHidden(toolbarHidden)
+    window.electronAPI.trafficLight.setVisible(!toolbarHidden)
   }, [toolbarHidden])
 
   useEffect(() => {
@@ -260,7 +260,7 @@ const Player = () => {
           />
         </Box>
       </Box>
-      <Fade in={visible && !toolbarHidden}>
+      <Fade in={visible}>
         <AppBar
           color="default"
           component="div"

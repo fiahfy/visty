@@ -1,12 +1,11 @@
 import { BrowserWindow, app } from 'electron'
-import { State } from 'electron-window-state'
+import { createManager as createTrafficLightManager } from 'electron-traffic-light'
+import { State, createManager as createWindowManager } from 'electron-window'
 import { basename, join } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import registerApplicationMenu from './applicationMenu'
 import registerContextMenu from './contextMenu'
-import createFullscreenManager from './fullscreen'
 import registerHandlers from './handlers'
-import createWindowManager from './window'
 
 // The built directory structure
 //
@@ -26,7 +25,7 @@ process.env.VITE_PUBLIC = app.isPackaged
 const VITE_DEV_SERVER_URL = process.env['VITE_DEV_SERVER_URL']
 
 app.whenReady().then(async () => {
-  const fullscreenManager = createFullscreenManager()
+  const trafficLightManager = createTrafficLightManager()
 
   const baseCreateWindow = (state: State) => {
     const browserWindow = new BrowserWindow({
@@ -49,7 +48,7 @@ app.whenReady().then(async () => {
       browserWindow.loadFile(join(process.env.DIST, 'index.html'))
     }
 
-    fullscreenManager.register(browserWindow)
+    trafficLightManager.handle(browserWindow)
 
     return browserWindow
   }
