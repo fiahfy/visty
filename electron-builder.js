@@ -5,12 +5,13 @@ module.exports = {
   appId: 'net.fiahfy.visty',
   asar: true,
   files: ['dist', 'dist-electron'],
+  // @see https://github.com/electron-userland/electron-builder/issues/3204
   fileAssociations: [
-    {
-      ext: audioExtensions,
-    },
-    {
-      ext: videoExtensions,
-    },
+    ...audioExtensions.map((ext) => ({
+      ext,
+    })),
+    ...videoExtensions.map((ext) => ({
+      ext,
+    })),
   ],
 }
