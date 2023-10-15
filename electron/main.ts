@@ -1,4 +1,5 @@
 import { BrowserWindow, app } from 'electron'
+import { createManager as createFullscreenManager } from 'electron-fullscreen'
 import { createManager as createTrafficLightManager } from 'electron-traffic-light'
 import { State, createManager as createWindowManager } from 'electron-window'
 import { basename, join } from 'node:path'
@@ -26,6 +27,7 @@ const VITE_DEV_SERVER_URL = process.env['VITE_DEV_SERVER_URL']
 
 app.whenReady().then(async () => {
   const trafficLightManager = createTrafficLightManager()
+  const fullscreenManager = createFullscreenManager()
 
   const baseCreateWindow = (state: State) => {
     const browserWindow = new BrowserWindow({
@@ -49,6 +51,7 @@ app.whenReady().then(async () => {
     }
 
     trafficLightManager.handle(browserWindow)
+    fullscreenManager.handle(browserWindow)
 
     return browserWindow
   }

@@ -1,8 +1,4 @@
-import {
-  Pause as PauseIcon,
-  PlayArrow as PlayArrowIcon,
-} from '@mui/icons-material'
-import { AppBar, Box, Fade, Toolbar, Typography } from '@mui/material'
+import { Box, Fade } from '@mui/material'
 import {
   DragEvent,
   useCallback,
@@ -12,27 +8,29 @@ import {
   useState,
 } from 'react'
 import ControlBar from '~/components/ControlBar'
-import FadeAndScale from '~/components/mui/FadeAndScale'
+import Overlay from '~/components/Overlay'
+import TitleBar from '~/components/TitleBar'
 import useTitle from '~/hooks/useTitle'
 import useTrafficLight from '~/hooks/useTrafficLight'
 import useVideo from '~/hooks/useVideo'
 
 const Player = () => {
-  const [iconVisible, setIconVisible] = useState(false)
-  const [toolbarVisible, setToolbarVisible] = useState(false)
+  const [controlBarVisible, setControlBarVisible] = useState(false)
   const [hovered, setHovered] = useState(false)
 
   const videoRef = useRef<HTMLVideoElement>(null)
   const {
+    changeVolume,
     currentTime,
     duration,
     file,
+    loop,
     muted,
-    onChangeCurrentTime,
-    onChangeVolume,
-    onClickMute,
-    onClickPlay,
     paused,
+    seek,
+    toggleLoop,
+    toggleMuted,
+    togglePaused,
     volume,
   } = useVideo(videoRef)
 
@@ -40,35 +38,60 @@ const Player = () => {
 
   useTitle(title)
 
-  const { visible } = useTrafficLight()
+  const { setVisible, visible } = useTrafficLight()
 
   const timer = useRef<number>()
 
-  const ActionIcon = useMemo(
-    () => (paused ? PauseIcon : PlayArrowIcon),
-    [paused],
-  )
+  useEffect(() => {
+    setVisible(controlBarVisible)
+  }, [controlBarVisible, setVisible])
 
   useEffect(() => {
-    window.electronAPI.trafficLight.setVisible(toolbarVisible)
-  }, [toolbarVisible])
-
-  useEffect(() => {
-    setIconVisible(true)
-    const timer = setTimeout(() => setIconVisible(false), 50)
-    return () => clearTimeout(timer)
-  }, [paused])
+    const handler = async (e: KeyboardEvent) => {
+      console.log(e.key)
+      switch (e.key) {
+        case 'ArrowLeft':
+          return seek(currentTime - 5)
+        case 'ArrowRight':
+          return seek(currentTime + 5)
+        case 'ArrowUp':
+          return changeVolume(volume + 0.1)
+        case 'ArrowDown':
+          return changeVolume(volume - 0.1)
+        case 'Escape':
+          return await window.electronAPI.fullscreen.exitFullscreen()
+        case 'f':
+          return await window.electronAPI.fullscreen.toggleFullscreen()
+        case 'l':
+          return toggleLoop()
+        case 'm':
+          return toggleMuted()
+        case ' ':
+          return togglePaused()
+      }
+    }
+    document.body.addEventListener('keydown', handler)
+    return () => document.body.removeEventListener('keydown', handler)
+  }, [
+    changeVolume,
+    currentTime,
+    seek,
+    toggleLoop,
+    toggleMuted,
+    togglePaused,
+    volume,
+  ])
 
   const clearTimer = useCallback(() => window.clearTimeout(timer.current), [])
 
   const resetTimer = useCallback(
     (hovered: boolean) => {
-      setToolbarVisible(true)
+      setControlBarVisible(true)
       clearTimer()
       if (hovered || paused) {
         return
       }
-      timer.current = window.setTimeout(() => setToolbarVisible(false), 2000)
+      timer.current = window.setTimeout(() => setControlBarVisible(false), 2000)
     },
     [clearTimer, paused],
   )
@@ -104,6 +127,7 @@ const Player = () => {
     setHovered(true)
     resetTimer(true)
   }, [resetTimer])
+
   const handleMouseLeave = useCallback(() => {
     setHovered(false)
     resetTimer(false)
@@ -115,83 +139,35 @@ const Player = () => {
       onDrop={handleDrop}
       onMouseMove={handleMouseMove}
       sx={{
-        cursor: toolbarVisible ? undefined : 'none',
+        cursor: controlBarVisible ? undefined : 'none',
         display: 'flex',
         width: '100%',
       }}
     >
       <video
-        onClick={onClickPlay}
+        onClick={togglePaused}
         ref={videoRef}
         src={file.url}
         style={{ background: 'black', width: '100%' }}
       />
-      {currentTime < duration && (
-        <Box
-          sx={{
-            alignItems: 'center',
-            display: 'flex',
-            inset: 0,
-            justifyContent: 'center',
-            pointerEvents: 'none',
-            position: 'absolute',
-          }}
-        >
-          <FadeAndScale in={iconVisible} timeout={300}>
-            <Box
-              sx={{
-                display: 'inline-block',
-                backgroundColor: 'black',
-                borderRadius: '50%',
-                opacity: 0.7,
-                p: 1,
-              }}
-            >
-              <ActionIcon
-                sx={(theme) => ({
-                  height: theme.spacing(6),
-                  verticalAlign: 'bottom',
-                  width: theme.spacing(6),
-                })}
-              />
-            </Box>
-          </FadeAndScale>
-        </Box>
-      )}
+      <Overlay currentTime={currentTime} duration={duration} paused={paused} />
       <Fade in={visible}>
-        <AppBar
-          color="default"
-          component="div"
-          elevation={0}
-          enableColorOnDark
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
-          sx={{ WebkitAppRegion: 'drag' }}
-        >
-          <Toolbar
-            disableGutters
-            sx={{
-              justifyContent: 'center',
-              minHeight: (theme) => `${theme.spacing(3.5)}!important`,
-              px: visible ? 8.5 : 1,
-            }}
-          >
-            <Typography mt={0.25} noWrap variant="caption">
-              {title}
-            </Typography>
-          </Toolbar>
-        </AppBar>
+        <div onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+          <TitleBar title={title} />
+        </div>
       </Fade>
-      <Fade in={toolbarVisible}>
-        <div>
+      <Fade in={controlBarVisible}>
+        <div onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
           <ControlBar
             currentTime={currentTime}
             duration={duration}
+            loop={loop}
             muted={muted}
-            onChangeCurrentTime={onChangeCurrentTime}
-            onChangeVolume={onChangeVolume}
-            onClickMute={onClickMute}
-            onClickPlay={onClickPlay}
+            onChangeCurrentTime={seek}
+            onChangeVolume={changeVolume}
+            onClickLoop={toggleLoop}
+            onClickMute={toggleMuted}
+            onClickPlay={togglePaused}
             paused={paused}
             volume={volume}
           />

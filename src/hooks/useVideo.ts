@@ -1,14 +1,17 @@
 import { RefObject, useCallback, useEffect, useState } from 'react'
 import { useAppDispatch, useAppSelector } from '~/store'
 import {
+  selectDefaultLoop,
   selectDefaultMuted,
   selectDefaultVolume,
+  setDefaultLoop,
   setDefaultMuted,
   setDefaultVolume,
 } from '~/store/settings'
 import { selectFile } from '~/store/window'
 
 const useVideo = (ref: RefObject<HTMLVideoElement>) => {
+  const defaultLoop = useAppSelector(selectDefaultLoop)
   const defaultMuted = useAppSelector(selectDefaultMuted)
   const defaultVolume = useAppSelector(selectDefaultVolume)
   const file = useAppSelector(selectFile)
@@ -16,6 +19,7 @@ const useVideo = (ref: RefObject<HTMLVideoElement>) => {
 
   const [currentTime, setCurrentTime] = useState(0)
   const [duration, setDuration] = useState(100)
+  const [loop, setLoop] = useState(false)
   const [muted, setMuted] = useState(false)
   const [paused, setPaused] = useState(true)
   const [volume, setVolume] = useState(0)
@@ -37,6 +41,7 @@ const useVideo = (ref: RefObject<HTMLVideoElement>) => {
         height: video.videoHeight,
       })
 
+      video.loop = defaultLoop
       video.volume = defaultMuted ? 0 : defaultVolume
 
       let requestId: number
@@ -47,6 +52,7 @@ const useVideo = (ref: RefObject<HTMLVideoElement>) => {
         setPaused(video.paused)
         setCurrentTime(video.currentTime)
         setDuration(video.duration)
+        setLoop(video.loop)
         setVolume(video.volume)
         requestId = requestAnimationFrame(callback)
       }
@@ -54,30 +60,18 @@ const useVideo = (ref: RefObject<HTMLVideoElement>) => {
 
       return () => cancelAnimationFrame(requestId)
     })()
-  }, [defaultMuted, defaultVolume, file, ref, video])
+  }, [defaultLoop, defaultMuted, defaultVolume, file, ref, video])
 
-  const onChangeCurrentTime = useCallback(
-    (value: number) => {
-      if (!video) {
-        return
-      }
-      video.currentTime = value
-    },
-    [video],
-  )
-
-  const onClickPlay = useCallback(() => {
+  const toggleLoop = useCallback(() => {
     if (!video) {
       return
     }
-    if (video.paused) {
-      video.play()
-    } else {
-      video.pause()
-    }
-  }, [video])
+    const loop = !video.loop
+    video.loop = loop
+    dispatch(setDefaultLoop(loop))
+  }, [dispatch, video])
 
-  const onClickMute = useCallback(() => {
+  const toggleMuted = useCallback(() => {
     if (!video) {
       return
     }
@@ -89,12 +83,33 @@ const useVideo = (ref: RefObject<HTMLVideoElement>) => {
     })
   }, [defaultVolume, dispatch, video])
 
-  const onChangeVolume = useCallback(
+  const togglePaused = useCallback(() => {
+    if (!video) {
+      return
+    }
+    if (video.paused) {
+      video.play()
+    } else {
+      video.pause()
+    }
+  }, [video])
+
+  const seek = useCallback(
     (value: number) => {
       if (!video) {
         return
       }
-      video.volume = value
+      video.currentTime = value
+    },
+    [video],
+  )
+
+  const changeVolume = useCallback(
+    (value: number) => {
+      if (!video) {
+        return
+      }
+      video.volume = Math.min(Math.max(0, value), 1)
       dispatch(setDefaultVolume(volume))
       dispatch(setDefaultMuted(volume === 0))
     },
@@ -102,15 +117,17 @@ const useVideo = (ref: RefObject<HTMLVideoElement>) => {
   )
 
   return {
+    changeVolume,
     currentTime,
     duration,
     file,
+    loop,
     muted,
-    onChangeCurrentTime,
-    onChangeVolume,
-    onClickMute,
-    onClickPlay,
     paused,
+    seek,
+    toggleLoop,
+    toggleMuted,
+    togglePaused,
     volume,
   }
 }

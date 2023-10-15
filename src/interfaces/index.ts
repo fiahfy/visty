@@ -3,6 +3,7 @@
 // example, to import the interface below do:
 //
 // import User from 'path/to/interfaces';
+import { Operations as FullscreenOperations } from 'electron-fullscreen/preload'
 import { Operations as TrafficLightOperations } from 'electron-traffic-light/preload'
 import { Operations as WindowOperations } from 'electron-window/preload'
 
@@ -20,6 +21,7 @@ export interface IElectronAPI {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     addListener: (callback: (message: any) => void) => () => void
   }
+  fullscreen: FullscreenOperations
   trafficLight: TrafficLightOperations
   window: WindowOperations<{
     file: { name: string; path: string; url: string }

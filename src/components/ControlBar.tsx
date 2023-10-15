@@ -3,33 +3,40 @@ import {
   FullscreenExit as FullscreenExitIcon,
   Pause as PauseIcon,
   PlayArrow as PlayArrowIcon,
+  Repeat as RepeatIcon,
+  RepeatOn as RepeatOnIcon,
   VolumeDown as VolumeDownIcon,
   VolumeOff as VolumeOffIcon,
   VolumeUp as VolumeUpIcon,
 } from '@mui/icons-material'
 import { AppBar, Box, IconButton, Toolbar, Typography } from '@mui/material'
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import NoTransitionSlider from '~/components/mui/NoTransitionSlider'
 import { formatDuration } from '~/utils/formatter'
 
 type Props = {
   currentTime: number
   duration: number
+  loop: boolean
   muted: boolean
   onChangeCurrentTime: (value: number) => void
   onChangeVolume: (value: number) => void
+  onClickLoop: () => void
   onClickMute: () => void
   onClickPlay: () => void
   paused: boolean
   volume: number
 }
+
 const ControlBar = (props: Props) => {
   const {
     currentTime,
     duration,
+    loop,
     muted,
     onChangeCurrentTime,
     onChangeVolume,
+    onClickLoop,
     onClickMute,
     onClickPlay,
     paused,
@@ -37,6 +44,12 @@ const ControlBar = (props: Props) => {
   } = props
 
   const [fullscreen, setFullscreen] = useState(false)
+
+  useEffect(() => {
+    const removeListener =
+      window.electronAPI.fullscreen.addListener(setFullscreen)
+    return () => removeListener()
+  }, [])
 
   const volumeValue = useMemo(() => (muted ? 0 : volume), [muted, volume])
 
@@ -51,6 +64,8 @@ const ControlBar = (props: Props) => {
       return VolumeOffIcon
     }
   }, [volumeValue])
+
+  const LoopIcon = useMemo(() => (loop ? RepeatOnIcon : RepeatIcon), [loop])
 
   const FullscreenIcon = useMemo(
     () => (fullscreen ? FullscreenExitIcon : FullscreenEnterIcon),
@@ -70,6 +85,10 @@ const ControlBar = (props: Props) => {
     },
     [onChangeVolume],
   )
+
+  const handleClickFullscreen = useCallback(async () => {
+    await window.electronAPI.fullscreen.setFullscreen(!fullscreen)
+  }, [fullscreen])
 
   return (
     <AppBar
@@ -96,6 +115,7 @@ const ControlBar = (props: Props) => {
         <NoTransitionSlider
           max={duration}
           onChange={handleChangeCurrentTime}
+          onKeyDown={(e) => e.preventDefault()}
           size="small"
           step={0.01}
           sx={{
@@ -122,6 +142,7 @@ const ControlBar = (props: Props) => {
         <NoTransitionSlider
           max={1}
           onChange={handleChangeVolume}
+          onKeyDown={(e) => e.preventDefault()}
           size="small"
           step={0.01}
           sx={{
@@ -135,8 +156,11 @@ const ControlBar = (props: Props) => {
           {formatDuration(currentTime)} / {formatDuration(duration)}
         </Typography>
         <Box sx={{ flexGrow: 1 }} />
+        <IconButton onClick={onClickLoop} size="small" title="Loop">
+          <LoopIcon fontSize="small" />
+        </IconButton>
         <IconButton
-          onClick={() => setFullscreen((fullscreen) => !fullscreen)}
+          onClick={handleClickFullscreen}
           size="small"
           title={fullscreen ? 'Exit full screen' : 'Full screen'}
         >

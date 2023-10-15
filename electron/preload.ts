@@ -1,4 +1,5 @@
 import { IpcRendererEvent, contextBridge, ipcRenderer } from 'electron'
+import { exposeOperations as exposeFullscreenOperations } from 'electron-fullscreen/preload'
 import { exposeOperations as exposeTrafficLightOperations } from 'electron-traffic-light/preload'
 import { exposeOperations as exposeWindowOperations } from 'electron-window/preload'
 import { ApplicationMenuParams } from './applicationMenu'
@@ -28,6 +29,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
       return () => ipcRenderer.removeListener('message-send', listener)
     },
   },
+  fullscreen: exposeFullscreenOperations(),
   trafficLight: exposeTrafficLightOperations(),
   window: exposeWindowOperations(),
 })
