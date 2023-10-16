@@ -11,8 +11,8 @@ const registerHandlers = () => {
         return
       }
       const { height, width } = size
-      browserWindow.setContentSize(width, height)
       browserWindow.setAspectRatio(width / height)
+      browserWindow.setContentSize(width, height)
     },
   )
   ipcMain.handle('open-file', (event: IpcMainInvokeEvent, filePath: string) => {
