@@ -59,12 +59,12 @@ export const createManager = () => {
   )
 
   const handle = (browserWindow: BrowserWindow) => {
-    browserWindow.on('resize', () => {
-      browserWindow.webContents.send(
-        `${channelPrefix}-send`,
-        browserWindow.isFullScreen(),
-      )
-    })
+    browserWindow.on('enter-full-screen', () =>
+      browserWindow.webContents.send(`${channelPrefix}-send`, true),
+    )
+    browserWindow.on('leave-full-screen', () =>
+      browserWindow.webContents.send(`${channelPrefix}-send`, false),
+    )
   }
 
   return { handle }
