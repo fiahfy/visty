@@ -20,6 +20,7 @@ const Player = () => {
 
   const videoRef = useRef<HTMLVideoElement>(null)
   const {
+    actionCode,
     changeVolume,
     currentTime,
     duration,
@@ -28,6 +29,7 @@ const Player = () => {
     muted,
     paused,
     seek,
+    seekTo,
     toggleLoop,
     toggleMuted,
     togglePaused,
@@ -48,12 +50,11 @@ const Player = () => {
 
   useEffect(() => {
     const handler = async (e: KeyboardEvent) => {
-      console.log(e.key)
       switch (e.key) {
         case 'ArrowLeft':
-          return seek(currentTime - 5)
+          return seekTo('backward')
         case 'ArrowRight':
-          return seek(currentTime + 5)
+          return seekTo('forward')
         case 'ArrowUp':
           return changeVolume(volume + 0.1)
         case 'ArrowDown':
@@ -75,7 +76,7 @@ const Player = () => {
   }, [
     changeVolume,
     currentTime,
-    seek,
+    seekTo,
     toggleLoop,
     toggleMuted,
     togglePaused,
@@ -150,7 +151,7 @@ const Player = () => {
         src={file.url}
         style={{ background: 'black', width: '100%' }}
       />
-      <Overlay currentTime={currentTime} duration={duration} paused={paused} />
+      <Overlay actionCode={actionCode} />
       <Fade in={visible}>
         <div onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
           <TitleBar title={title} />

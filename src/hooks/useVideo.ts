@@ -10,6 +10,18 @@ import {
 } from '~/store/settings'
 import { selectFile } from '~/store/window'
 
+type Action =
+  | 'play'
+  | 'pause'
+  | 'seekBackward'
+  | 'seekForward'
+  | 'mute'
+  | 'unmute'
+type ActionCode = `${Action}:${string}`
+
+const generateActionCode = (action: Action): ActionCode =>
+  `${action}:${Date.now()}`
+
 const useVideo = (ref: RefObject<HTMLVideoElement>) => {
   const defaultLoop = useAppSelector(selectDefaultLoop)
   const defaultMuted = useAppSelector(selectDefaultMuted)
@@ -17,6 +29,7 @@ const useVideo = (ref: RefObject<HTMLVideoElement>) => {
   const file = useAppSelector(selectFile)
   const dispatch = useAppDispatch()
 
+  const [actionCode, setActionCode] = useState<ActionCode>()
   const [currentTime, setCurrentTime] = useState(0)
   const [duration, setDuration] = useState(100)
   const [loop, setLoop] = useState(false)
@@ -79,6 +92,8 @@ const useVideo = (ref: RefObject<HTMLVideoElement>) => {
       const newMuted = !muted
       video.volume = newMuted ? 0 : defaultVolume
       dispatch(setDefaultMuted(newMuted))
+      const action = newMuted ? 'mute' : 'unmute'
+      setActionCode(generateActionCode(action))
       return newMuted
     })
   }, [defaultVolume, dispatch, video])
@@ -89,8 +104,10 @@ const useVideo = (ref: RefObject<HTMLVideoElement>) => {
     }
     if (video.paused) {
       video.play()
+      setActionCode(generateActionCode('play'))
     } else {
       video.pause()
+      setActionCode(generateActionCode('pause'))
     }
   }, [video])
 
@@ -100,6 +117,18 @@ const useVideo = (ref: RefObject<HTMLVideoElement>) => {
         return
       }
       video.currentTime = value
+    },
+    [video],
+  )
+
+  const seekTo = useCallback(
+    (direction: 'backward' | 'forward') => {
+      if (!video) {
+        return
+      }
+      video.currentTime += direction === 'forward' ? 5 : -5
+      const action = direction === 'forward' ? 'seekForward' : 'seekBackward'
+      setActionCode(generateActionCode(action))
     },
     [video],
   )
@@ -117,6 +146,7 @@ const useVideo = (ref: RefObject<HTMLVideoElement>) => {
   )
 
   return {
+    actionCode,
     changeVolume,
     currentTime,
     duration,
@@ -125,6 +155,7 @@ const useVideo = (ref: RefObject<HTMLVideoElement>) => {
     muted,
     paused,
     seek,
+    seekTo,
     toggleLoop,
     toggleMuted,
     togglePaused,
