@@ -6,11 +6,9 @@ import { ApplicationMenuParams } from './applicationMenu'
 import { ContextMenuParams } from './contextMenu'
 
 contextBridge.exposeInMainWorld('electronAPI', {
-  changeOriginalSize: (size: { height: number; width: number }) =>
-    ipcRenderer.invoke('change-original-size', size),
   openFile: (filePath: string) => ipcRenderer.invoke('open-file', filePath),
-  setTrafficLightHidden: (hidden: boolean) =>
-    ipcRenderer.invoke('set-traffic-light-hidden', hidden),
+  setContentSize: (size: { height: number; width: number }) =>
+    ipcRenderer.invoke('set-content-size', size),
   applicationMenu: {
     update: (params: ApplicationMenuParams) =>
       ipcRenderer.invoke('application-menu-update', params),
