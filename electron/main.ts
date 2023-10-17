@@ -31,8 +31,8 @@ const fullscreenManager = createFullscreenManager()
 const baseCreateWindow = (options: BrowserWindowConstructorOptions) => {
   const browserWindow = new BrowserWindow({
     ...options,
-    minHeight: 350,
-    minWidth: 550,
+    minHeight: 300,
+    minWidth: 400,
     titleBarStyle: process.platform === 'darwin' ? 'hidden' : 'default',
     webPreferences: {
       preload: join(__dirname, 'preload.js'),
