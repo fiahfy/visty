@@ -12,7 +12,7 @@ const registerHandlers = () => {
     event.sender.send('message-send', { type: 'changeFile', data: { file } })
   })
   ipcMain.handle(
-    'set-content-size',
+    'set-window-size',
     (event: IpcMainInvokeEvent, size: { height: number; width: number }) => {
       const browserWindow = BrowserWindow.fromWebContents(event.sender)
       if (!browserWindow) {
@@ -20,35 +20,37 @@ const registerHandlers = () => {
       }
 
       const { height, width } = size
-      browserWindow.setAspectRatio(width / height)
-      browserWindow.setContentSize(width, height)
 
-      const windowBounds = browserWindow.getBounds()
-      const screenBounds = screen.getDisplayNearestPoint(windowBounds).bounds
-      if (windowBounds.x + windowBounds.width > screenBounds.width) {
+      let bounds = browserWindow.getBounds()
+      const screenBounds = screen.getDisplayNearestPoint(bounds).bounds
+
+      bounds = { ...bounds, height, width }
+
+      if (bounds.x + bounds.width > screenBounds.width) {
         const newWidth =
-          windowBounds.width > screenBounds.width
-            ? screenBounds.width
-            : windowBounds.width
-        browserWindow.setBounds({
-          ...windowBounds,
+          bounds.width > screenBounds.width ? screenBounds.width : bounds.width
+        bounds = {
+          ...bounds,
           x: screenBounds.width - newWidth,
           width: newWidth,
           height: (newWidth * height) / width,
-        })
+        }
       }
-      if (windowBounds.y + windowBounds.height > screenBounds.height) {
+      if (bounds.y + bounds.height > screenBounds.height) {
         const newHeight =
-          windowBounds.height > screenBounds.height
+          bounds.height > screenBounds.height
             ? screenBounds.height
-            : windowBounds.height
-        browserWindow.setBounds({
-          ...windowBounds,
+            : bounds.height
+        bounds = {
+          ...bounds,
           y: screenBounds.height - newHeight,
           height: newHeight,
           width: (newHeight * width) / height,
-        })
+        }
       }
+
+      browserWindow.setBounds(bounds, true)
+      browserWindow.setAspectRatio(width / height)
     },
   )
 }

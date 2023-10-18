@@ -57,14 +57,14 @@ const baseCreateWindow = (options: BrowserWindowConstructorOptions) => {
 
 const windowManager = createWindowManager(baseCreateWindow)
 
-const createWindow = (filePath: string) => {
+const createWindow = async (filePath: string) => {
   // TODO: check file
   const file = {
     name: basename(filePath),
     path: filePath,
     url: pathToFileURL(filePath).href,
   }
-  windowManager.create({ file })
+  await windowManager.create({ file })
 }
 
 // Quit when all windows are closed, except on macOS. There, it's common
@@ -90,7 +90,7 @@ app.on('before-quit', async () => {
 
 app.on('open-file', async (_event, path) => {
   await app.whenReady()
-  createWindow(path)
+  await createWindow(path)
 })
 
 app.whenReady().then(async () => {

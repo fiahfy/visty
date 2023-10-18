@@ -49,7 +49,7 @@ const useVideo = (ref: RefObject<HTMLVideoElement>) => {
         video.addEventListener('loadedmetadata', () => resolve()),
       )
 
-      await window.electronAPI.setContentSize({
+      await window.electronAPI.setWindowSize({
         width: video.videoWidth,
         height: video.videoHeight,
       })

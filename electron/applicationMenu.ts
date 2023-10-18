@@ -13,7 +13,9 @@ type State = {}
 
 export type ApplicationMenuParams = Partial<State>
 
-const registerApplicationMenu = (createWindow: (filePath: string) => void) => {
+const registerApplicationMenu = (
+  createWindow: (filePath: string) => Promise<void>,
+) => {
   const isMac = process.platform === 'darwin'
 
   let state: State = {}
@@ -52,7 +54,7 @@ const registerApplicationMenu = (createWindow: (filePath: string) => void) => {
               })
               const filePath = filePaths[0]
               if (filePath) {
-                createWindow(filePath)
+                await createWindow(filePath)
               }
             },
             label: 'Open File...',
