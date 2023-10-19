@@ -11,6 +11,8 @@ const useMessageListener = () => {
       switch (type) {
         case 'changeFile':
           return dispatch(change(data.file))
+        case 'log':
+          return console.log('logger>>', data)
       }
     })
     return () => removeListener()

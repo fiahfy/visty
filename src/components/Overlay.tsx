@@ -28,8 +28,12 @@ const Overlay = (props: Props) => {
 
   const [iconVisible, setIconVisible] = useState(false)
 
-  const ActionIcon = useMemo(() => {
+  const action = useMemo(() => {
     const [action] = (actionCode ?? '').split(':')
+    return action
+  }, [actionCode])
+
+  const ActionIcon = useMemo(() => {
     switch (action) {
       case 'play':
         return PlayArrowIcon
@@ -46,9 +50,12 @@ const Overlay = (props: Props) => {
       default:
         return null
     }
-  }, [actionCode])
+  }, [action])
 
   useEffect(() => {
+    if (!actionCode) {
+      return
+    }
     setIconVisible(true)
     const timer = setTimeout(() => setIconVisible(false), 50)
     return () => clearTimeout(timer)
