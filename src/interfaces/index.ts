@@ -9,7 +9,7 @@ import { Operations as WindowOperations } from 'electron-window/preload'
 
 export interface IElectronAPI {
   openFile: (filePath: string) => Promise<void>
-  setWindowSize: (size: { height: number; width: number }) => Promise<void>
+  setContentSize: (size: { height: number; width: number }) => Promise<void>
   applicationMenu: {
     update: (params: ApplicationMenuParams) => Promise<void>
   }

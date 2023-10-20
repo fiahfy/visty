@@ -7,8 +7,8 @@ import { ContextMenuParams } from './contextMenu'
 
 contextBridge.exposeInMainWorld('electronAPI', {
   openFile: (filePath: string) => ipcRenderer.invoke('open-file', filePath),
-  setWindowSize: (size: { height: number; width: number }) =>
-    ipcRenderer.invoke('set-window-size', size),
+  setContentSize: (size: { height: number; width: number }) =>
+    ipcRenderer.invoke('set-content-size', size),
   applicationMenu: {
     update: (params: ApplicationMenuParams) =>
       ipcRenderer.invoke('application-menu-update', params),
