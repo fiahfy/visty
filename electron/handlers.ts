@@ -21,40 +21,32 @@ const registerHandlers = () => {
 
       const { height, width } = size
 
-      const bounds = browserWindow.getBounds()
-      const workArea = screen.getDisplayMatching(bounds).workArea
+      const workArea = screen.getDisplayMatching(
+        browserWindow.getBounds(),
+      ).workArea
 
-      let contentBounds = { ...browserWindow.getContentBounds(), height, width }
-
-      const titleBarHeight = bounds.height - contentBounds.height
-      if (contentBounds.x + contentBounds.width > workArea.x + workArea.width) {
+      let bounds = { ...browserWindow.getContentBounds(), height, width }
+      if (bounds.x + bounds.width > workArea.x + workArea.width) {
         const newWidth =
-          contentBounds.width > workArea.width
-            ? workArea.width
-            : contentBounds.width
-        contentBounds = {
-          ...contentBounds,
+          bounds.width > workArea.width ? workArea.width : bounds.width
+        bounds = {
+          ...bounds,
           x: workArea.x + workArea.width - newWidth,
           width: newWidth,
           height: Math.round((newWidth * height) / width),
         }
       }
-      if (
-        contentBounds.y + contentBounds.height >
-        workArea.y + workArea.height
-      ) {
+      if (bounds.y + bounds.height > workArea.y + workArea.height) {
         const newHeight =
-          contentBounds.height > workArea.height - titleBarHeight
-            ? workArea.height - titleBarHeight
-            : contentBounds.height
-        contentBounds = {
-          ...contentBounds,
+          bounds.height > workArea.height ? workArea.height : bounds.height
+        bounds = {
+          ...bounds,
           y: workArea.y + workArea.height - newHeight,
           height: newHeight,
           width: Math.round((newHeight * width) / height),
         }
       }
-      browserWindow.setContentBounds(contentBounds, true)
+      browserWindow.setContentBounds(bounds, true)
       browserWindow.setAspectRatio(width / height)
     },
   )
