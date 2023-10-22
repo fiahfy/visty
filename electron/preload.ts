@@ -21,7 +21,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.invoke('showContextMenu', params),
   updateApplicationMenu: (params: ApplicationMenuParams) =>
     ipcRenderer.invoke('updateApplicationMenu', params),
+  ...exposeTrafficLightOperations(),
+  ...exposeWindowOperations(),
   fullscreen: exposeFullscreenOperations(),
-  trafficLight: exposeTrafficLightOperations(),
-  window: exposeWindowOperations(),
 })

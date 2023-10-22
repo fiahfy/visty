@@ -7,7 +7,7 @@ import { Operations as FullscreenOperations } from 'electron-fullscreen/preload'
 import { Operations as TrafficLightOperations } from 'electron-traffic-light/preload'
 import { Operations as WindowOperations } from 'electron-window/preload'
 
-export interface IElectronAPI {
+export type IElectronAPI = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   addMessageListener: (callback: (message: any) => void) => () => void
   openFile: (filePath: string) => Promise<void>
@@ -15,11 +15,10 @@ export interface IElectronAPI {
   showContextMenu: (params: ContextMenuParams) => Promise<void>
   updateApplicationMenu: (params: ApplicationMenuParams) => Promise<void>
   fullscreen: FullscreenOperations
-  trafficLight: TrafficLightOperations
-  window: WindowOperations<{
+} & TrafficLightOperations &
+  WindowOperations<{
     file: { name: string; path: string; url: string }
   }>
-}
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type ApplicationMenuParams = any
