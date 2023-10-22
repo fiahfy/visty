@@ -6,17 +6,17 @@ import {
   ipcMain,
 } from 'electron'
 
-export type ContextMenuItemOption = {
-  id: string
+export type ContextMenuOption = {
   data?: any // eslint-disable-line @typescript-eslint/no-explicit-any
+  type: string
 }
 
 export type ContextMenuParams = {
   isEditable: boolean
+  options: ContextMenuOption[]
   selectionText: string
   x: number
   y: number
-  options: ContextMenuItemOption[]
 }
 
 const registerContextMenu = () => {
@@ -49,15 +49,15 @@ const registerContextMenu = () => {
       }
 
       const actionCreators: {
-        [id in string]: (
-          data: ContextMenuItemOption['data'],
+        [type in string]: (
+          data: ContextMenuOption['data'],
         ) => MenuItemConstructorOptions
       } = {
         separator: () => defaultActions.separator,
       }
 
       const actions = params.options.flatMap((option) => {
-        const creator = actionCreators[option.id]
+        const creator = actionCreators[option.type]
         return creator ? creator(option.data) : []
       })
 
