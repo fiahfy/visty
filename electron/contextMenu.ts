@@ -21,7 +21,7 @@ export type ContextMenuParams = {
 
 const registerContextMenu = () => {
   ipcMain.handle(
-    'context-menu-show',
+    'showContextMenu',
     (event: IpcMainInvokeEvent, params: ContextMenuParams) => {
       const defaultActions = {
         separator: { type: 'separator' as const },

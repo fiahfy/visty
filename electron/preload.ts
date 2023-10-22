@@ -6,27 +6,21 @@ import { ApplicationMenuParams } from './applicationMenu'
 import { ContextMenuParams } from './contextMenu'
 
 contextBridge.exposeInMainWorld('electronAPI', {
-  openFile: (filePath: string) => ipcRenderer.invoke('open-file', filePath),
-  setContentSize: (size: { height: number; width: number }) =>
-    ipcRenderer.invoke('set-content-size', size),
-  applicationMenu: {
-    update: (params: ApplicationMenuParams) =>
-      ipcRenderer.invoke('application-menu-update', params),
-  },
-  contextMenu: {
-    show: (params: ContextMenuParams) =>
-      ipcRenderer.invoke('context-menu-show', params),
-  },
-  message: {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  addMessageListener: (callback: (message: any) => void) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    addListener: (callback: (message: any) => void) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const listener = (_event: IpcRendererEvent, message: any) =>
-        callback(message)
-      ipcRenderer.on('message-send', listener)
-      return () => ipcRenderer.removeListener('message-send', listener)
-    },
+    const listener = (_event: IpcRendererEvent, message: any) =>
+      callback(message)
+    ipcRenderer.on('sendMessage', listener)
+    return () => ipcRenderer.removeListener('sendMessage', listener)
   },
+  openFile: (filePath: string) => ipcRenderer.invoke('openFile', filePath),
+  setContentSize: (size: { height: number; width: number }) =>
+    ipcRenderer.invoke('setContentSize', size),
+  showContextMenu: (params: ContextMenuParams) =>
+    ipcRenderer.invoke('showContextMenu', params),
+  updateApplicationMenu: (params: ApplicationMenuParams) =>
+    ipcRenderer.invoke('updateApplicationMenu', params),
   fullscreen: exposeFullscreenOperations(),
   trafficLight: exposeTrafficLightOperations(),
   window: exposeWindowOperations(),

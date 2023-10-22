@@ -10,6 +10,8 @@
 
 ## TODOs
 
+- [ ] Zoom In
+- [ ] Partial Loop
 - [ ] Use Electron Forge
 
 ## Screenshots
