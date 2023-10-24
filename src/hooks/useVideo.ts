@@ -36,6 +36,8 @@ const useVideo = (ref: RefObject<HTMLVideoElement>) => {
   const [muted, setMuted] = useState(false)
   const [paused, setPaused] = useState(true)
   const [volume, setVolume] = useState(0)
+  const [timeRange, setTimeRange] = useState<[number, number]>()
+  const [zoom, setZoom] = useState(1)
 
   const video = ref.current
 
@@ -56,24 +58,45 @@ const useVideo = (ref: RefObject<HTMLVideoElement>) => {
 
       video.loop = defaultLoop
       video.volume = defaultMuted ? 0 : defaultVolume
+    })()
+  }, [defaultLoop, defaultMuted, defaultVolume, file, video])
 
-      let requestId: number
-      const callback = () => {
-        if (video.readyState < 1) {
-          return
-        }
+  useEffect(() => {
+    if (!video) {
+      return
+    }
+    let requestId: number
+    const callback = () => {
+      if (video.readyState >= 1) {
         setPaused(video.paused)
         setCurrentTime(video.currentTime)
         setDuration(video.duration)
         setLoop(video.loop)
         setVolume(video.volume)
-        requestId = requestAnimationFrame(callback)
       }
       requestId = requestAnimationFrame(callback)
+    }
+    requestId = requestAnimationFrame(callback)
+    return () => cancelAnimationFrame(requestId)
+  }, [video])
 
-      return () => cancelAnimationFrame(requestId)
-    })()
-  }, [defaultLoop, defaultMuted, defaultVolume, file, ref, video])
+  useEffect(() => {
+    if (!video) {
+      return
+    }
+    let requestId: number
+    const callback = () => {
+      if (timeRange) {
+        const [startTime, endTime] = timeRange
+        if (video.currentTime < startTime || video.currentTime > endTime) {
+          video.currentTime = startTime
+        }
+      }
+      requestId = requestAnimationFrame(callback)
+    }
+    requestId = requestAnimationFrame(callback)
+    return () => cancelAnimationFrame(requestId)
+  }, [timeRange, video])
 
   const toggleLoop = useCallback(() => {
     if (!video) {
@@ -111,6 +134,14 @@ const useVideo = (ref: RefObject<HTMLVideoElement>) => {
     }
   }, [video])
 
+  const togglePartialLoop = useCallback(() => {
+    if (timeRange) {
+      setTimeRange(undefined)
+    } else {
+      setTimeRange([currentTime, duration])
+    }
+  }, [currentTime, duration, timeRange])
+
   const seek = useCallback(
     (value: number) => {
       if (!video) {
@@ -145,8 +176,21 @@ const useVideo = (ref: RefObject<HTMLVideoElement>) => {
     [dispatch, video, volume],
   )
 
+  const changeTimeRange = useCallback((value: [number, number]) => {
+    setTimeRange(value)
+  }, [])
+
+  const zoomIn = useCallback(() => {
+    setZoom((zoom) => zoom * 1.1)
+  }, [])
+
+  const zoomOut = useCallback(() => {
+    setZoom((zoom) => zoom / 1.1)
+  }, [])
+
   return {
     actionCode,
+    changeTimeRange,
     changeVolume,
     currentTime,
     duration,
@@ -156,10 +200,15 @@ const useVideo = (ref: RefObject<HTMLVideoElement>) => {
     paused,
     seek,
     seekTo,
+    timeRange,
     toggleLoop,
     toggleMuted,
+    togglePartialLoop,
     togglePaused,
     volume,
+    zoom,
+    zoomIn,
+    zoomOut,
   }
 }
 

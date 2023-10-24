@@ -13,8 +13,6 @@ const TitleBar = (props: Props) => {
       component="div"
       elevation={0}
       enableColorOnDark
-      // onMouseEnter={handleMouseEnter}
-      // onMouseLeave={handleMouseLeave}
       sx={{ WebkitAppRegion: 'drag', opacity: 0.95 }}
     >
       <Toolbar

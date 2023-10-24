@@ -23,6 +23,9 @@ const registerContextMenu = () => {
   ipcMain.handle(
     'showContextMenu',
     (event: IpcMainInvokeEvent, params: ContextMenuParams) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const send = (message: any) => event.sender.send('sendMessage', message)
+
       const defaultActions = {
         separator: { type: 'separator' as const },
         cut: params.isEditable && {
@@ -53,6 +56,12 @@ const registerContextMenu = () => {
           data: ContextMenuOption['data'],
         ) => MenuItemConstructorOptions
       } = {
+        partialLoop: ({ enabled }) => ({
+          label: 'Partial Loop',
+          checked: enabled,
+          click: () => send({ type: 'togglePartialLoop' }),
+          type: 'checkbox',
+        }),
         separator: () => defaultActions.separator,
       }
 

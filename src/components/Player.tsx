@@ -13,6 +13,7 @@ import TitleBar from '~/components/TitleBar'
 import useTitle from '~/hooks/useTitle'
 import useTrafficLight from '~/hooks/useTrafficLight'
 import useVideo from '~/hooks/useVideo'
+import { createMenuHandler } from '~/utils/contextMenu'
 
 const Player = () => {
   const [controlBarVisible, setControlBarVisible] = useState(false)
@@ -21,6 +22,7 @@ const Player = () => {
   const videoRef = useRef<HTMLVideoElement>(null)
   const {
     actionCode,
+    changeTimeRange,
     changeVolume,
     currentTime,
     duration,
@@ -30,10 +32,15 @@ const Player = () => {
     paused,
     seek,
     seekTo,
+    timeRange,
     toggleLoop,
     toggleMuted,
+    togglePartialLoop,
     togglePaused,
     volume,
+    // zoom,
+    zoomIn,
+    zoomOut,
   } = useVideo(videoRef)
 
   const title = useMemo(() => file.name, [file])
@@ -43,10 +50,6 @@ const Player = () => {
   const { setVisible, visible } = useTrafficLight()
 
   const timer = useRef<number>()
-
-  useEffect(() => {
-    setVisible(controlBarVisible)
-  }, [controlBarVisible, setVisible])
 
   useEffect(() => {
     const handler = async (e: KeyboardEvent) => {
@@ -69,6 +72,16 @@ const Player = () => {
           return toggleMuted()
         case ' ':
           return togglePaused()
+        case ';':
+          if ((e.ctrlKey && !e.metaKey) || (!e.ctrlKey && e.metaKey)) {
+            return zoomIn()
+          }
+          return
+        case '-':
+          if ((e.ctrlKey && !e.metaKey) || (!e.ctrlKey && e.metaKey)) {
+            return zoomOut()
+          }
+          return
       }
     }
     document.body.addEventListener('keydown', handler)
@@ -81,7 +94,24 @@ const Player = () => {
     toggleMuted,
     togglePaused,
     volume,
+    zoomIn,
+    zoomOut,
   ])
+
+  useEffect(() => {
+    const removeListener = window.electronAPI.addMessageListener((message) => {
+      const { type } = message
+      switch (type) {
+        case 'togglePartialLoop':
+          return togglePartialLoop()
+      }
+    })
+    return () => removeListener()
+  }, [togglePartialLoop])
+
+  useEffect(() => {
+    setVisible(controlBarVisible)
+  }, [controlBarVisible, setVisible])
 
   const clearTimer = useCallback(() => window.clearTimeout(timer.current), [])
 
@@ -134,14 +164,24 @@ const Player = () => {
     resetTimer(false)
   }, [resetTimer])
 
+  const handleContextMenu = useMemo(
+    () =>
+      createMenuHandler([
+        { type: 'partialLoop', data: { enabled: !!timeRange } },
+      ]),
+    [timeRange],
+  )
+
   return (
     <Box
+      onContextMenu={handleContextMenu}
       onDragOver={handleDragOver}
       onDrop={handleDrop}
       onMouseMove={handleMouseMove}
       sx={{
         cursor: controlBarVisible ? undefined : 'none',
         display: 'flex',
+        overflow: 'auto',
         width: '100%',
       }}
     >
@@ -165,11 +205,13 @@ const Player = () => {
             loop={loop}
             muted={muted}
             onChangeCurrentTime={seek}
+            onChangeTimeRange={changeTimeRange}
             onChangeVolume={changeVolume}
             onClickLoop={toggleLoop}
             onClickMute={toggleMuted}
             onClickPlay={togglePaused}
             paused={paused}
+            timeRange={timeRange}
             volume={volume}
           />
         </div>
