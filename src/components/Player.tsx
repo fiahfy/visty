@@ -30,6 +30,7 @@ const Player = () => {
     loop,
     muted,
     paused,
+    resetZoom,
     seek,
     seekTo,
     timeRange,
@@ -38,7 +39,8 @@ const Player = () => {
     togglePartialLoop,
     togglePaused,
     volume,
-    // zoom,
+    zoom,
+    zoomBy,
     zoomIn,
     zoomOut,
   } = useVideo(videoRef)
@@ -82,6 +84,11 @@ const Player = () => {
             return zoomOut()
           }
           return
+        case '0':
+          if ((e.ctrlKey && !e.metaKey) || (!e.ctrlKey && e.metaKey)) {
+            return resetZoom()
+          }
+          return
       }
     }
     document.body.addEventListener('keydown', handler)
@@ -89,6 +96,7 @@ const Player = () => {
   }, [
     changeVolume,
     currentTime,
+    resetZoom,
     seekTo,
     toggleLoop,
     toggleMuted,
@@ -97,6 +105,17 @@ const Player = () => {
     zoomIn,
     zoomOut,
   ])
+
+  useEffect(() => {
+    const handler = (e: WheelEvent) => {
+      if ((e.ctrlKey && !e.metaKey) || (!e.ctrlKey && e.metaKey)) {
+        e.preventDefault()
+        zoomBy(e.deltaY * 0.01)
+      }
+    }
+    document.body.addEventListener('wheel', handler)
+    return () => document.body.removeEventListener('wheel', handler)
+  }, [zoomBy])
 
   useEffect(() => {
     const removeListener = window.electronAPI.addMessageListener((message) => {
@@ -180,7 +199,7 @@ const Player = () => {
       onMouseMove={handleMouseMove}
       sx={{
         cursor: controlBarVisible ? undefined : 'none',
-        display: 'flex',
+        height: '100%',
         overflow: 'auto',
         width: '100%',
       }}
@@ -189,7 +208,12 @@ const Player = () => {
         onClick={togglePaused}
         ref={videoRef}
         src={file.url}
-        style={{ background: 'black', width: '100%' }}
+        style={{
+          background: 'black',
+          display: 'block',
+          minHeight: '100%',
+          width: `${100 * zoom}%`,
+        }}
       />
       <Overlay actionCode={actionCode} />
       <Fade in={visible}>

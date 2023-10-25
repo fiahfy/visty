@@ -176,17 +176,29 @@ const useVideo = (ref: RefObject<HTMLVideoElement>) => {
     [dispatch, video, volume],
   )
 
-  const changeTimeRange = useCallback((value: [number, number]) => {
-    setTimeRange(value)
-  }, [])
+  const changeTimeRange = useCallback(
+    (value: [number, number]) => setTimeRange(value),
+    [],
+  )
 
-  const zoomIn = useCallback(() => {
-    setZoom((zoom) => zoom * 1.1)
-  }, [])
+  const adjustZoom = (zoom: number) => Math.min(Math.max(1, zoom), 10)
 
-  const zoomOut = useCallback(() => {
-    setZoom((zoom) => zoom / 1.1)
-  }, [])
+  const zoomIn = useCallback(
+    () => setZoom((zoom) => adjustZoom(zoom * 1.1)),
+    [],
+  )
+
+  const zoomOut = useCallback(
+    () => setZoom((zoom) => adjustZoom(zoom * 0.9)),
+    [],
+  )
+
+  const resetZoom = useCallback(() => setZoom(adjustZoom(1)), [])
+
+  const zoomBy = useCallback(
+    (value: number) => setZoom((zoom) => adjustZoom(zoom * (1 + value))),
+    [],
+  )
 
   return {
     actionCode,
@@ -198,6 +210,7 @@ const useVideo = (ref: RefObject<HTMLVideoElement>) => {
     loop,
     muted,
     paused,
+    resetZoom,
     seek,
     seekTo,
     timeRange,
@@ -207,6 +220,7 @@ const useVideo = (ref: RefObject<HTMLVideoElement>) => {
     togglePaused,
     volume,
     zoom,
+    zoomBy,
     zoomIn,
     zoomOut,
   }
