@@ -1,6 +1,8 @@
 import { Box, Fade } from '@mui/material'
 import {
   DragEvent,
+  MouseEvent,
+  WheelEvent,
   useCallback,
   useEffect,
   useMemo,
@@ -18,7 +20,12 @@ import { createMenuHandler } from '~/utils/contextMenu'
 const Player = () => {
   const [controlBarVisible, setControlBarVisible] = useState(false)
   const [hovered, setHovered] = useState(false)
+  const [dragOffset, setDragOffset] = useState<{
+    x: number
+    y: number
+  }>()
 
+  const wrapperRef = useRef<HTMLDivElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
   const {
     actionCode,
@@ -107,17 +114,6 @@ const Player = () => {
   ])
 
   useEffect(() => {
-    const handler = (e: WheelEvent) => {
-      if ((e.ctrlKey && !e.metaKey) || (!e.ctrlKey && e.metaKey)) {
-        e.preventDefault()
-        zoomBy(e.deltaY * 0.01)
-      }
-    }
-    document.body.addEventListener('wheel', handler)
-    return () => document.body.removeEventListener('wheel', handler)
-  }, [zoomBy])
-
-  useEffect(() => {
     const removeListener = window.electronAPI.addMessageListener((message) => {
       const { type } = message
       switch (type) {
@@ -148,6 +144,14 @@ const Player = () => {
 
   useEffect(() => resetTimer(hovered), [hovered, paused, resetTimer])
 
+  const handleContextMenu = useMemo(
+    () =>
+      createMenuHandler([
+        { type: 'partialLoop', data: { enabled: !!timeRange } },
+      ]),
+    [timeRange],
+  )
+
   const handleDragOver = useCallback((e: DragEvent) => {
     e.preventDefault()
     e.stopPropagation()
@@ -168,9 +172,47 @@ const Player = () => {
     window.electronAPI.openFile(path)
   }, [])
 
+  const handleClick = useCallback(
+    (e: MouseEvent) => {
+      if ((e.ctrlKey && !e.metaKey) || (!e.ctrlKey && e.metaKey)) {
+        return
+      }
+      togglePaused()
+    },
+    [togglePaused],
+  )
+
+  const handleMouseDown = useCallback((e: MouseEvent) => {
+    if ((e.ctrlKey && !e.metaKey) || (!e.ctrlKey && e.metaKey)) {
+      const wrapper = wrapperRef.current
+      if (wrapper) {
+        setDragOffset({
+          x: wrapper.scrollLeft + e.clientX,
+          y: wrapper.scrollTop + e.clientY,
+        })
+      }
+    }
+  }, [])
+
   const handleMouseMove = useCallback(
-    () => resetTimer(hovered),
-    [hovered, resetTimer],
+    (e: MouseEvent) => {
+      resetTimer(hovered)
+      const wrapper = wrapperRef.current
+      if (wrapper && dragOffset) {
+        wrapper.scrollLeft = dragOffset.x - e.clientX
+        wrapper.scrollTop = dragOffset.y - e.clientY
+      }
+    },
+    [dragOffset, hovered, resetTimer],
+  )
+
+  const handleWheel = useCallback(
+    (e: WheelEvent) => {
+      if ((e.ctrlKey && !e.metaKey) || (!e.ctrlKey && e.metaKey)) {
+        zoomBy(e.deltaY * 0.01)
+      }
+    },
+    [zoomBy],
   )
 
   const handleMouseEnter = useCallback(() => {
@@ -183,29 +225,33 @@ const Player = () => {
     resetTimer(false)
   }, [resetTimer])
 
-  const handleContextMenu = useMemo(
-    () =>
-      createMenuHandler([
-        { type: 'partialLoop', data: { enabled: !!timeRange } },
-      ]),
-    [timeRange],
-  )
-
   return (
     <Box
       onContextMenu={handleContextMenu}
       onDragOver={handleDragOver}
       onDrop={handleDrop}
-      onMouseMove={handleMouseMove}
+      ref={wrapperRef}
       sx={{
-        cursor: controlBarVisible ? undefined : 'none',
+        cursor: dragOffset
+          ? 'grabbing'
+          : controlBarVisible
+          ? undefined
+          : 'none',
         height: '100%',
         overflow: 'auto',
         width: '100%',
+        '::-webkit-scrollbar': {
+          display: 'none',
+        },
       }}
     >
       <video
-        onClick={togglePaused}
+        onClick={handleClick}
+        onMouseDown={handleMouseDown}
+        onMouseLeave={() => setDragOffset(undefined)}
+        onMouseMove={handleMouseMove}
+        onMouseUp={() => setDragOffset(undefined)}
+        onWheel={handleWheel}
         ref={videoRef}
         src={file.url}
         style={{
