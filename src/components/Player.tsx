@@ -17,7 +17,7 @@ import useTrafficLight from '~/hooks/useTrafficLight'
 import useVideo from '~/hooks/useVideo'
 import { useAppDispatch } from '~/store'
 import { change } from '~/store/window'
-import { createMenuHandler } from '~/utils/contextMenu'
+import { createContextMenuHandler } from '~/utils/contextMenu'
 import DroppableMask from './DroppableMask'
 
 const Player = () => {
@@ -31,6 +31,7 @@ const Player = () => {
 
   const {
     actionCode,
+    changeSpeed,
     changeTimeRange,
     changeVolume,
     currentTime,
@@ -40,14 +41,17 @@ const Player = () => {
     muted,
     partialLoop,
     paused,
+    pictureInPicture,
     resetZoom,
     seek,
     seekTo,
+    speed,
     timeRange,
     toggleLoop,
     toggleMuted,
     togglePartialLoop,
     togglePaused,
+    togglePictureInPicture,
     volume,
     zoom,
     zoomBy,
@@ -73,22 +77,32 @@ const Player = () => {
       switch (type) {
         case 'changeFile':
           return dispatch(change(data.file))
-        case 'zoomIn':
-          return zoomIn()
-        case 'zoomOut':
-          return zoomOut()
+        case 'changeSpeed':
+          return changeSpeed(data.value)
         case 'resetZoom':
           return resetZoom()
+        case 'toggleFullscreen':
+          return window.electronAPI.toggleFullscreen()
         case 'toggleLoop':
           return toggleLoop()
         case 'togglePartialLoop':
           return togglePartialLoop()
-        case 'toggleFullscreen':
-          return window.electronAPI.toggleFullscreen()
+        case 'zoomIn':
+          return zoomIn()
+        case 'zoomOut':
+          return zoomOut()
       }
     })
     return () => removeListener()
-  }, [dispatch, resetZoom, toggleLoop, togglePartialLoop, zoomIn, zoomOut])
+  }, [
+    changeSpeed,
+    dispatch,
+    resetZoom,
+    toggleLoop,
+    togglePartialLoop,
+    zoomIn,
+    zoomOut,
+  ])
 
   useEffect(() => {
     const handler = async (e: KeyboardEvent) => {
@@ -159,9 +173,9 @@ const Player = () => {
 
   const handleContextMenu = useMemo(
     () =>
-      createMenuHandler([
-        { type: 'partialLoop', data: { enabled: partialLoop } },
-        { type: 'loop', data: { enabled: !!loop } },
+      createContextMenuHandler([
+        { type: 'partialLoop', data: { checked: partialLoop } },
+        { type: 'loop', data: { checked: loop } },
       ]),
     [loop, partialLoop],
   )
@@ -270,8 +284,11 @@ const Player = () => {
             onChangeVolume={changeVolume}
             onClickLoop={toggleLoop}
             onClickMute={toggleMuted}
+            onClickPictureInPicture={togglePictureInPicture}
             onClickPlay={togglePaused}
             paused={paused}
+            pictureInPicture={pictureInPicture}
+            speed={speed}
             timeRange={timeRange}
             volume={volume}
           />

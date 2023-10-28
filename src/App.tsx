@@ -1,10 +1,10 @@
 import { Box, GlobalStyles } from '@mui/material'
 import { useMemo } from 'react'
 import Player from '~/components/Player'
-import { createMenuHandler } from '~/utils/contextMenu'
+import { createContextMenuHandler } from '~/utils/contextMenu'
 
 const App = () => {
-  const handleContextMenu = useMemo(() => createMenuHandler(), [])
+  const handleContextMenu = useMemo(() => createContextMenuHandler(), [])
 
   return (
     <Box

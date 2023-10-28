@@ -9,7 +9,6 @@ import {
   shell,
 } from 'electron'
 
-// eslint-disable-next-line @typescript-eslint/ban-types
 type State = {
   loop: boolean
   partialLoop: boolean

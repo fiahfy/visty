@@ -7,15 +7,21 @@ const send = (event: IpcMainInvokeEvent, message: any) =>
 
 const registerContextMenu = () => {
   const actionCreators: ActionCreators = {
-    partialLoop: (event, _params, { enabled }) => ({
+    changeSpeed: (event, _params, { checked, value }) => ({
+      label: value === 1 ? 'Normal' : `${value}`,
+      checked,
+      click: () => send(event, { type: 'changeSpeed', data: { value } }),
+      type: 'checkbox',
+    }),
+    partialLoop: (event, _params, { checked }) => ({
       label: 'Partial Loop',
-      checked: enabled,
+      checked,
       click: () => send(event, { type: 'togglePartialLoop' }),
       type: 'checkbox',
     }),
-    loop: (event, _params, { enabled }) => ({
+    loop: (event, _params, { checked }) => ({
       label: 'Loop',
-      checked: enabled,
+      checked,
       click: () => send(event, { type: 'toggleLoop' }),
       type: 'checkbox',
     }),

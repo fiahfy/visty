@@ -10,7 +10,6 @@
 
 ## TODOs
 
-- [ ] Change Playback Speed
 - [ ] Rotate/Flip
 - [ ] Subtitles
 - [ ] Use Electron Forge

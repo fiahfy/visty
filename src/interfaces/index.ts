@@ -23,9 +23,3 @@ export type IElectronAPI = {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type ApplicationMenuParams = any
-
-export type Settings = {
-  defaultLoop: boolean
-  defaultMuted: boolean
-  defaultVolume: number
-}

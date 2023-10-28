@@ -35,8 +35,10 @@ const useVideo = (ref: RefObject<HTMLVideoElement>) => {
   const [loop, setLoop] = useState(false)
   const [muted, setMuted] = useState(false)
   const [paused, setPaused] = useState(true)
-  const [volume, setVolume] = useState(0)
+  const [pictureInPicture, setPictureInPicture] = useState(false)
+  const [speed, setSpeed] = useState(1)
   const [timeRange, setTimeRange] = useState<[number, number]>()
+  const [volume, setVolume] = useState(0)
   const [zoom, setZoom] = useState(1)
 
   const partialLoop = useMemo(() => !!timeRange, [timeRange])
@@ -69,13 +71,34 @@ const useVideo = (ref: RefObject<HTMLVideoElement>) => {
     if (!video) {
       return
     }
+    const handleEnterPictureInPicture = () => setPictureInPicture(true)
+    const handleLeavePictureInPicture = () => setPictureInPicture(false)
+    video.addEventListener('enterpictureinpicture', handleEnterPictureInPicture)
+    video.addEventListener('leavepictureinpicture', handleLeavePictureInPicture)
+    return () => {
+      video.removeEventListener(
+        'enterpictureinpicture',
+        handleEnterPictureInPicture,
+      )
+      video.removeEventListener(
+        'leavepictureinpicture',
+        handleLeavePictureInPicture,
+      )
+    }
+  }, [video])
+
+  useEffect(() => {
+    if (!video) {
+      return
+    }
     let requestId: number
     const callback = () => {
       if (video.readyState >= 1) {
-        setPaused(video.paused)
         setCurrentTime(video.currentTime)
         setDuration(video.duration)
         setLoop(video.loop)
+        setPaused(video.paused)
+        setSpeed(video.playbackRate)
         setVolume(video.volume)
       }
       requestId = requestAnimationFrame(callback)
@@ -146,6 +169,17 @@ const useVideo = (ref: RefObject<HTMLVideoElement>) => {
     }
   }, [currentTime, duration, timeRange])
 
+  const togglePictureInPicture = useCallback(async () => {
+    if (!video) {
+      return
+    }
+    if (pictureInPicture) {
+      await document.exitPictureInPicture()
+    } else {
+      await video.requestPictureInPicture()
+    }
+  }, [pictureInPicture, video])
+
   const seek = useCallback(
     (value: number) => {
       if (!video) {
@@ -173,16 +207,28 @@ const useVideo = (ref: RefObject<HTMLVideoElement>) => {
       if (!video) {
         return
       }
-      video.volume = Math.min(Math.max(0, value), 1)
+      const volume = Math.min(Math.max(0, value), 1)
+      video.volume = volume
       dispatch(setDefaultVolume(volume))
       dispatch(setDefaultMuted(volume === 0))
     },
-    [dispatch, video, volume],
+    [dispatch, video],
   )
 
   const changeTimeRange = useCallback(
     (value: [number, number]) => setTimeRange(value),
     [],
+  )
+
+  const changeSpeed = useCallback(
+    (value: number) => {
+      if (!video) {
+        return
+      }
+      video.playbackRate = value
+      dispatch(setDefaultVolume(value))
+    },
+    [dispatch, video],
   )
 
   const zoomBy = useCallback(
@@ -199,6 +245,7 @@ const useVideo = (ref: RefObject<HTMLVideoElement>) => {
 
   return {
     actionCode,
+    changeSpeed,
     changeTimeRange,
     changeVolume,
     currentTime,
@@ -208,14 +255,17 @@ const useVideo = (ref: RefObject<HTMLVideoElement>) => {
     muted,
     partialLoop,
     paused,
+    pictureInPicture,
     resetZoom,
     seek,
     seekTo,
+    speed,
     timeRange,
     toggleLoop,
     toggleMuted,
     togglePartialLoop,
     togglePaused,
+    togglePictureInPicture,
     volume,
     zoom,
     zoomBy,

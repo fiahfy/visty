@@ -1,12 +1,17 @@
 import { PayloadAction, createSelector, createSlice } from '@reduxjs/toolkit'
-import { Settings } from '~/interfaces'
 import { AppState } from '~/store'
 
-type State = Settings
+type State = {
+  defaultLoop: boolean
+  defaultMuted: boolean
+  defaultSpeed: number
+  defaultVolume: number
+}
 
 const initialState: State = {
   defaultLoop: false,
   defaultMuted: false,
+  defaultSpeed: 1,
   defaultVolume: 1,
 }
 
@@ -20,6 +25,9 @@ export const settingsSlice = createSlice({
     setDefaultMuted(state, action: PayloadAction<boolean>) {
       return { ...state, defaultMuted: action.payload }
     },
+    setDefaultSpeed(state, action: PayloadAction<number>) {
+      return { ...state, defaultSpeed: action.payload }
+    },
     setDefaultVolume(state, action: PayloadAction<number>) {
       return { ...state, defaultVolume: action.payload }
     },
@@ -29,8 +37,13 @@ export const settingsSlice = createSlice({
   },
 })
 
-export const { replace, setDefaultLoop, setDefaultMuted, setDefaultVolume } =
-  settingsSlice.actions
+export const {
+  replace,
+  setDefaultLoop,
+  setDefaultMuted,
+  setDefaultSpeed,
+  setDefaultVolume,
+} = settingsSlice.actions
 
 export default settingsSlice.reducer
 
@@ -44,6 +57,11 @@ export const selectDefaultLoop = createSelector(
 export const selectDefaultMuted = createSelector(
   selectSettings,
   (settings) => settings.defaultMuted,
+)
+
+export const selectDefaultSpeed = createSelector(
+  selectSettings,
+  (settings) => settings.defaultSpeed,
 )
 
 export const selectDefaultVolume = createSelector(

@@ -2,9 +2,11 @@ import {
   Fullscreen as FullscreenEnterIcon,
   FullscreenExit as FullscreenExitIcon,
   Pause as PauseIcon,
+  PictureInPictureAlt as PictureInPictureAltIcon,
   PlayArrow as PlayArrowIcon,
   Repeat as RepeatIcon,
   RepeatOn as RepeatOnIcon,
+  Speed as SpeedIcon,
   VolumeDown as VolumeDownIcon,
   VolumeOff as VolumeOffIcon,
   VolumeUp as VolumeUpIcon,
@@ -18,6 +20,7 @@ import {
   Typography,
 } from '@mui/material'
 import { MouseEvent, useCallback, useEffect, useMemo, useState } from 'react'
+import { createContextMenuHandler } from '~/utils/contextMenu'
 import { formatDuration } from '~/utils/formatter'
 
 type Props = {
@@ -30,8 +33,11 @@ type Props = {
   onChangeVolume: (value: number) => void
   onClickLoop: () => void
   onClickMute: () => void
+  onClickPictureInPicture: () => void
   onClickPlay: () => void
   paused: boolean
+  pictureInPicture: boolean
+  speed: number
   timeRange: [number, number] | undefined
   volume: number
 }
@@ -47,8 +53,11 @@ const ControlBar = (props: Props) => {
     onChangeVolume,
     onClickLoop,
     onClickMute,
+    onClickPictureInPicture,
     onClickPlay,
     paused,
+    pictureInPicture,
+    speed,
     timeRange,
     volume,
   } = props
@@ -109,6 +118,17 @@ const ControlBar = (props: Props) => {
   const handleClickFullscreen = useCallback(async () => {
     await window.electronAPI.setFullscreen(!fullscreen)
   }, [fullscreen])
+
+  const onClickSpeed = useMemo(
+    () =>
+      createContextMenuHandler(
+        [0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2].map((value) => ({
+          type: 'changeSpeed',
+          data: { checked: value === speed, value },
+        })),
+      ),
+    [speed],
+  )
 
   const handleChangeCurrentTime = useCallback(
     (_e: Event, value: number | number[]) => {
@@ -285,6 +305,18 @@ const ControlBar = (props: Props) => {
         <Box sx={{ flexGrow: 1 }} />
         <IconButton onClick={onClickLoop} size="small" title="Loop (l)">
           <LoopIcon fontSize="small" />
+        </IconButton>
+        <IconButton onClick={onClickSpeed} size="small" title="Playback speed">
+          <SpeedIcon fontSize="small" />
+        </IconButton>
+        <IconButton
+          onClick={onClickPictureInPicture}
+          size="small"
+          title={
+            pictureInPicture ? 'Exit picture in picture' : 'Picture in picture'
+          }
+        >
+          <PictureInPictureAltIcon fontSize="small" />
         </IconButton>
         <IconButton
           onClick={handleClickFullscreen}
