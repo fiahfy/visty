@@ -1,7 +1,7 @@
 import { IpcRendererEvent, ipcRenderer } from 'electron'
 
 export type Operations = {
-  addListener: (callback: (fullscreen: boolean) => void) => () => void
+  addFullscreenListener: (callback: (fullscreen: boolean) => void) => () => void
   enterFullscreen: () => Promise<void>
   exitFullscreen: () => Promise<void>
   isFullscreen: () => Promise<boolean>
@@ -10,22 +10,18 @@ export type Operations = {
 }
 
 export const exposeOperations = () => {
-  const channelPrefix = 'electron-fullscreen'
   return {
-    addListener: (callback: (fullscreen: boolean) => void) => {
+    addFullscreenListener: (callback: (fullscreen: boolean) => void) => {
       const listener = (_event: IpcRendererEvent, fullscreen: boolean) =>
         callback(fullscreen)
-      ipcRenderer.on(`${channelPrefix}-send`, listener)
-      return () => ipcRenderer.removeListener(`${channelPrefix}-send`, listener)
+      ipcRenderer.on('sendFullscreen', listener)
+      return () => ipcRenderer.removeListener('sendFullscreen', listener)
     },
-    enterFullscreen: () =>
-      ipcRenderer.invoke(`${channelPrefix}-enter-fullscreen`),
-    exitFullscreen: () =>
-      ipcRenderer.invoke(`${channelPrefix}-exit-fullscreen`),
-    isFullscreen: () => ipcRenderer.invoke(`${channelPrefix}-is-fullscreen`),
+    enterFullscreen: () => ipcRenderer.invoke('enterFullscreen'),
+    exitFullscreen: () => ipcRenderer.invoke('exitFullscreen'),
+    isFullscreen: () => ipcRenderer.invoke('isFullscreen'),
     setFullscreen: (fullscreen: boolean) =>
-      ipcRenderer.invoke(`${channelPrefix}-set-fullscreen`, fullscreen),
-    toggleFullscreen: () =>
-      ipcRenderer.invoke(`${channelPrefix}-toggle-fullscreen`),
+      ipcRenderer.invoke('setFullscreen', fullscreen),
+    toggleFullscreen: () => ipcRenderer.invoke('toggleFullscreen'),
   }
 }

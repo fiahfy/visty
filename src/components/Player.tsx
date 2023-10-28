@@ -72,9 +72,9 @@ const Player = () => {
         case 'ArrowDown':
           return changeVolume(volume - 0.1)
         case 'Escape':
-          return await window.electronAPI.fullscreen.exitFullscreen()
+          return await window.electronAPI.exitFullscreen()
         case 'f':
-          return await window.electronAPI.fullscreen.toggleFullscreen()
+          return await window.electronAPI.toggleFullscreen()
         case 'l':
           return toggleLoop()
         case 'm':

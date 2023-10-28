@@ -1,7 +1,7 @@
+import { exposeOperations as exposeTrafficLightOperations } from '@fiahfy/electron-traffic-light/preload'
+import { exposeOperations as exposeWindowOperations } from '@fiahfy/electron-window/preload'
 import { IpcRendererEvent, contextBridge, ipcRenderer } from 'electron'
 import { exposeOperations as exposeFullscreenOperations } from 'electron-fullscreen/preload'
-import { exposeOperations as exposeTrafficLightOperations } from 'electron-traffic-light/preload'
-import { exposeOperations as exposeWindowOperations } from 'electron-window/preload'
 import { ApplicationMenuParams } from './applicationMenu'
 import { ContextMenuParams } from './contextMenu'
 
@@ -21,7 +21,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.invoke('showContextMenu', params),
   updateApplicationMenu: (params: ApplicationMenuParams) =>
     ipcRenderer.invoke('updateApplicationMenu', params),
+  ...exposeFullscreenOperations(),
   ...exposeTrafficLightOperations(),
   ...exposeWindowOperations(),
-  fullscreen: exposeFullscreenOperations(),
 })

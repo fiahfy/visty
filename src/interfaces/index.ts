@@ -3,9 +3,9 @@
 // example, to import the interface below do:
 //
 // import User from 'path/to/interfaces';
+import { Operations as TrafficLightOperations } from '@fiahfy/electron-traffic-light/preload'
+import { Operations as WindowOperations } from '@fiahfy/electron-window/preload'
 import { Operations as FullscreenOperations } from 'electron-fullscreen/preload'
-import { Operations as TrafficLightOperations } from 'electron-traffic-light/preload'
-import { Operations as WindowOperations } from 'electron-window/preload'
 
 export type IElectronAPI = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -14,8 +14,8 @@ export type IElectronAPI = {
   setContentSize: (size: { height: number; width: number }) => Promise<void>
   showContextMenu: (params: ContextMenuParams) => Promise<void>
   updateApplicationMenu: (params: ApplicationMenuParams) => Promise<void>
-  fullscreen: FullscreenOperations
-} & TrafficLightOperations &
+} & FullscreenOperations &
+  TrafficLightOperations &
   WindowOperations<{
     file: { name: string; path: string; url: string }
   }>

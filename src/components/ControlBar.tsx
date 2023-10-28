@@ -58,7 +58,7 @@ const ControlBar = (props: Props) => {
 
   useEffect(() => {
     const removeListener =
-      window.electronAPI.fullscreen.addListener(setFullscreen)
+      window.electronAPI.addFullscreenListener(setFullscreen)
     return () => removeListener()
   }, [])
 
@@ -107,7 +107,7 @@ const ControlBar = (props: Props) => {
   )
 
   const handleClickFullscreen = useCallback(async () => {
-    await window.electronAPI.fullscreen.setFullscreen(!fullscreen)
+    await window.electronAPI.setFullscreen(!fullscreen)
   }, [fullscreen])
 
   const handleChangeCurrentTime = useCallback(
