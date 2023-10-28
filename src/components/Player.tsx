@@ -1,6 +1,5 @@
 import { Box, Fade } from '@mui/material'
 import {
-  DragEvent,
   MouseEvent,
   WheelEvent,
   useCallback,
@@ -10,14 +9,16 @@ import {
   useState,
 } from 'react'
 import ControlBar from '~/components/ControlBar'
-import Overlay from '~/components/Overlay'
+import FlashIndicator from '~/components/FlashIndicator'
 import TitleBar from '~/components/TitleBar'
+import useDrop from '~/hooks/useDrop'
 import useTitle from '~/hooks/useTitle'
 import useTrafficLight from '~/hooks/useTrafficLight'
 import useVideo from '~/hooks/useVideo'
 import { useAppDispatch } from '~/store'
-import { change, updateApplicationMenu } from '~/store/window'
+import { change } from '~/store/window'
 import { createMenuHandler } from '~/utils/contextMenu'
+import DroppableMask from './DroppableMask'
 
 const Player = () => {
   const dispatch = useAppDispatch()
@@ -37,6 +38,7 @@ const Player = () => {
     file,
     loop,
     muted,
+    partialLoop,
     paused,
     resetZoom,
     seek,
@@ -52,6 +54,7 @@ const Player = () => {
     zoomIn,
     zoomOut,
   } = useVideo(videoRef)
+  const { dropping, onDragEnter, onDragLeave, onDragOver, onDrop } = useDrop()
 
   const title = useMemo(() => file.name, [file])
 
@@ -127,10 +130,12 @@ const Player = () => {
   ])
 
   useEffect(() => {
-    const handler = () => dispatch(updateApplicationMenu())
+    const handler = () =>
+      window.electronAPI.updateApplicationMenu({ loop, partialLoop })
+    handler()
     window.addEventListener('focus', handler)
     return () => window.removeEventListener('focus', handler)
-  }, [dispatch])
+  }, [loop, partialLoop])
 
   useEffect(() => {
     setVisible(controlBarVisible)
@@ -155,31 +160,11 @@ const Player = () => {
   const handleContextMenu = useMemo(
     () =>
       createMenuHandler([
-        { type: 'partialLoop', data: { enabled: !!timeRange } },
+        { type: 'partialLoop', data: { enabled: partialLoop } },
         { type: 'loop', data: { enabled: !!loop } },
       ]),
-    [loop, timeRange],
+    [loop, partialLoop],
   )
-
-  const handleDragOver = useCallback((e: DragEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    e.dataTransfer.dropEffect = 'move'
-  }, [])
-
-  const handleDrop = useCallback((e: DragEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    const paths = Array.from(e.dataTransfer.files).map(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (file) => (file as any).path,
-    ) as string[]
-    const path = paths[0]
-    if (!path) {
-      return
-    }
-    window.electronAPI.openFile(path)
-  }, [])
 
   const handleClick = useCallback(
     (e: MouseEvent) => {
@@ -237,8 +222,10 @@ const Player = () => {
   return (
     <Box
       onContextMenu={handleContextMenu}
-      onDragOver={handleDragOver}
-      onDrop={handleDrop}
+      onDragEnter={onDragEnter}
+      onDragLeave={onDragLeave}
+      onDragOver={onDragOver}
+      onDrop={onDrop}
       ref={wrapperRef}
       sx={{
         cursor: dragOffset
@@ -270,14 +257,9 @@ const Player = () => {
           width: `${100 * zoom}%`,
         }}
       />
-      <Overlay actionCode={actionCode} />
-      <Fade in={visible}>
-        <div onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
-          <TitleBar title={title} />
-        </div>
-      </Fade>
+      <FlashIndicator actionCode={actionCode} />
       <Fade in={controlBarVisible}>
-        <div onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+        <Box onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
           <ControlBar
             currentTime={currentTime}
             duration={duration}
@@ -293,7 +275,13 @@ const Player = () => {
             timeRange={timeRange}
             volume={volume}
           />
-        </div>
+        </Box>
+      </Fade>
+      <DroppableMask dropping={dropping} />
+      <Fade in={visible}>
+        <Box onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+          <TitleBar title={title} />
+        </Box>
       </Fade>
     </Box>
   )

@@ -69,8 +69,4 @@ export const change =
         file,
       }),
     )
-    dispatch(updateApplicationMenu())
   }
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const updateApplicationMenu = (): AppThunk => async (_, _getState) => {}

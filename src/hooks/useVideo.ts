@@ -1,4 +1,4 @@
-import { RefObject, useCallback, useEffect, useState } from 'react'
+import { RefObject, useCallback, useEffect, useMemo, useState } from 'react'
 import { useAppDispatch, useAppSelector } from '~/store'
 import {
   selectDefaultLoop,
@@ -39,6 +39,8 @@ const useVideo = (ref: RefObject<HTMLVideoElement>) => {
   const [timeRange, setTimeRange] = useState<[number, number]>()
   const [zoom, setZoom] = useState(1)
 
+  const partialLoop = useMemo(() => !!timeRange, [timeRange])
+
   const video = ref.current
 
   useEffect(() => {
@@ -46,6 +48,8 @@ const useVideo = (ref: RefObject<HTMLVideoElement>) => {
       if (!video) {
         return
       }
+
+      setTimeRange(undefined)
 
       await new Promise<void>((resolve) =>
         video.addEventListener('loadedmetadata', () => resolve()),
@@ -202,6 +206,7 @@ const useVideo = (ref: RefObject<HTMLVideoElement>) => {
     file,
     loop,
     muted,
+    partialLoop,
     paused,
     resetZoom,
     seek,

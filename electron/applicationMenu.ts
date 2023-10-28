@@ -10,7 +10,10 @@ import {
 } from 'electron'
 
 // eslint-disable-next-line @typescript-eslint/ban-types
-type State = {}
+type State = {
+  loop: boolean
+  partialLoop: boolean
+}
 
 export type ApplicationMenuParams = Partial<State>
 
@@ -25,7 +28,10 @@ const registerApplicationMenu = (
 ) => {
   const isMac = process.platform === 'darwin'
 
-  let state: State = {}
+  let state: State = {
+    loop: false,
+    partialLoop: false,
+  }
 
   const update = () => {
     // @see https://www.electronjs.org/docs/latest/api/menu#examples
@@ -108,14 +114,17 @@ const registerApplicationMenu = (
             label: 'Reset Zoom',
           },
           { type: 'separator' },
-          // TODO: implement
           {
+            checked: state.partialLoop,
             click: () => send({ type: 'togglePartialLoop' }),
             label: 'Partial Loop',
+            type: 'checkbox',
           },
           {
+            checked: state.loop,
             click: () => send({ type: 'toggleLoop' }),
             label: 'Loop',
+            type: 'checkbox',
           },
           { type: 'separator' },
           { role: 'reload' },

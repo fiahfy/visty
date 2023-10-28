@@ -23,7 +23,7 @@ type Props = {
   actionCode: ActionCode | undefined
 }
 
-const Overlay = (props: Props) => {
+const FlashIndicator = (props: Props) => {
   const { actionCode } = props
 
   const [iconVisible, setIconVisible] = useState(false)
@@ -97,4 +97,4 @@ const Overlay = (props: Props) => {
   )
 }
 
-export default Overlay
+export default FlashIndicator
