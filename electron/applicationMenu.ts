@@ -1,4 +1,5 @@
 import {
+  BrowserWindow,
   IpcMainInvokeEvent,
   Menu,
   MenuItemConstructorOptions,
@@ -12,6 +13,12 @@ import {
 type State = {}
 
 export type ApplicationMenuParams = Partial<State>
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const send = (message: any) => {
+  const activeWindow = BrowserWindow.getFocusedWindow()
+  activeWindow?.webContents.send('sendMessage', message)
+}
 
 const registerApplicationMenu = (
   createWindow: (filePath: string) => Promise<void>,
@@ -80,17 +87,34 @@ const registerApplicationMenu = (
       {
         label: 'View',
         submenu: [
-          // TODO: implement
           {
-            checked: true,
-            click: () => undefined,
-            label: 'Actual Size',
-            type: 'checkbox',
+            click: () => send({ type: 'toggleFullscreen' }),
+            label: 'Full Screen',
+          },
+          { type: 'separator' },
+          {
+            accelerator: 'CmdOrCtrl+Plus',
+            click: () => send({ type: 'zoomIn' }),
+            label: 'Zoom In',
+          },
+          {
+            accelerator: 'CmdOrCtrl+-',
+            click: () => send({ type: 'zoomOut' }),
+            label: 'Zoom Out',
+          },
+          {
+            accelerator: 'CmdOrCtrl+0',
+            click: () => send({ type: 'resetZoom' }),
+            label: 'Reset Zoom',
           },
           { type: 'separator' },
           // TODO: implement
           {
-            click: () => undefined,
+            click: () => send({ type: 'togglePartialLoop' }),
+            label: 'Partial Loop',
+          },
+          {
+            click: () => send({ type: 'toggleLoop' }),
             label: 'Loop',
           },
           { type: 'separator' },

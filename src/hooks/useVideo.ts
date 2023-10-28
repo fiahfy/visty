@@ -181,24 +181,17 @@ const useVideo = (ref: RefObject<HTMLVideoElement>) => {
     [],
   )
 
-  const adjustZoom = (zoom: number) => Math.min(Math.max(1, zoom), 10)
-
-  const zoomIn = useCallback(
-    () => setZoom((zoom) => adjustZoom(zoom * 1.1)),
-    [],
-  )
-
-  const zoomOut = useCallback(
-    () => setZoom((zoom) => adjustZoom(zoom * 0.9)),
-    [],
-  )
-
-  const resetZoom = useCallback(() => setZoom(adjustZoom(1)), [])
-
   const zoomBy = useCallback(
-    (value: number) => setZoom((zoom) => adjustZoom(zoom * (1 + value))),
+    (value: number) =>
+      setZoom((zoom) => Math.min(Math.max(1, zoom * (1 + value)), 10)),
     [],
   )
+
+  const zoomIn = useCallback(() => zoomBy(0.1), [zoomBy])
+
+  const zoomOut = useCallback(() => zoomBy(-0.1), [zoomBy])
+
+  const resetZoom = useCallback(() => setZoom(1), [])
 
   return {
     actionCode,

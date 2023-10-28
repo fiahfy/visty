@@ -249,14 +249,14 @@ const ControlBar = (props: Props) => {
         <IconButton
           onClick={onClickPlay}
           size="small"
-          title={paused ? 'Play' : 'Pause'}
+          title={`${paused ? 'Play' : 'Pause'} (k)`}
         >
           <PlayIcon fontSize="small" />
         </IconButton>
         <IconButton
           onClick={onClickMute}
           size="small"
-          title={muted ? 'Unmute' : 'Mute'}
+          title={`${muted ? 'Unmute' : 'Mute'} (m)`}
         >
           <VolumeIcon fontSize="small" />
         </IconButton>
@@ -283,13 +283,13 @@ const ControlBar = (props: Props) => {
           {formatDuration(currentTime)} / {formatDuration(duration)}
         </Typography>
         <Box sx={{ flexGrow: 1 }} />
-        <IconButton onClick={onClickLoop} size="small" title="Loop">
+        <IconButton onClick={onClickLoop} size="small" title="Loop (l)">
           <LoopIcon fontSize="small" />
         </IconButton>
         <IconButton
           onClick={handleClickFullscreen}
           size="small"
-          title={fullscreen ? 'Exit full screen' : 'Full screen'}
+          title={`${fullscreen ? 'Exit full screen' : 'Full screen'} (f)`}
         >
           <FullscreenIcon fontSize="small" />
         </IconButton>

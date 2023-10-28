@@ -1,14 +1,9 @@
 import { Box, GlobalStyles } from '@mui/material'
 import { useMemo } from 'react'
 import Player from '~/components/Player'
-import useEventListener from '~/hooks/useEventListener'
-import useMessageListener from '~/hooks/useMessageListener'
 import { createMenuHandler } from '~/utils/contextMenu'
 
 const App = () => {
-  useEventListener()
-  useMessageListener()
-
   const handleContextMenu = useMemo(() => createMenuHandler(), [])
 
   return (

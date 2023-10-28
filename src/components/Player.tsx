@@ -15,18 +15,19 @@ import TitleBar from '~/components/TitleBar'
 import useTitle from '~/hooks/useTitle'
 import useTrafficLight from '~/hooks/useTrafficLight'
 import useVideo from '~/hooks/useVideo'
+import { useAppDispatch } from '~/store'
+import { change, updateApplicationMenu } from '~/store/window'
 import { createMenuHandler } from '~/utils/contextMenu'
 
 const Player = () => {
-  const [controlBarVisible, setControlBarVisible] = useState(false)
-  const [hovered, setHovered] = useState(false)
-  const [dragOffset, setDragOffset] = useState<{
-    x: number
-    y: number
-  }>()
+  const dispatch = useAppDispatch()
+
+  const { setVisible, visible } = useTrafficLight()
 
   const wrapperRef = useRef<HTMLDivElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
+  const timer = useRef<number>()
+
   const {
     actionCode,
     changeTimeRange,
@@ -56,9 +57,35 @@ const Player = () => {
 
   useTitle(title)
 
-  const { setVisible, visible } = useTrafficLight()
+  const [controlBarVisible, setControlBarVisible] = useState(false)
+  const [hovered, setHovered] = useState(false)
+  const [dragOffset, setDragOffset] = useState<{
+    x: number
+    y: number
+  }>()
 
-  const timer = useRef<number>()
+  useEffect(() => {
+    const removeListener = window.electronAPI.addMessageListener((message) => {
+      const { type, data } = message
+      switch (type) {
+        case 'changeFile':
+          return dispatch(change(data.file))
+        case 'zoomIn':
+          return zoomIn()
+        case 'zoomOut':
+          return zoomOut()
+        case 'resetZoom':
+          return resetZoom()
+        case 'toggleLoop':
+          return toggleLoop()
+        case 'togglePartialLoop':
+          return togglePartialLoop()
+        case 'toggleFullscreen':
+          return window.electronAPI.toggleFullscreen()
+      }
+    })
+    return () => removeListener()
+  }, [dispatch, resetZoom, toggleLoop, togglePartialLoop, zoomIn, zoomOut])
 
   useEffect(() => {
     const handler = async (e: KeyboardEvent) => {
@@ -79,23 +106,9 @@ const Player = () => {
           return toggleLoop()
         case 'm':
           return toggleMuted()
+        case 'k':
         case ' ':
           return togglePaused()
-        case ';':
-          if ((e.ctrlKey && !e.metaKey) || (!e.ctrlKey && e.metaKey)) {
-            return zoomIn()
-          }
-          return
-        case '-':
-          if ((e.ctrlKey && !e.metaKey) || (!e.ctrlKey && e.metaKey)) {
-            return zoomOut()
-          }
-          return
-        case '0':
-          if ((e.ctrlKey && !e.metaKey) || (!e.ctrlKey && e.metaKey)) {
-            return resetZoom()
-          }
-          return
       }
     }
     document.body.addEventListener('keydown', handler)
@@ -114,15 +127,10 @@ const Player = () => {
   ])
 
   useEffect(() => {
-    const removeListener = window.electronAPI.addMessageListener((message) => {
-      const { type } = message
-      switch (type) {
-        case 'togglePartialLoop':
-          return togglePartialLoop()
-      }
-    })
-    return () => removeListener()
-  }, [togglePartialLoop])
+    const handler = () => dispatch(updateApplicationMenu())
+    window.addEventListener('focus', handler)
+    return () => window.removeEventListener('focus', handler)
+  }, [dispatch])
 
   useEffect(() => {
     setVisible(controlBarVisible)
@@ -148,8 +156,9 @@ const Player = () => {
     () =>
       createMenuHandler([
         { type: 'partialLoop', data: { enabled: !!timeRange } },
+        { type: 'loop', data: { enabled: !!loop } },
       ]),
-    [timeRange],
+    [loop, timeRange],
   )
 
   const handleDragOver = useCallback((e: DragEvent) => {

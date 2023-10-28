@@ -62,6 +62,12 @@ const registerContextMenu = () => {
           click: () => send({ type: 'togglePartialLoop' }),
           type: 'checkbox',
         }),
+        loop: ({ enabled }) => ({
+          label: 'Loop',
+          checked: enabled,
+          click: () => send({ type: 'toggleLoop' }),
+          type: 'checkbox',
+        }),
         separator: () => defaultActions.separator,
       }
 

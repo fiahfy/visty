@@ -10,8 +10,6 @@
 
 ## TODOs
 
-- [ ] Zoom In/Out
-- [ ] Partial Loop
 - [ ] Change Playback Speed
 - [ ] Rotate/Flip
 - [ ] Subtitles
