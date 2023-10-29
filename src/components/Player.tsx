@@ -1,4 +1,4 @@
-import { Box, Fade } from '@mui/material'
+import { Box, Fade, Typography } from '@mui/material'
 import {
   MouseEvent,
   WheelEvent,
@@ -20,8 +20,17 @@ import { createContextMenuHandler } from '~/utils/contextMenu'
 const Player = () => {
   const { setVisible, visible } = useTrafficLight()
 
-  const { file, loop, partialLoop, paused, ref, togglePaused, zoom, zoomBy } =
-    useVideo()
+  const {
+    file,
+    loop,
+    message,
+    partialLoop,
+    paused,
+    ref,
+    togglePaused,
+    zoom,
+    zoomBy,
+  } = useVideo()
 
   const { dropping, onDragEnter, onDragLeave, onDragOver, onDrop } = useDrop()
 
@@ -155,6 +164,20 @@ const Player = () => {
           width: `${100 * zoom}%`,
         }}
       />
+      {message && (
+        <Box
+          sx={{
+            alignItems: 'center',
+            display: 'flex',
+            inset: 0,
+            justifyContent: 'center',
+            pointerEvents: 'none',
+            position: 'absolute',
+          }}
+        >
+          <Typography variant="body2">{message}</Typography>
+        </Box>
+      )}
       <FlashIndicator />
       <Fade in={controlBarVisible}>
         <Box onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>

@@ -278,7 +278,14 @@ const ControlBar = () => {
           }}
           value={volumeValue}
         />
-        <Typography noWrap sx={{ mx: 1 }} variant="body2">
+        <Typography
+          noWrap
+          sx={{
+            flexShrink: 0,
+            mx: 1,
+          }}
+          variant="body2"
+        >
           {formatDuration(currentTime)} / {formatDuration(duration)}
         </Typography>
         <Box sx={{ flexGrow: 1 }} />

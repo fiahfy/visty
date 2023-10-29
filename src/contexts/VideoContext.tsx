@@ -39,6 +39,7 @@ export const VideoContext = createContext<
       file: { name: string; path: string; url: string }
       loop: boolean
       loopRange: [number, number] | undefined
+      message: string | undefined
       muted: boolean
       partialLoop: boolean
       paused: boolean
@@ -75,7 +76,8 @@ export const VideoProvider = (props: Props) => {
 
   const [actionCode, setActionCode] = useState<ActionCode>()
   const [currentTime, setCurrentTime] = useState(0)
-  const [duration, setDuration] = useState(100)
+  const [duration, setDuration] = useState(0)
+  const [state, setState] = useState('loading')
   const [loop, setLoop] = useState(false)
   const [loopRange, setLoopRange] = useState<[number, number]>()
   const [muted, setMuted] = useState(false)
@@ -85,6 +87,16 @@ export const VideoProvider = (props: Props) => {
   const [volume, setVolume] = useState(0)
   const [zoom, setZoom] = useState(1)
 
+  const message = useMemo(() => {
+    switch (state) {
+      case 'loading':
+        return 'Loading...'
+      case 'error':
+        return 'Failed to load.'
+      default:
+        return undefined
+    }
+  }, [state])
   const partialLoop = useMemo(() => !!loopRange, [loopRange])
   const loopStartTime = useMemo(
     () => (loopRange ? loopRange[0] : undefined),
@@ -99,20 +111,26 @@ export const VideoProvider = (props: Props) => {
       if (!video) {
         return
       }
+      setState('loading')
+      try {
+        setLoopRange(undefined)
 
-      setLoopRange(undefined)
+        await new Promise<void>((resolve, reject) => {
+          video.addEventListener('loadedmetadata', () => resolve())
+          video.addEventListener('error', (e) => reject(e))
+        })
 
-      await new Promise<void>((resolve) =>
-        video.addEventListener('loadedmetadata', () => resolve()),
-      )
+        await window.electronAPI.setContentSize({
+          width: video.videoWidth,
+          height: video.videoHeight,
+        })
 
-      await window.electronAPI.setContentSize({
-        width: video.videoWidth,
-        height: video.videoHeight,
-      })
-
-      video.loop = defaultLoop
-      video.volume = defaultMuted ? 0 : defaultVolume
+        video.loop = defaultLoop
+        video.volume = defaultMuted ? 0 : defaultVolume
+        setState('loaded')
+      } catch (e) {
+        setState('error')
+      }
     })()
   }, [defaultLoop, defaultMuted, defaultVolume, file])
 
@@ -319,6 +337,7 @@ export const VideoProvider = (props: Props) => {
     file,
     loop,
     loopRange,
+    message,
     muted,
     partialLoop,
     paused,
