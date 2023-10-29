@@ -1,3 +1,4 @@
+import audioExtensions from 'audio-extensions'
 import {
   BrowserWindow,
   IpcMainInvokeEvent,
@@ -8,6 +9,7 @@ import {
   ipcMain,
   shell,
 } from 'electron'
+import videoExtensions from 'video-extensions'
 
 type State = {
   loop: boolean
@@ -62,6 +64,10 @@ const registerApplicationMenu = (
             accelerator: 'CmdOrCtrl+O',
             click: async () => {
               const { filePaths } = await dialog.showOpenDialog({
+                filters: [
+                  { extensions: audioExtensions, name: 'Audios' },
+                  { extensions: videoExtensions, name: 'Videos' },
+                ],
                 properties: ['openFile'],
               })
               const filePath = filePaths[0]
