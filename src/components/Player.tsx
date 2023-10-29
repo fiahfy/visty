@@ -9,60 +9,21 @@ import {
   useState,
 } from 'react'
 import ControlBar from '~/components/ControlBar'
+import DroppableMask from '~/components/DroppableMask'
 import FlashIndicator from '~/components/FlashIndicator'
 import TitleBar from '~/components/TitleBar'
 import useDrop from '~/hooks/useDrop'
-import useTitle from '~/hooks/useTitle'
 import useTrafficLight from '~/hooks/useTrafficLight'
 import useVideo from '~/hooks/useVideo'
-import { useAppDispatch } from '~/store'
-import { change } from '~/store/window'
 import { createContextMenuHandler } from '~/utils/contextMenu'
-import DroppableMask from './DroppableMask'
 
 const Player = () => {
-  const dispatch = useAppDispatch()
-
   const { setVisible, visible } = useTrafficLight()
 
-  const wrapperRef = useRef<HTMLDivElement>(null)
-  const videoRef = useRef<HTMLVideoElement>(null)
-  const timer = useRef<number>()
+  const { file, loop, partialLoop, paused, ref, togglePaused, zoom, zoomBy } =
+    useVideo()
 
-  const {
-    actionCode,
-    changeLoopRange,
-    changePlaybackRate,
-    changeVolume,
-    currentTime,
-    duration,
-    file,
-    loop,
-    loopRange,
-    muted,
-    partialLoop,
-    paused,
-    pictureInPicture,
-    playbackRate,
-    resetZoom,
-    seek,
-    seekTo,
-    toggleLoop,
-    toggleMuted,
-    togglePartialLoop,
-    togglePaused,
-    togglePictureInPicture,
-    volume,
-    zoom,
-    zoomBy,
-    zoomIn,
-    zoomOut,
-  } = useVideo(videoRef)
   const { dropping, onDragEnter, onDragLeave, onDragOver, onDrop } = useDrop()
-
-  const title = useMemo(() => file.name, [file])
-
-  useTitle(title)
 
   const [controlBarVisible, setControlBarVisible] = useState(false)
   const [hovered, setHovered] = useState(false)
@@ -71,85 +32,8 @@ const Player = () => {
     y: number
   }>()
 
-  useEffect(() => {
-    const removeListener = window.electronAPI.addMessageListener((message) => {
-      const { type, data } = message
-      switch (type) {
-        case 'changeFile':
-          return dispatch(change(data.file))
-        case 'changePlaybackRate':
-          return changePlaybackRate(data.value)
-        case 'resetZoom':
-          return resetZoom()
-        case 'toggleFullscreen':
-          return window.electronAPI.toggleFullscreen()
-        case 'toggleLoop':
-          return toggleLoop()
-        case 'togglePartialLoop':
-          return togglePartialLoop()
-        case 'zoomIn':
-          return zoomIn()
-        case 'zoomOut':
-          return zoomOut()
-      }
-    })
-    return () => removeListener()
-  }, [
-    changePlaybackRate,
-    dispatch,
-    resetZoom,
-    toggleLoop,
-    togglePartialLoop,
-    zoomIn,
-    zoomOut,
-  ])
-
-  useEffect(() => {
-    const handler = async (e: KeyboardEvent) => {
-      switch (e.key) {
-        case 'ArrowLeft':
-          return seekTo('backward')
-        case 'ArrowRight':
-          return seekTo('forward')
-        case 'ArrowUp':
-          return changeVolume(volume + 0.1)
-        case 'ArrowDown':
-          return changeVolume(volume - 0.1)
-        case 'Escape':
-          return await window.electronAPI.exitFullscreen()
-        case 'f':
-          return await window.electronAPI.toggleFullscreen()
-        case 'l':
-          return toggleLoop()
-        case 'm':
-          return toggleMuted()
-        case 'k':
-        case ' ':
-          return togglePaused()
-      }
-    }
-    document.body.addEventListener('keydown', handler)
-    return () => document.body.removeEventListener('keydown', handler)
-  }, [
-    changeVolume,
-    currentTime,
-    resetZoom,
-    seekTo,
-    toggleLoop,
-    toggleMuted,
-    togglePaused,
-    volume,
-    zoomIn,
-    zoomOut,
-  ])
-
-  useEffect(() => {
-    const handler = () =>
-      window.electronAPI.updateApplicationMenu({ loop, partialLoop })
-    handler()
-    window.addEventListener('focus', handler)
-    return () => window.removeEventListener('focus', handler)
-  }, [loop, partialLoop])
+  const wrapperRef = useRef<HTMLDivElement>(null)
+  const timer = useRef<number>()
 
   useEffect(() => {
     setVisible(controlBarVisible)
@@ -262,7 +146,7 @@ const Player = () => {
         onMouseMove={handleMouseMove}
         onMouseUp={() => setDragOffset(undefined)}
         onWheel={handleWheel}
-        ref={videoRef}
+        ref={ref}
         src={file.url}
         style={{
           background: 'black',
@@ -271,33 +155,16 @@ const Player = () => {
           width: `${100 * zoom}%`,
         }}
       />
-      <FlashIndicator actionCode={actionCode} />
+      <FlashIndicator />
       <Fade in={controlBarVisible}>
         <Box onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
-          <ControlBar
-            currentTime={currentTime}
-            duration={duration}
-            loop={loop}
-            loopRange={loopRange}
-            muted={muted}
-            onChangeCurrentTime={seek}
-            onChangeLoopRange={changeLoopRange}
-            onChangeVolume={changeVolume}
-            onClickLoop={toggleLoop}
-            onClickMute={toggleMuted}
-            onClickPictureInPicture={togglePictureInPicture}
-            onClickPlay={togglePaused}
-            paused={paused}
-            pictureInPicture={pictureInPicture}
-            playbackRate={playbackRate}
-            volume={volume}
-          />
+          <ControlBar />
         </Box>
       </Fade>
       <DroppableMask dropping={dropping} />
       <Fade in={visible}>
         <Box onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
-          <TitleBar title={title} />
+          <TitleBar />
         </Box>
       </Fade>
     </Box>

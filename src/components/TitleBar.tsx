@@ -1,11 +1,8 @@
 import { AppBar, Toolbar, Typography } from '@mui/material'
+import useVideo from '~/hooks/useVideo'
 
-type Props = {
-  title: string
-}
-
-const TitleBar = (props: Props) => {
-  const { title } = props
+const TitleBar = () => {
+  const { file } = useVideo()
 
   return (
     <AppBar
@@ -24,7 +21,7 @@ const TitleBar = (props: Props) => {
         }}
       >
         <Typography mt={0.25} noWrap variant="caption">
-          {title}
+          {file.name}
         </Typography>
       </Toolbar>
     </AppBar>

@@ -9,22 +9,10 @@ import {
 import { Box } from '@mui/material'
 import { useEffect, useMemo, useState } from 'react'
 import FadeAndScale from '~/components/mui/FadeAndScale'
+import useVideo from '~/hooks/useVideo'
 
-type Action =
-  | 'play'
-  | 'pause'
-  | 'seekBackward'
-  | 'seekForward'
-  | 'mute'
-  | 'unmute'
-type ActionCode = `${Action}:${string}`
-
-type Props = {
-  actionCode: ActionCode | undefined
-}
-
-const FlashIndicator = (props: Props) => {
-  const { actionCode } = props
+const FlashIndicator = () => {
+  const { actionCode } = useVideo()
 
   const [iconVisible, setIconVisible] = useState(false)
 

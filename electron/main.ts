@@ -58,7 +58,6 @@ const baseCreateWindow = (options: BrowserWindowConstructorOptions) => {
 const windowManager = createWindowManager(baseCreateWindow)
 
 const createWindow = async (filePath: string) => {
-  // TODO: check file
   const file = {
     name: basename(filePath),
     path: filePath,

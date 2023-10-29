@@ -20,47 +20,29 @@ import {
   Typography,
 } from '@mui/material'
 import { MouseEvent, useCallback, useEffect, useMemo, useState } from 'react'
+import useVideo from '~/hooks/useVideo'
 import { createContextMenuHandler } from '~/utils/contextMenu'
 import { formatDuration } from '~/utils/formatter'
 
-type Props = {
-  currentTime: number
-  duration: number
-  loop: boolean
-  loopRange: [number, number] | undefined
-  muted: boolean
-  onChangeCurrentTime: (value: number) => void
-  onChangeLoopRange: (value: [number, number]) => void
-  onChangeVolume: (value: number) => void
-  onClickLoop: () => void
-  onClickMute: () => void
-  onClickPictureInPicture: () => void
-  onClickPlay: () => void
-  paused: boolean
-  pictureInPicture: boolean
-  playbackRate: number
-  volume: number
-}
-
-const ControlBar = (props: Props) => {
+const ControlBar = () => {
   const {
+    changeLoopRange,
+    changeVolume,
     currentTime,
     duration,
     loop,
     loopRange,
     muted,
-    onChangeCurrentTime,
-    onChangeLoopRange,
-    onChangeVolume,
-    onClickLoop,
-    onClickMute,
-    onClickPictureInPicture,
-    onClickPlay,
     paused,
     pictureInPicture,
     playbackRate,
+    seek,
+    toggleLoop,
+    toggleMuted,
+    togglePaused,
+    togglePictureInPicture,
     volume,
-  } = props
+  } = useVideo()
 
   const [fullscreen, setFullscreen] = useState(false)
   const [partialLoopEnabled, setPartialLoopEnabled] = useState(false)
@@ -109,15 +91,16 @@ const ControlBar = (props: Props) => {
   const handleClickCurrentTime = useCallback(
     (e: MouseEvent) => {
       if ((e.ctrlKey && !e.metaKey) || (!e.ctrlKey && e.metaKey)) {
-        onChangeLoopRange([currentTime, duration])
+        changeLoopRange([currentTime, duration])
       }
     },
-    [currentTime, duration, onChangeLoopRange],
+    [changeLoopRange, currentTime, duration],
   )
 
-  const handleClickFullscreen = useCallback(async () => {
-    await window.electronAPI.setFullscreen(!fullscreen)
-  }, [fullscreen])
+  const handleClickFullscreen = useCallback(
+    () => window.electronAPI.setFullscreen(!fullscreen),
+    [fullscreen],
+  )
 
   const onClickPlaybackSpeed = useMemo(
     () =>
@@ -131,24 +114,19 @@ const ControlBar = (props: Props) => {
   )
 
   const handleChangeCurrentTime = useCallback(
-    (_e: Event, value: number | number[]) => {
-      onChangeCurrentTime(value as number)
-    },
-    [onChangeCurrentTime],
+    (_e: Event, value: number | number[]) => seek(value as number),
+    [seek],
   )
 
   const handleChangeLoopRange = useCallback(
-    (_e: Event, value: number | number[]) => {
-      onChangeLoopRange(value as [number, number])
-    },
-    [onChangeLoopRange],
+    (_e: Event, value: number | number[]) =>
+      changeLoopRange(value as [number, number]),
+    [changeLoopRange],
   )
 
   const handleChangeVolume = useCallback(
-    (_e: Event, value: number | number[]) => {
-      onChangeVolume(value as number)
-    },
-    [onChangeVolume],
+    (_e: Event, value: number | number[]) => changeVolume(value as number),
+    [changeVolume],
   )
 
   return (
@@ -156,6 +134,7 @@ const ControlBar = (props: Props) => {
       color="transparent"
       component="div"
       elevation={0}
+      onKeyDown={(e) => e.stopPropagation()}
       sx={{
         bottom: 0,
         top: 'auto',
@@ -267,14 +246,14 @@ const ControlBar = (props: Props) => {
           />
         )}
         <IconButton
-          onClick={onClickPlay}
+          onClick={togglePaused}
           size="small"
           title={`${paused ? 'Play' : 'Pause'} (k)`}
         >
           <PlayIcon fontSize="small" />
         </IconButton>
         <IconButton
-          onClick={onClickMute}
+          onClick={toggleMuted}
           size="small"
           title={`${muted ? 'Unmute' : 'Mute'} (m)`}
         >
@@ -303,7 +282,7 @@ const ControlBar = (props: Props) => {
           {formatDuration(currentTime)} / {formatDuration(duration)}
         </Typography>
         <Box sx={{ flexGrow: 1 }} />
-        <IconButton onClick={onClickLoop} size="small" title="Loop (l)">
+        <IconButton onClick={toggleLoop} size="small" title="Loop (l)">
           <LoopIcon fontSize="small" />
         </IconButton>
         <IconButton
@@ -314,7 +293,7 @@ const ControlBar = (props: Props) => {
           <SpeedIcon fontSize="small" />
         </IconButton>
         <IconButton
-          onClick={onClickPictureInPicture}
+          onClick={togglePictureInPicture}
           size="small"
           title={
             pictureInPicture ? 'Exit picture in picture' : 'Picture in picture'

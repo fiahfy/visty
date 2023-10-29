@@ -8,13 +8,16 @@ import App from '~/App'
 import { StoreProvider } from '~/contexts/StoreContext'
 import { ThemeProvider } from '~/contexts/ThemeContext'
 import { TrafficLightProvider } from '~/contexts/TrafficLightContext'
+import { VideoProvider } from '~/contexts/VideoContext'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <StoreProvider>
       <ThemeProvider>
         <TrafficLightProvider>
-          <App />
+          <VideoProvider>
+            <App />
+          </VideoProvider>
         </TrafficLightProvider>
       </ThemeProvider>
     </StoreProvider>
