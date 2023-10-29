@@ -20,17 +20,8 @@ import { createContextMenuHandler } from '~/utils/contextMenu'
 const Player = () => {
   const { setVisible, visible } = useTrafficLight()
 
-  const {
-    file,
-    loop,
-    message,
-    partialLoop,
-    paused,
-    ref,
-    togglePaused,
-    zoom,
-    zoomBy,
-  } = useVideo()
+  const { file, loop, message, partialLoop, ref, togglePaused, zoom, zoomBy } =
+    useVideo()
 
   const { dropping, onDragEnter, onDragLeave, onDragOver, onDrop } = useDrop()
 
@@ -54,15 +45,15 @@ const Player = () => {
     (hovered: boolean) => {
       setControlBarVisible(true)
       clearTimer()
-      if (hovered || paused) {
+      if (hovered) {
         return
       }
       timer.current = window.setTimeout(() => setControlBarVisible(false), 2000)
     },
-    [clearTimer, paused],
+    [clearTimer],
   )
 
-  useEffect(() => resetTimer(hovered), [hovered, paused, resetTimer])
+  useEffect(() => resetTimer(hovered), [hovered, resetTimer])
 
   const handleContextMenu = useMemo(
     () =>
