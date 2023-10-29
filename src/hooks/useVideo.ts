@@ -33,15 +33,19 @@ const useVideo = (ref: RefObject<HTMLVideoElement>) => {
   const [currentTime, setCurrentTime] = useState(0)
   const [duration, setDuration] = useState(100)
   const [loop, setLoop] = useState(false)
+  const [loopRange, setLoopRange] = useState<[number, number]>()
   const [muted, setMuted] = useState(false)
   const [paused, setPaused] = useState(true)
   const [pictureInPicture, setPictureInPicture] = useState(false)
-  const [speed, setSpeed] = useState(1)
-  const [timeRange, setTimeRange] = useState<[number, number]>()
+  const [playbackRate, setPlaybackRate] = useState(1)
   const [volume, setVolume] = useState(0)
   const [zoom, setZoom] = useState(1)
 
-  const partialLoop = useMemo(() => !!timeRange, [timeRange])
+  const partialLoop = useMemo(() => !!loopRange, [loopRange])
+  const loopStartTime = useMemo(
+    () => (loopRange ? loopRange[0] : undefined),
+    [loopRange],
+  )
 
   const video = ref.current
 
@@ -51,7 +55,7 @@ const useVideo = (ref: RefObject<HTMLVideoElement>) => {
         return
       }
 
-      setTimeRange(undefined)
+      setLoopRange(undefined)
 
       await new Promise<void>((resolve) =>
         video.addEventListener('loadedmetadata', () => resolve()),
@@ -98,7 +102,7 @@ const useVideo = (ref: RefObject<HTMLVideoElement>) => {
         setDuration(video.duration)
         setLoop(video.loop)
         setPaused(video.paused)
-        setSpeed(video.playbackRate)
+        setPlaybackRate(video.playbackRate)
         setVolume(video.volume)
       }
       requestId = requestAnimationFrame(callback)
@@ -113,8 +117,8 @@ const useVideo = (ref: RefObject<HTMLVideoElement>) => {
     }
     let requestId: number
     const callback = () => {
-      if (timeRange) {
-        const [startTime, endTime] = timeRange
+      if (loopRange) {
+        const [startTime, endTime] = loopRange
         if (video.currentTime < startTime || video.currentTime > endTime) {
           video.currentTime = startTime
         }
@@ -123,7 +127,16 @@ const useVideo = (ref: RefObject<HTMLVideoElement>) => {
     }
     requestId = requestAnimationFrame(callback)
     return () => cancelAnimationFrame(requestId)
-  }, [timeRange, video])
+  }, [loopRange, video])
+
+  useEffect(() => {
+    if (!video) {
+      return
+    }
+    if (loopStartTime !== undefined) {
+      video.currentTime = loopStartTime
+    }
+  }, [loopStartTime, video])
 
   const toggleLoop = useCallback(() => {
     if (!video) {
@@ -162,12 +175,12 @@ const useVideo = (ref: RefObject<HTMLVideoElement>) => {
   }, [video])
 
   const togglePartialLoop = useCallback(() => {
-    if (timeRange) {
-      setTimeRange(undefined)
+    if (loopRange) {
+      setLoopRange(undefined)
     } else {
-      setTimeRange([currentTime, duration])
+      setLoopRange([currentTime, duration])
     }
-  }, [currentTime, duration, timeRange])
+  }, [currentTime, duration, loopRange])
 
   const togglePictureInPicture = useCallback(async () => {
     if (!video) {
@@ -215,20 +228,19 @@ const useVideo = (ref: RefObject<HTMLVideoElement>) => {
     [dispatch, video],
   )
 
-  const changeTimeRange = useCallback(
-    (value: [number, number]) => setTimeRange(value),
+  const changeLoopRange = useCallback(
+    (value: [number, number]) => setLoopRange(value),
     [],
   )
 
-  const changeSpeed = useCallback(
+  const changePlaybackRate = useCallback(
     (value: number) => {
       if (!video) {
         return
       }
       video.playbackRate = value
-      dispatch(setDefaultVolume(value))
     },
-    [dispatch, video],
+    [video],
   )
 
   const zoomBy = useCallback(
@@ -245,22 +257,22 @@ const useVideo = (ref: RefObject<HTMLVideoElement>) => {
 
   return {
     actionCode,
-    changeSpeed,
-    changeTimeRange,
+    changeLoopRange,
+    changePlaybackRate,
     changeVolume,
     currentTime,
     duration,
     file,
     loop,
+    loopRange,
     muted,
     partialLoop,
     paused,
     pictureInPicture,
+    playbackRate,
     resetZoom,
     seek,
     seekTo,
-    speed,
-    timeRange,
     toggleLoop,
     toggleMuted,
     togglePartialLoop,

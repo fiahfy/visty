@@ -31,22 +31,22 @@ const Player = () => {
 
   const {
     actionCode,
-    changeSpeed,
-    changeTimeRange,
+    changeLoopRange,
+    changePlaybackRate,
     changeVolume,
     currentTime,
     duration,
     file,
     loop,
+    loopRange,
     muted,
     partialLoop,
     paused,
     pictureInPicture,
+    playbackRate,
     resetZoom,
     seek,
     seekTo,
-    speed,
-    timeRange,
     toggleLoop,
     toggleMuted,
     togglePartialLoop,
@@ -77,8 +77,8 @@ const Player = () => {
       switch (type) {
         case 'changeFile':
           return dispatch(change(data.file))
-        case 'changeSpeed':
-          return changeSpeed(data.value)
+        case 'changePlaybackRate':
+          return changePlaybackRate(data.value)
         case 'resetZoom':
           return resetZoom()
         case 'toggleFullscreen':
@@ -95,7 +95,7 @@ const Player = () => {
     })
     return () => removeListener()
   }, [
-    changeSpeed,
+    changePlaybackRate,
     dispatch,
     resetZoom,
     toggleLoop,
@@ -278,9 +278,10 @@ const Player = () => {
             currentTime={currentTime}
             duration={duration}
             loop={loop}
+            loopRange={loopRange}
             muted={muted}
             onChangeCurrentTime={seek}
-            onChangeTimeRange={changeTimeRange}
+            onChangeLoopRange={changeLoopRange}
             onChangeVolume={changeVolume}
             onClickLoop={toggleLoop}
             onClickMute={toggleMuted}
@@ -288,8 +289,7 @@ const Player = () => {
             onClickPlay={togglePaused}
             paused={paused}
             pictureInPicture={pictureInPicture}
-            speed={speed}
-            timeRange={timeRange}
+            playbackRate={playbackRate}
             volume={volume}
           />
         </Box>

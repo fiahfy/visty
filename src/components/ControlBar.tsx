@@ -27,9 +27,10 @@ type Props = {
   currentTime: number
   duration: number
   loop: boolean
+  loopRange: [number, number] | undefined
   muted: boolean
   onChangeCurrentTime: (value: number) => void
-  onChangeTimeRange: (value: [number, number]) => void
+  onChangeLoopRange: (value: [number, number]) => void
   onChangeVolume: (value: number) => void
   onClickLoop: () => void
   onClickMute: () => void
@@ -37,8 +38,7 @@ type Props = {
   onClickPlay: () => void
   paused: boolean
   pictureInPicture: boolean
-  speed: number
-  timeRange: [number, number] | undefined
+  playbackRate: number
   volume: number
 }
 
@@ -47,9 +47,10 @@ const ControlBar = (props: Props) => {
     currentTime,
     duration,
     loop,
+    loopRange,
     muted,
     onChangeCurrentTime,
-    onChangeTimeRange,
+    onChangeLoopRange,
     onChangeVolume,
     onClickLoop,
     onClickMute,
@@ -57,13 +58,12 @@ const ControlBar = (props: Props) => {
     onClickPlay,
     paused,
     pictureInPicture,
-    speed,
-    timeRange,
+    playbackRate,
     volume,
   } = props
 
   const [fullscreen, setFullscreen] = useState(false)
-  const [timeRangeEnabled, setTimeRangeEnabled] = useState(false)
+  const [partialLoopEnabled, setPartialLoopEnabled] = useState(false)
 
   useEffect(() => {
     const removeListener =
@@ -73,10 +73,10 @@ const ControlBar = (props: Props) => {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) =>
-      setTimeRangeEnabled(
+      setPartialLoopEnabled(
         (e.ctrlKey && !e.metaKey) || (!e.ctrlKey && e.metaKey),
       )
-    const handleKeyUp = () => setTimeRangeEnabled(false)
+    const handleKeyUp = () => setPartialLoopEnabled(false)
     document.addEventListener('keydown', handleKeyDown)
     document.addEventListener('keyup', handleKeyUp)
     return () => {
@@ -109,25 +109,25 @@ const ControlBar = (props: Props) => {
   const handleClickCurrentTime = useCallback(
     (e: MouseEvent) => {
       if ((e.ctrlKey && !e.metaKey) || (!e.ctrlKey && e.metaKey)) {
-        onChangeTimeRange([currentTime, duration])
+        onChangeLoopRange([currentTime, duration])
       }
     },
-    [currentTime, duration, onChangeTimeRange],
+    [currentTime, duration, onChangeLoopRange],
   )
 
   const handleClickFullscreen = useCallback(async () => {
     await window.electronAPI.setFullscreen(!fullscreen)
   }, [fullscreen])
 
-  const onClickSpeed = useMemo(
+  const onClickPlaybackSpeed = useMemo(
     () =>
       createContextMenuHandler(
         [0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2].map((value) => ({
-          type: 'changeSpeed',
-          data: { checked: value === speed, value },
+          type: 'changePlaybackRate',
+          data: { checked: value === playbackRate, value },
         })),
       ),
-    [speed],
+    [playbackRate],
   )
 
   const handleChangeCurrentTime = useCallback(
@@ -137,11 +137,11 @@ const ControlBar = (props: Props) => {
     [onChangeCurrentTime],
   )
 
-  const handleChangeTimeRange = useCallback(
+  const handleChangeLoopRange = useCallback(
     (_e: Event, value: number | number[]) => {
-      onChangeTimeRange(value as [number, number])
+      onChangeLoopRange(value as [number, number])
     },
-    [onChangeTimeRange],
+    [onChangeLoopRange],
   )
 
   const handleChangeVolume = useCallback(
@@ -217,18 +217,18 @@ const ControlBar = (props: Props) => {
           valueLabelDisplay="auto"
           valueLabelFormat={formatDuration}
         />
-        {timeRange && (
+        {loopRange && (
           <Slider
             color="secondary"
             max={duration}
-            onChange={handleChangeTimeRange}
+            onChange={handleChangeLoopRange}
             onKeyDown={(e) => e.preventDefault()}
             size="small"
             step={0.01}
             sx={{
               borderRadius: 0,
               inset: (theme) => `-14px ${theme.spacing(1)} auto`,
-              pointerEvents: timeRangeEnabled ? 'auto' : 'none',
+              pointerEvents: partialLoopEnabled ? 'auto' : 'none',
               position: 'absolute',
               width: 'auto',
               '.MuiSlider-thumb': {
@@ -261,7 +261,7 @@ const ControlBar = (props: Props) => {
                 },
               },
             }}
-            value={timeRange}
+            value={loopRange}
             valueLabelDisplay="on"
             valueLabelFormat={formatDuration}
           />
@@ -306,7 +306,11 @@ const ControlBar = (props: Props) => {
         <IconButton onClick={onClickLoop} size="small" title="Loop (l)">
           <LoopIcon fontSize="small" />
         </IconButton>
-        <IconButton onClick={onClickSpeed} size="small" title="Playback speed">
+        <IconButton
+          onClick={onClickPlaybackSpeed}
+          size="small"
+          title="Playback speed"
+        >
           <SpeedIcon fontSize="small" />
         </IconButton>
         <IconButton

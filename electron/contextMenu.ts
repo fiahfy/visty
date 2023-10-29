@@ -7,10 +7,10 @@ const send = (event: IpcMainInvokeEvent, message: any) =>
 
 const registerContextMenu = () => {
   const actionCreators: ActionCreators = {
-    changeSpeed: (event, _params, { checked, value }) => ({
+    changePlaybackRate: (event, _params, { checked, value }) => ({
       label: value === 1 ? 'Normal' : `${value}`,
       checked,
-      click: () => send(event, { type: 'changeSpeed', data: { value } }),
+      click: () => send(event, { type: 'changePlaybackRate', data: { value } }),
       type: 'checkbox',
     }),
     partialLoop: (event, _params, { checked }) => ({
