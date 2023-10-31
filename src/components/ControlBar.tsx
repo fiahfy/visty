@@ -134,7 +134,6 @@ const ControlBar = () => {
       color="transparent"
       component="div"
       elevation={0}
-      onKeyDown={(e) => e.stopPropagation()}
       sx={{
         bottom: 0,
         top: 'auto',
@@ -247,6 +246,7 @@ const ControlBar = () => {
         )}
         <IconButton
           onClick={togglePaused}
+          onKeyDown={(e) => e.preventDefault()}
           size="small"
           title={`${paused ? 'Play' : 'Pause'} (k)`}
         >
@@ -254,6 +254,7 @@ const ControlBar = () => {
         </IconButton>
         <IconButton
           onClick={toggleMuted}
+          onKeyDown={(e) => e.preventDefault()}
           size="small"
           title={`${muted ? 'Unmute' : 'Mute'} (m)`}
         >
@@ -289,7 +290,12 @@ const ControlBar = () => {
           {formatDuration(currentTime)} / {formatDuration(duration)}
         </Typography>
         <Box sx={{ flexGrow: 1 }} />
-        <IconButton onClick={toggleLoop} size="small" title="Loop (l)">
+        <IconButton
+          onClick={toggleLoop}
+          onKeyDown={(e) => e.preventDefault()}
+          size="small"
+          title="Loop (l)"
+        >
           <LoopIcon fontSize="small" />
         </IconButton>
         <IconButton
@@ -301,6 +307,7 @@ const ControlBar = () => {
         </IconButton>
         <IconButton
           onClick={togglePictureInPicture}
+          onKeyDown={(e) => e.preventDefault()}
           size="small"
           title={
             pictureInPicture ? 'Exit picture in picture' : 'Picture in picture'
@@ -310,6 +317,7 @@ const ControlBar = () => {
         </IconButton>
         <IconButton
           onClick={handleClickFullscreen}
+          onKeyDown={(e) => e.preventDefault()}
           size="small"
           title={`${fullscreen ? 'Exit full screen' : 'Full screen'} (f)`}
         >

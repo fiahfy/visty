@@ -106,44 +106,32 @@ export const VideoProvider = (props: Props) => {
   const ref = useRef<HTMLVideoElement>(null)
 
   useEffect(() => {
-    ;(async () => {
-      const video = ref.current
-      if (!video) {
-        return
-      }
-      setState('loading')
-      try {
-        setLoopRange(undefined)
-
-        await new Promise<void>((resolve, reject) => {
-          video.addEventListener('loadedmetadata', () => resolve())
-          video.addEventListener('error', (e) => reject(e))
-        })
-
-        await window.electronAPI.setContentSize({
-          width: video.videoWidth,
-          height: video.videoHeight,
-        })
-
-        video.loop = defaultLoop
-        video.volume = defaultMuted ? 0 : defaultVolume
-        setState('loaded')
-      } catch (e) {
-        setState('error')
-      }
-    })()
-  }, [defaultLoop, defaultMuted, defaultVolume, file])
-
-  useEffect(() => {
     const video = ref.current
     if (!video) {
       return
     }
+    const handleLoadStart = () => setState('loading')
+    const handleLoadedMetadata = async () => {
+      await window.electronAPI.setContentSize({
+        width: video.videoWidth,
+        height: video.videoHeight,
+      })
+      video.loop = defaultLoop
+      video.volume = defaultMuted ? 0 : defaultVolume
+      setState('loaded')
+    }
+    const handleError = () => setState('error')
     const handleEnterPictureInPicture = () => setPictureInPicture(true)
     const handleLeavePictureInPicture = () => setPictureInPicture(false)
+    video.addEventListener('loadedstart', handleLoadStart)
+    video.addEventListener('loadedmetadata', handleLoadedMetadata)
+    video.addEventListener('error', handleError)
     video.addEventListener('enterpictureinpicture', handleEnterPictureInPicture)
     video.addEventListener('leavepictureinpicture', handleLeavePictureInPicture)
     return () => {
+      video.removeEventListener('loadedstart', handleLoadStart)
+      video.removeEventListener('loadedmetadata', handleLoadedMetadata)
+      video.removeEventListener('error', handleError)
       video.removeEventListener(
         'enterpictureinpicture',
         handleEnterPictureInPicture,
@@ -153,7 +141,7 @@ export const VideoProvider = (props: Props) => {
         handleLeavePictureInPicture,
       )
     }
-  }, [])
+  }, [defaultLoop, defaultMuted, defaultVolume])
 
   useEffect(() => {
     const video = ref.current
