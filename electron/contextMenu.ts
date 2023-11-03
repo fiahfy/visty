@@ -7,7 +7,13 @@ const send = (event: IpcMainInvokeEvent, message: any) =>
 
 const registerContextMenu = () => {
   const actionCreators: ActionCreators = {
-    changePlaybackRate: (event, _params, { checked, value }) => ({
+    alwaysShowSeekBar: (event, _params, { checked }) => ({
+      label: 'Always Show Seek Bar',
+      checked,
+      click: () => send(event, { type: 'toggleAlwaysShowSeekBar' }),
+      type: 'checkbox',
+    }),
+    playbackRate: (event, _params, { checked, value }) => ({
       label: value === 1 ? 'Normal' : `${value}`,
       checked,
       click: () => send(event, { type: 'changePlaybackRate', data: { value } }),

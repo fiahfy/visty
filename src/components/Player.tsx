@@ -11,6 +11,7 @@ import {
 import ControlBar from '~/components/ControlBar'
 import DroppableMask from '~/components/DroppableMask'
 import FlashIndicator from '~/components/FlashIndicator'
+import ProgressBar from '~/components/ProgressBar'
 import TitleBar from '~/components/TitleBar'
 import useDrop from '~/hooks/useDrop'
 import useTrafficLight from '~/hooks/useTrafficLight'
@@ -173,6 +174,11 @@ const Player = () => {
       <Fade in={controlBarVisible}>
         <Box onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
           <ControlBar />
+        </Box>
+      </Fade>
+      <Fade in={!controlBarVisible}>
+        <Box>
+          <ProgressBar />
         </Box>
       </Fade>
       <DroppableMask dropping={dropping} />

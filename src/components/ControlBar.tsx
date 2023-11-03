@@ -6,6 +6,7 @@ import {
   PlayArrow as PlayArrowIcon,
   Repeat as RepeatIcon,
   RepeatOn as RepeatOnIcon,
+  Settings as SettingsIcon,
   Speed as SpeedIcon,
   VolumeDown as VolumeDownIcon,
   VolumeOff as VolumeOffIcon,
@@ -21,10 +22,14 @@ import {
 } from '@mui/material'
 import { MouseEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import useVideo from '~/hooks/useVideo'
+import { useAppSelector } from '~/store'
+import { selectAlwaysShowSeekBar } from '~/store/settings'
 import { createContextMenuHandler } from '~/utils/contextMenu'
 import { formatDuration } from '~/utils/formatter'
 
 const ControlBar = () => {
+  const alwaysShowSeekBar = useAppSelector(selectAlwaysShowSeekBar)
+
   const {
     changeLoopRange,
     changeVolume,
@@ -106,11 +111,22 @@ const ControlBar = () => {
     () =>
       createContextMenuHandler(
         [0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2].map((value) => ({
-          type: 'changePlaybackRate',
+          type: 'playbackRate',
           data: { checked: value === playbackRate, value },
         })),
       ),
     [playbackRate],
+  )
+
+  const onClickSettings = useMemo(
+    () =>
+      createContextMenuHandler([
+        {
+          type: 'alwaysShowSeekBar',
+          data: { checked: alwaysShowSeekBar },
+        },
+      ]),
+    [alwaysShowSeekBar],
   )
 
   const handleChangeCurrentTime = useCallback(
@@ -304,6 +320,9 @@ const ControlBar = () => {
           title="Playback speed"
         >
           <SpeedIcon fontSize="small" />
+        </IconButton>
+        <IconButton onClick={onClickSettings} size="small" title="Settings">
+          <SettingsIcon fontSize="small" />
         </IconButton>
         <IconButton
           onClick={togglePictureInPicture}

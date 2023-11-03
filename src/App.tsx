@@ -4,6 +4,7 @@ import Player from '~/components/Player'
 import useTitle from '~/hooks/useTitle'
 import useVideo from '~/hooks/useVideo'
 import { useAppDispatch } from '~/store'
+import { toggleAlwaysShowSeekBar } from '~/store/settings'
 import { change } from '~/store/window'
 import { createContextMenuHandler } from '~/utils/contextMenu'
 
@@ -40,6 +41,8 @@ const App = () => {
           return changePlaybackRate(data.value)
         case 'resetZoom':
           return resetZoom()
+        case 'toggleAlwaysShowSeekBar':
+          return dispatch(toggleAlwaysShowSeekBar())
         case 'toggleFullscreen':
           return window.electronAPI.toggleFullscreen()
         case 'toggleLoop':
