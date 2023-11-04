@@ -22,6 +22,7 @@ const App = () => {
     previousTrack,
     resetZoom,
     seekTo,
+    toggleAutoplay,
     toggleLoop,
     toggleMuted,
     togglePartialLoop,
@@ -43,6 +44,8 @@ const App = () => {
           return changePlaybackRate(data.value)
         case 'resetZoom':
           return resetZoom()
+        case 'toggleAutoplay':
+          return toggleAutoplay()
         case 'toggleAlwaysShowSeekBar':
           return dispatch(toggleAlwaysShowSeekBar())
         case 'toggleFullscreen':
@@ -62,6 +65,7 @@ const App = () => {
     changePlaybackRate,
     dispatch,
     resetZoom,
+    toggleAutoplay,
     toggleLoop,
     togglePartialLoop,
     zoomIn,

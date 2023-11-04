@@ -4,7 +4,6 @@ import {
   WheelEvent,
   useCallback,
   useEffect,
-  useMemo,
   useRef,
   useState,
 } from 'react'
@@ -16,13 +15,11 @@ import TitleBar from '~/components/TitleBar'
 import useDrop from '~/hooks/useDrop'
 import useTrafficLight from '~/hooks/useTrafficLight'
 import useVideo from '~/hooks/useVideo'
-import { createContextMenuHandler } from '~/utils/contextMenu'
 
 const Player = () => {
   const { setVisible, visible } = useTrafficLight()
 
-  const { file, loop, message, partialLoop, ref, togglePaused, zoom, zoomBy } =
-    useVideo()
+  const { file, message, ref, togglePaused, zoom, zoomBy } = useVideo()
 
   const { dropping, onDragEnter, onDragLeave, onDragOver, onDrop } = useDrop()
 
@@ -55,15 +52,6 @@ const Player = () => {
   )
 
   useEffect(() => resetTimer(hovered), [hovered, resetTimer])
-
-  const handleContextMenu = useMemo(
-    () =>
-      createContextMenuHandler([
-        { type: 'partialLoop', data: { checked: partialLoop } },
-        { type: 'loop', data: { checked: loop } },
-      ]),
-    [loop, partialLoop],
-  )
 
   const handleClick = useCallback(
     (e: MouseEvent) => {
@@ -120,7 +108,6 @@ const Player = () => {
 
   return (
     <Box
-      onContextMenu={handleContextMenu}
       onDragEnter={onDragEnter}
       onDragLeave={onDragLeave}
       onDragOver={onDragOver}

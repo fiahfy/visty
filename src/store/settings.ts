@@ -3,6 +3,7 @@ import { AppState } from '~/store'
 
 type State = {
   alwaysShowSeekBar: boolean
+  defaultAutoplay: boolean
   defaultLoop: boolean
   defaultMuted: boolean
   defaultVolume: number
@@ -10,6 +11,7 @@ type State = {
 
 const initialState: State = {
   alwaysShowSeekBar: false,
+  defaultAutoplay: false,
   defaultLoop: false,
   defaultMuted: false,
   defaultVolume: 1,
@@ -19,6 +21,9 @@ export const settingsSlice = createSlice({
   name: 'settings',
   initialState,
   reducers: {
+    setDefaultAutoplay(state, action: PayloadAction<boolean>) {
+      return { ...state, defaultAutoplay: action.payload }
+    },
     setDefaultLoop(state, action: PayloadAction<boolean>) {
       return { ...state, defaultLoop: action.payload }
     },
@@ -39,6 +44,7 @@ export const settingsSlice = createSlice({
 
 export const {
   replace,
+  setDefaultAutoplay,
   setDefaultLoop,
   setDefaultMuted,
   setDefaultVolume,
@@ -54,17 +60,17 @@ export const selectAlwaysShowSeekBar = createSelector(
   (settings) => settings.alwaysShowSeekBar,
 )
 
+export const selectDefaultActualVolume = createSelector(
+  selectSettings,
+  (settings) => (settings.defaultMuted ? 0 : settings.defaultVolume),
+)
+
+export const selectDefaultAutoplay = createSelector(
+  selectSettings,
+  (settings) => settings.defaultAutoplay,
+)
+
 export const selectDefaultLoop = createSelector(
   selectSettings,
   (settings) => settings.defaultLoop,
-)
-
-export const selectDefaultMuted = createSelector(
-  selectSettings,
-  (settings) => settings.defaultMuted,
-)
-
-export const selectDefaultVolume = createSelector(
-  selectSettings,
-  (settings) => settings.defaultVolume,
 )

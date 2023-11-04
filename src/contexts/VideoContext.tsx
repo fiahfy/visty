@@ -10,9 +10,10 @@ import {
 } from 'react'
 import { useAppDispatch, useAppSelector } from '~/store'
 import {
+  selectDefaultActualVolume,
+  selectDefaultAutoplay,
   selectDefaultLoop,
-  selectDefaultMuted,
-  selectDefaultVolume,
+  setDefaultAutoplay,
   setDefaultLoop,
   setDefaultMuted,
   setDefaultVolume,
@@ -40,12 +41,13 @@ type ActionCode = `${Action}:${string}`
 export const VideoContext = createContext<
   | {
       actionCode: ActionCode | undefined
+      autoplay: boolean
       changeLoopRange: (value: [number, number]) => void
       changePlaybackRate: (value: number) => void
       changeVolume: (value: number) => void
       currentTime: number
       duration: number
-      file: { name: string; path: string; url: string }
+      file: File
       fullscreen: boolean
       loop: boolean
       loopRange: [number, number] | undefined
@@ -62,6 +64,7 @@ export const VideoContext = createContext<
       resetZoom: () => void
       seek: (value: number) => void
       seekTo: (direction: 'backward' | 'forward') => void
+      toggleAutoplay: () => void
       toggleFullscreen: () => void
       toggleLoop: () => void
       toggleMuted: () => void
@@ -82,30 +85,30 @@ type Props = { children: ReactNode }
 export const VideoProvider = (props: Props) => {
   const { children } = props
 
+  const defaultAutoplay = useAppSelector(selectDefaultAutoplay)
   const defaultLoop = useAppSelector(selectDefaultLoop)
-  const defaultMuted = useAppSelector(selectDefaultMuted)
-  const defaultVolume = useAppSelector(selectDefaultVolume)
+  const defaultVolume = useAppSelector(selectDefaultActualVolume)
   const file = useAppSelector(selectFile)
   const dispatch = useAppDispatch()
 
   const [actionCode, setActionCode] = useState<ActionCode>()
+  const [autoplay, setAutoplay] = useState(defaultAutoplay)
   const [currentTime, setCurrentTime] = useState(0)
   const [duration, setDuration] = useState(0)
-  const [state, setState] = useState('loading')
-  const [loop, setLoop] = useState(false)
+  const [fullscreen, setFullscreen] = useState(false)
+  const [loop, setLoop] = useState(defaultLoop)
   const [loopRange, setLoopRange] = useState<[number, number]>()
   const [muted, setMuted] = useState(false)
   const [paused, setPaused] = useState(true)
   const [pictureInPicture, setPictureInPicture] = useState(false)
   const [playbackRate, setPlaybackRate] = useState(1)
-  const [volume, setVolume] = useState(0)
-  const [zoom, setZoom] = useState(1)
-  const [fullscreen, setFullscreen] = useState(false)
-
   const [playlistFile, setPlaylistFile] = useState<PlaylistFile>({
     next: undefined,
     previous: undefined,
   })
+  const [state, setState] = useState('loading')
+  const [volume, setVolume] = useState(defaultVolume)
+  const [zoom, setZoom] = useState(1)
 
   const message = useMemo(() => {
     switch (state) {
@@ -136,6 +139,11 @@ export const VideoProvider = (props: Props) => {
     if (!video) {
       return
     }
+
+    video.loop = defaultLoop
+    video.volume = defaultVolume
+    video.autoplay = defaultAutoplay
+
     const handleLoadStart = () => setState('loading')
     const handleLoadedMetadata = async () => {
       await window.electronAPI.setContentSize({
@@ -143,7 +151,8 @@ export const VideoProvider = (props: Props) => {
         height: video.videoHeight,
       })
       video.loop = defaultLoop
-      video.volume = defaultMuted ? 0 : defaultVolume
+      video.volume = defaultVolume
+      video.autoplay = defaultAutoplay
       setState('loaded')
     }
     const handleError = () => setState('error')
@@ -167,7 +176,7 @@ export const VideoProvider = (props: Props) => {
         handleLeavePictureInPicture,
       )
     }
-  }, [defaultLoop, defaultMuted, defaultVolume])
+  }, [defaultAutoplay, defaultLoop, defaultVolume])
 
   useEffect(() => {
     const video = ref.current
@@ -183,6 +192,7 @@ export const VideoProvider = (props: Props) => {
         setPaused(video.paused)
         setPlaybackRate(video.playbackRate)
         setVolume(video.volume)
+        setAutoplay(video.autoplay)
       }
       requestId = requestAnimationFrame(callback)
     }
@@ -257,6 +267,16 @@ export const VideoProvider = (props: Props) => {
     },
     [dispatch],
   )
+
+  const toggleAutoplay = useCallback(() => {
+    const video = ref.current
+    if (!video) {
+      return
+    }
+    const newAutoplay = !autoplay
+    video.autoplay = newAutoplay
+    dispatch(setDefaultAutoplay(newAutoplay))
+  }, [autoplay, dispatch])
 
   const toggleFullscreen = useCallback(
     async () => window.electronAPI.toggleFullscreen(),
@@ -371,6 +391,7 @@ export const VideoProvider = (props: Props) => {
 
   const value = {
     actionCode,
+    autoplay,
     changeLoopRange,
     changePlaybackRate,
     changeVolume,
@@ -393,6 +414,7 @@ export const VideoProvider = (props: Props) => {
     resetZoom,
     seek,
     seekTo,
+    toggleAutoplay,
     toggleFullscreen,
     toggleLoop,
     toggleMuted,

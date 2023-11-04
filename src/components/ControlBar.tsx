@@ -4,12 +4,9 @@ import {
   Pause as PauseIcon,
   PictureInPictureAlt as PictureInPictureAltIcon,
   PlayArrow as PlayArrowIcon,
-  Repeat as RepeatIcon,
-  RepeatOn as RepeatOnIcon,
   Settings as SettingsIcon,
   SkipNext as SkipNextIcon,
   SkipPrevious as SkipPreviousIcon,
-  Speed as SpeedIcon,
   VolumeDown as VolumeDownIcon,
   VolumeOff as VolumeOffIcon,
   VolumeUp as VolumeUpIcon,
@@ -33,6 +30,7 @@ const ControlBar = () => {
   const alwaysShowSeekBar = useAppSelector(selectAlwaysShowSeekBar)
 
   const {
+    autoplay,
     changeVolume,
     currentTime,
     duration,
@@ -40,13 +38,13 @@ const ControlBar = () => {
     loop,
     muted,
     nextTrack,
+    partialLoop,
     paused,
     pictureInPicture,
     playbackRate,
     playlistFile,
     previousTrack,
     toggleFullscreen,
-    toggleLoop,
     toggleMuted,
     togglePaused,
     togglePictureInPicture,
@@ -67,33 +65,27 @@ const ControlBar = () => {
     }
   }, [volumeValue])
 
-  const LoopIcon = useMemo(() => (loop ? RepeatOnIcon : RepeatIcon), [loop])
-
   const FullscreenIcon = useMemo(
     () => (fullscreen ? FullscreenExitIcon : FullscreenEnterIcon),
     [fullscreen],
   )
 
-  const handleClickPlaybackSpeed = useMemo(
-    () =>
-      createContextMenuHandler(
-        [0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2].map((value) => ({
-          type: 'playbackRate',
-          data: { checked: value === playbackRate, value },
-        })),
-      ),
-    [playbackRate],
-  )
-
   const handleClickSettings = useMemo(
     () =>
       createContextMenuHandler([
+        { type: 'playbackRate', data: { playbackRate } },
+        { type: 'separator' },
+        { type: 'autoplay', data: { checked: autoplay } },
+        { type: 'separator' },
+        { type: 'loop', data: { checked: loop } },
+        { type: 'partialLoop', data: { checked: partialLoop } },
+        { type: 'separator' },
         {
           type: 'alwaysShowSeekBar',
           data: { checked: alwaysShowSeekBar },
         },
       ]),
-    [alwaysShowSeekBar],
+    [alwaysShowSeekBar, autoplay, loop, partialLoop, playbackRate],
   )
 
   const handleChangeVolume = useCallback(
@@ -185,21 +177,6 @@ const ControlBar = () => {
           {formatDuration(currentTime)} / {formatDuration(duration)}
         </Typography>
         <Box sx={{ flexGrow: 1 }} />
-        <IconButton
-          onClick={toggleLoop}
-          onKeyDown={(e) => e.preventDefault()}
-          size="small"
-          title="Loop (l)"
-        >
-          <LoopIcon fontSize="small" />
-        </IconButton>
-        <IconButton
-          onClick={handleClickPlaybackSpeed}
-          size="small"
-          title="Playback speed"
-        >
-          <SpeedIcon fontSize="small" />
-        </IconButton>
         <IconButton onClick={handleClickSettings} size="small" title="Settings">
           <SettingsIcon fontSize="small" />
         </IconButton>

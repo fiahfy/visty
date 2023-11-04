@@ -25,9 +25,7 @@ export type IElectronAPI = {
 } & ContextMenuOperations &
   FullscreenOperations &
   TrafficLightOperations &
-  WindowOperations<{
-    file: { name: string; path: string; url: string }
-  }>
+  WindowOperations<{ file: File }>
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type ApplicationMenuParams = any
