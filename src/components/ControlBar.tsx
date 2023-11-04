@@ -45,7 +45,7 @@ const ControlBar = () => {
     paused,
     pictureInPicture,
     playbackRate,
-    playlistItem,
+    playlistFile,
     previousTrack,
     seek,
     toggleFullscreen,
@@ -256,11 +256,11 @@ const ControlBar = () => {
           />
         )}
         <IconButton
-          disabled={!playlistItem.previousFile}
+          disabled={!playlistFile.previous}
           onClick={previousTrack}
           onKeyDown={(e) => e.preventDefault()}
           size="small"
-          title={playlistItem.previousFile?.name}
+          title={playlistFile.previous?.name}
         >
           <SkipPreviousIcon fontSize="small" />
         </IconButton>
@@ -273,11 +273,11 @@ const ControlBar = () => {
           <PlayIcon fontSize="small" />
         </IconButton>
         <IconButton
-          disabled={!playlistItem.nextFile}
+          disabled={!playlistFile.next}
           onClick={nextTrack}
           onKeyDown={(e) => e.preventDefault()}
           size="small"
-          title={playlistItem.nextFile?.name}
+          title={playlistFile.next?.name}
         >
           <SkipNextIcon fontSize="small" />
         </IconButton>

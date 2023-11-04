@@ -21,9 +21,9 @@ import { selectFile } from '~/store/window'
 
 type File = { name: string; path: string; url: string }
 
-type PlaylistItem = {
-  previousFile: File | undefined
-  nextFile: File | undefined
+type PlaylistFile = {
+  next: File | undefined
+  previous: File | undefined
 }
 
 type Action =
@@ -56,7 +56,7 @@ export const VideoContext = createContext<
       paused: boolean
       pictureInPicture: boolean
       playbackRate: number
-      playlistItem: PlaylistItem
+      playlistFile: PlaylistFile
       previousTrack: () => void
       ref: RefObject<HTMLVideoElement>
       resetZoom: () => void
@@ -102,9 +102,9 @@ export const VideoProvider = (props: Props) => {
   const [zoom, setZoom] = useState(1)
   const [fullscreen, setFullscreen] = useState(false)
 
-  const [playlistItem, setPlaylistItem] = useState<PlaylistItem>({
-    previousFile: undefined,
-    nextFile: undefined,
+  const [playlistFile, setPlaylistFile] = useState<PlaylistFile>({
+    next: undefined,
+    previous: undefined,
   })
 
   const message = useMemo(() => {
@@ -221,8 +221,8 @@ export const VideoProvider = (props: Props) => {
 
   useEffect(() => {
     ;(async () => {
-      const playlistItem = await window.electronAPI.getPlaylistItem(file.path)
-      setPlaylistItem(playlistItem)
+      const playlistFile = await window.electronAPI.getPlaylistFile(file.path)
+      setPlaylistFile(playlistFile)
     })()
   }, [file.path])
 
@@ -354,20 +354,20 @@ export const VideoProvider = (props: Props) => {
   const resetZoom = useCallback(() => setZoom(1), [])
 
   const previousTrack = useCallback(() => {
-    const path = playlistItem.previousFile?.path
+    const path = playlistFile.previous?.path
     if (path) {
       window.electronAPI.openFile(path)
       triggerAction('previousTrack')
     }
-  }, [playlistItem.previousFile?.path, triggerAction])
+  }, [playlistFile.previous?.path, triggerAction])
 
   const nextTrack = useCallback(() => {
-    const path = playlistItem.nextFile?.path
+    const path = playlistFile.next?.path
     if (path) {
       window.electronAPI.openFile(path)
       triggerAction('nextTrack')
     }
-  }, [playlistItem.nextFile?.path, triggerAction])
+  }, [playlistFile.next?.path, triggerAction])
 
   const value = {
     actionCode,
@@ -387,7 +387,7 @@ export const VideoProvider = (props: Props) => {
     paused,
     pictureInPicture,
     playbackRate,
-    playlistItem,
+    playlistFile,
     previousTrack,
     ref,
     resetZoom,

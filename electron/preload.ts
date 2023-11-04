@@ -14,8 +14,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.on('sendMessage', listener)
     return () => ipcRenderer.removeListener('sendMessage', listener)
   },
-  getPlaylistItem: (filePath: string) =>
-    ipcRenderer.invoke('getPlaylistItem', filePath),
+  getPlaylistFile: (filePath: string) =>
+    ipcRenderer.invoke('getPlaylistFile', filePath),
   openFile: (filePath: string) => ipcRenderer.invoke('openFile', filePath),
   setContentSize: (size: { height: number; width: number }) =>
     ipcRenderer.invoke('setContentSize', size),

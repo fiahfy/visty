@@ -36,25 +36,25 @@ const getMediaFiles = async (directoryPath: string) => {
 
 const registerHandlers = () => {
   ipcMain.handle(
-    'getPlaylistItem',
+    'getPlaylistFile',
     async (_event: IpcMainInvokeEvent, filePath: string) => {
       const directoryPath = dirname(filePath)
       const files = await getMediaFiles(directoryPath)
       if (files.length <= 1) {
         return {
-          previousFile: undefined,
-          nextFile: undefined,
+          next: undefined,
+          previous: undefined,
         }
       }
 
       const index = files.findIndex((file) => file.path === filePath)
       const previousIndex = index === 0 ? files.length - 1 : index - 1
-      const previousFile = files[previousIndex]
+      const previous = files[previousIndex]
       const nextIndex = index === files.length - 1 ? 0 : index + 1
-      const nextFile = files[nextIndex]
+      const next = files[nextIndex]
       return {
-        previousFile,
-        nextFile,
+        next,
+        previous,
       }
     },
   )
