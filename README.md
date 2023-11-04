@@ -12,6 +12,7 @@
 
 - [ ] Rotate/Flip
 - [ ] Subtitles
+- [ ] Autoplay Next Video
 - [ ] Show thumbnail on seek bar and previous/next track buttons
 - [ ] Use Electron Forge
 
