@@ -1,8 +1,63 @@
 import { BrowserWindow, IpcMainInvokeEvent, ipcMain, screen } from 'electron'
-import { basename } from 'node:path'
+import mime from 'mime'
+import { readdir } from 'node:fs/promises'
+import { basename, dirname, join } from 'node:path'
 import { pathToFileURL } from 'node:url'
 
+type File = { name: string; path: string; url: string }
+
+const isMediaFile = (path: string) => {
+  const type = mime.getType(path)
+  if (!type) {
+    return false
+  }
+  return type.startsWith('audio/') || type.startsWith('video/')
+}
+
+const getMediaFiles = async (directoryPath: string) => {
+  const dirents = await readdir(directoryPath, { withFileTypes: true })
+  return dirents
+    .reduce((acc, dirent) => {
+      const path = join(directoryPath, dirent.name)
+      if (!isMediaFile(path)) {
+        return acc
+      }
+      return [
+        ...acc,
+        {
+          name: dirent.name.normalize('NFC'),
+          path,
+          url: pathToFileURL(path).href,
+        },
+      ]
+    }, [] as File[])
+    .sort((a, b) => a.name.localeCompare(b.name))
+}
+
 const registerHandlers = () => {
+  ipcMain.handle(
+    'getPlaylistItem',
+    async (_event: IpcMainInvokeEvent, filePath: string) => {
+      const directoryPath = dirname(filePath)
+      const files = await getMediaFiles(directoryPath)
+      if (files.length <= 1) {
+        return {
+          previousFile: undefined,
+          nextFile: undefined,
+        }
+      }
+
+      const index = files.findIndex((file) => file.path === filePath)
+      const previousIndex = index === 0 ? files.length - 1 : index - 1
+      const previousFile = files[previousIndex]
+      const nextIndex = index === files.length - 1 ? 0 : index + 1
+      const nextFile = files[nextIndex]
+      return {
+        previousFile,
+        nextFile,
+      }
+    },
+  )
   ipcMain.handle('openFile', (event: IpcMainInvokeEvent, filePath: string) => {
     const file = {
       name: basename(filePath),

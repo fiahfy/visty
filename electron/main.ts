@@ -66,6 +66,8 @@ const createWindow = async (filePath: string) => {
   await windowManager.create({ file })
 }
 
+app.setAsDefaultProtocolClient('visty')
+
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
 // explicitly with Cmd + Q.
@@ -90,6 +92,15 @@ app.on('before-quit', async () => {
 app.on('open-file', async (_event, path) => {
   await app.whenReady()
   await createWindow(path)
+})
+
+app.on('open-url', async (_event, url) => {
+  await app.whenReady()
+  const u = new URL(url)
+  if (u.hostname === 'open') {
+    const path = u.searchParams.get('path') ?? ''
+    await createWindow(path)
+  }
 })
 
 app.whenReady().then(async () => {

@@ -17,7 +17,9 @@ const App = () => {
     currentTime,
     file,
     loop,
+    nextTrack,
     partialLoop,
+    previousTrack,
     resetZoom,
     seekTo,
     toggleLoop,
@@ -96,6 +98,10 @@ const App = () => {
         case 'k':
         case ' ':
           return togglePaused()
+        case 'N':
+          return nextTrack()
+        case 'P':
+          return previousTrack()
       }
     }
     document.body.addEventListener('keydown', handler)
@@ -103,6 +109,8 @@ const App = () => {
   }, [
     changeVolume,
     currentTime,
+    nextTrack,
+    previousTrack,
     resetZoom,
     seekTo,
     toggleLoop,

@@ -7,6 +7,8 @@ import {
   Repeat as RepeatIcon,
   RepeatOn as RepeatOnIcon,
   Settings as SettingsIcon,
+  SkipNext as SkipNextIcon,
+  SkipPrevious as SkipPreviousIcon,
   Speed as SpeedIcon,
   VolumeDown as VolumeDownIcon,
   VolumeOff as VolumeOffIcon,
@@ -35,13 +37,18 @@ const ControlBar = () => {
     changeVolume,
     currentTime,
     duration,
+    fullscreen,
     loop,
     loopRange,
     muted,
+    nextTrack,
     paused,
     pictureInPicture,
     playbackRate,
+    playlistItem,
+    previousTrack,
     seek,
+    toggleFullscreen,
     toggleLoop,
     toggleMuted,
     togglePaused,
@@ -49,14 +56,7 @@ const ControlBar = () => {
     volume,
   } = useVideo()
 
-  const [fullscreen, setFullscreen] = useState(false)
   const [partialLoopEnabled, setPartialLoopEnabled] = useState(false)
-
-  useEffect(() => {
-    const removeListener =
-      window.electronAPI.addFullscreenListener(setFullscreen)
-    return () => removeListener()
-  }, [])
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) =>
@@ -100,11 +100,6 @@ const ControlBar = () => {
       }
     },
     [changeLoopRange, currentTime, duration],
-  )
-
-  const handleClickFullscreen = useCallback(
-    () => window.electronAPI.setFullscreen(!fullscreen),
-    [fullscreen],
   )
 
   const onClickPlaybackSpeed = useMemo(
@@ -261,12 +256,30 @@ const ControlBar = () => {
           />
         )}
         <IconButton
+          disabled={!playlistItem.previousFile}
+          onClick={previousTrack}
+          onKeyDown={(e) => e.preventDefault()}
+          size="small"
+          title={playlistItem.previousFile?.name}
+        >
+          <SkipPreviousIcon fontSize="small" />
+        </IconButton>
+        <IconButton
           onClick={togglePaused}
           onKeyDown={(e) => e.preventDefault()}
           size="small"
           title={`${paused ? 'Play' : 'Pause'} (k)`}
         >
           <PlayIcon fontSize="small" />
+        </IconButton>
+        <IconButton
+          disabled={!playlistItem.nextFile}
+          onClick={nextTrack}
+          onKeyDown={(e) => e.preventDefault()}
+          size="small"
+          title={playlistItem.nextFile?.name}
+        >
+          <SkipNextIcon fontSize="small" />
         </IconButton>
         <IconButton
           onClick={toggleMuted}
@@ -335,7 +348,7 @@ const ControlBar = () => {
           <PictureInPictureAltIcon fontSize="small" />
         </IconButton>
         <IconButton
-          onClick={handleClickFullscreen}
+          onClick={toggleFullscreen}
           onKeyDown={(e) => e.preventDefault()}
           size="small"
           title={`${fullscreen ? 'Exit full screen' : 'Full screen'} (f)`}

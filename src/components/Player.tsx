@@ -167,7 +167,7 @@ const Player = () => {
             position: 'absolute',
           }}
         >
-          <Typography variant="body2">{message}</Typography>
+          <Typography variant="caption">{message}</Typography>
         </Box>
       )}
       <FlashIndicator />

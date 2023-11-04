@@ -19,12 +19,21 @@ import {
 } from '~/store/settings'
 import { selectFile } from '~/store/window'
 
+type File = { name: string; path: string; url: string }
+
+type PlaylistItem = {
+  previousFile: File | undefined
+  nextFile: File | undefined
+}
+
 type Action =
-  | 'play'
+  | 'mute'
+  | 'nextTrack'
   | 'pause'
+  | 'play'
+  | 'previousTrack'
   | 'seekBackward'
   | 'seekForward'
-  | 'mute'
   | 'unmute'
 type ActionCode = `${Action}:${string}`
 
@@ -37,18 +46,23 @@ export const VideoContext = createContext<
       currentTime: number
       duration: number
       file: { name: string; path: string; url: string }
+      fullscreen: boolean
       loop: boolean
       loopRange: [number, number] | undefined
       message: string | undefined
       muted: boolean
+      nextTrack: () => void
       partialLoop: boolean
       paused: boolean
       pictureInPicture: boolean
       playbackRate: number
+      playlistItem: PlaylistItem
+      previousTrack: () => void
       ref: RefObject<HTMLVideoElement>
       resetZoom: () => void
       seek: (value: number) => void
       seekTo: (direction: 'backward' | 'forward') => void
+      toggleFullscreen: () => void
       toggleLoop: () => void
       toggleMuted: () => void
       togglePartialLoop: () => void
@@ -86,6 +100,12 @@ export const VideoProvider = (props: Props) => {
   const [playbackRate, setPlaybackRate] = useState(1)
   const [volume, setVolume] = useState(0)
   const [zoom, setZoom] = useState(1)
+  const [fullscreen, setFullscreen] = useState(false)
+
+  const [playlistItem, setPlaylistItem] = useState<PlaylistItem>({
+    previousFile: undefined,
+    nextFile: undefined,
+  })
 
   const message = useMemo(() => {
     switch (state) {
@@ -104,6 +124,12 @@ export const VideoProvider = (props: Props) => {
   )
 
   const ref = useRef<HTMLVideoElement>(null)
+
+  useEffect(() => {
+    const removeListener =
+      window.electronAPI.addFullscreenListener(setFullscreen)
+    return () => removeListener()
+  }, [])
 
   useEffect(() => {
     const video = ref.current
@@ -193,8 +219,47 @@ export const VideoProvider = (props: Props) => {
     }
   }, [loopStartTime])
 
+  useEffect(() => {
+    ;(async () => {
+      const playlistItem = await window.electronAPI.getPlaylistItem(file.path)
+      setPlaylistItem(playlistItem)
+    })()
+  }, [file.path])
+
   const triggerAction = useCallback(
     (action: Action) => setActionCode(`${action}:${Date.now()}`),
+    [],
+  )
+
+  const changeLoopRange = useCallback(
+    (value: [number, number]) => setLoopRange(value),
+    [],
+  )
+
+  const changePlaybackRate = useCallback((value: number) => {
+    const video = ref.current
+    if (!video) {
+      return
+    }
+    video.playbackRate = value
+  }, [])
+
+  const changeVolume = useCallback(
+    (value: number) => {
+      const video = ref.current
+      if (!video) {
+        return
+      }
+      const volume = Math.min(Math.max(0, value), 1)
+      video.volume = volume
+      dispatch(setDefaultVolume(volume))
+      dispatch(setDefaultMuted(volume === 0))
+    },
+    [dispatch],
+  )
+
+  const toggleFullscreen = useCallback(
+    async () => window.electronAPI.toggleFullscreen(),
     [],
   )
 
@@ -276,33 +341,6 @@ export const VideoProvider = (props: Props) => {
     [triggerAction],
   )
 
-  const changeVolume = useCallback(
-    (value: number) => {
-      const video = ref.current
-      if (!video) {
-        return
-      }
-      const volume = Math.min(Math.max(0, value), 1)
-      video.volume = volume
-      dispatch(setDefaultVolume(volume))
-      dispatch(setDefaultMuted(volume === 0))
-    },
-    [dispatch],
-  )
-
-  const changeLoopRange = useCallback(
-    (value: [number, number]) => setLoopRange(value),
-    [],
-  )
-
-  const changePlaybackRate = useCallback((value: number) => {
-    const video = ref.current
-    if (!video) {
-      return
-    }
-    video.playbackRate = value
-  }, [])
-
   const zoomBy = useCallback(
     (value: number) =>
       setZoom((zoom) => Math.min(Math.max(1, zoom * (1 + value)), 10)),
@@ -315,6 +353,22 @@ export const VideoProvider = (props: Props) => {
 
   const resetZoom = useCallback(() => setZoom(1), [])
 
+  const previousTrack = useCallback(() => {
+    const path = playlistItem.previousFile?.path
+    if (path) {
+      window.electronAPI.openFile(path)
+      triggerAction('previousTrack')
+    }
+  }, [playlistItem.previousFile?.path, triggerAction])
+
+  const nextTrack = useCallback(() => {
+    const path = playlistItem.nextFile?.path
+    if (path) {
+      window.electronAPI.openFile(path)
+      triggerAction('nextTrack')
+    }
+  }, [playlistItem.nextFile?.path, triggerAction])
+
   const value = {
     actionCode,
     changeLoopRange,
@@ -323,18 +377,23 @@ export const VideoProvider = (props: Props) => {
     currentTime,
     duration,
     file,
+    fullscreen,
     loop,
     loopRange,
     message,
     muted,
+    nextTrack,
     partialLoop,
     paused,
     pictureInPicture,
     playbackRate,
+    playlistItem,
+    previousTrack,
     ref,
     resetZoom,
     seek,
     seekTo,
+    toggleFullscreen,
     toggleLoop,
     toggleMuted,
     togglePartialLoop,

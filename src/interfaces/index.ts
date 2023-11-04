@@ -8,9 +8,17 @@ import { Operations as TrafficLightOperations } from '@fiahfy/electron-traffic-l
 import { Operations as WindowOperations } from '@fiahfy/electron-window/preload'
 import { Operations as FullscreenOperations } from 'electron-fullscreen/preload'
 
+type File = { name: string; path: string; url: string }
+
+type PlaylistItem = {
+  previousFile: File | undefined
+  nextFile: File | undefined
+}
+
 export type IElectronAPI = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   addMessageListener: (callback: (message: any) => void) => () => void
+  getPlaylistItem: (filePath: string) => Promise<PlaylistItem>
   openFile: (filePath: string) => Promise<void>
   setContentSize: (size: { height: number; width: number }) => Promise<void>
   updateApplicationMenu: (params: ApplicationMenuParams) => Promise<void>

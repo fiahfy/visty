@@ -3,6 +3,8 @@ import {
   Pause as PauseIcon,
   PlayArrow as PlayArrowIcon,
   Replay5 as Replay5Icon,
+  SkipNext as SkipNextIcon,
+  SkipPrevious as SkipPreviousIcon,
   VolumeOff as VolumeOffIcon,
   VolumeUp as VolumeUpIcon,
 } from '@mui/icons-material'
@@ -23,16 +25,20 @@ const FlashIndicator = () => {
 
   const ActionIcon = useMemo(() => {
     switch (action) {
-      case 'play':
-        return PlayArrowIcon
+      case 'mute':
+        return VolumeOffIcon
+      case 'nextTrack':
+        return SkipNextIcon
       case 'pause':
         return PauseIcon
+      case 'play':
+        return PlayArrowIcon
+      case 'previousTrack':
+        return SkipPreviousIcon
       case 'seekBackward':
         return Replay5Icon
       case 'seekForward':
         return Forward5Icon
-      case 'mute':
-        return VolumeOffIcon
       case 'unmute':
         return VolumeUpIcon
       default:

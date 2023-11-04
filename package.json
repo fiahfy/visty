@@ -12,6 +12,7 @@
     "@mui/icons-material": "^5.14.14",
     "@mui/material": "^5.14.14",
     "@reduxjs/toolkit": "^1.9.7",
+    "mime": "^3.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-redux": "^8.1.3",
@@ -20,6 +21,7 @@
   "devDependencies": {
     "@fiahfy/eslint-config-react": "^0.0.21",
     "@fiahfy/prettier-config": "^0.0.3",
+    "@types/mime": "^3.0.3",
     "@types/react": "^18.2.31",
     "@types/react-dom": "^18.2.14",
     "@types/react-redux": "^7.1.28",
