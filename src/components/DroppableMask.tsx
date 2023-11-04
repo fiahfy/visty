@@ -1,6 +1,5 @@
 import { FileOpen as FileOpenIcon } from '@mui/icons-material'
 import { Box, Fade } from '@mui/material'
-import useTheme from '~/hooks/useTheme'
 
 type Props = {
   dropping: boolean
@@ -9,14 +8,12 @@ type Props = {
 const DroppableMask = (props: Props) => {
   const { dropping } = props
 
-  const { theme } = useTheme()
-
   return (
     <Fade in={dropping}>
       <Box
         sx={{
           inset: 0,
-          zIndex: theme.zIndex.appBar,
+          zIndex: (theme) => theme.zIndex.appBar,
           pointerEvents: 'none',
           position: 'absolute',
         }}

@@ -22,7 +22,7 @@ import {
   Toolbar,
   Typography,
 } from '@mui/material'
-import { MouseEvent, useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useMemo } from 'react'
 import useVideo from '~/hooks/useVideo'
 import { useAppSelector } from '~/store'
 import { selectAlwaysShowSeekBar } from '~/store/settings'
@@ -33,13 +33,11 @@ const ControlBar = () => {
   const alwaysShowSeekBar = useAppSelector(selectAlwaysShowSeekBar)
 
   const {
-    changeLoopRange,
     changeVolume,
     currentTime,
     duration,
     fullscreen,
     loop,
-    loopRange,
     muted,
     nextTrack,
     paused,
@@ -47,7 +45,6 @@ const ControlBar = () => {
     playbackRate,
     playlistFile,
     previousTrack,
-    seek,
     toggleFullscreen,
     toggleLoop,
     toggleMuted,
@@ -55,22 +52,6 @@ const ControlBar = () => {
     togglePictureInPicture,
     volume,
   } = useVideo()
-
-  const [partialLoopEnabled, setPartialLoopEnabled] = useState(false)
-
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) =>
-      setPartialLoopEnabled(
-        (e.ctrlKey && !e.metaKey) || (!e.ctrlKey && e.metaKey),
-      )
-    const handleKeyUp = () => setPartialLoopEnabled(false)
-    document.addEventListener('keydown', handleKeyDown)
-    document.addEventListener('keyup', handleKeyUp)
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown)
-      document.removeEventListener('keyup', handleKeyUp)
-    }
-  }, [])
 
   const volumeValue = useMemo(() => (muted ? 0 : volume), [muted, volume])
 
@@ -93,15 +74,6 @@ const ControlBar = () => {
     [fullscreen],
   )
 
-  const handleClickCurrentTime = useCallback(
-    (e: MouseEvent) => {
-      if ((e.ctrlKey && !e.metaKey) || (!e.ctrlKey && e.metaKey)) {
-        changeLoopRange([currentTime, duration])
-      }
-    },
-    [changeLoopRange, currentTime, duration],
-  )
-
   const handleClickPlaybackSpeed = useMemo(
     () =>
       createContextMenuHandler(
@@ -122,17 +94,6 @@ const ControlBar = () => {
         },
       ]),
     [alwaysShowSeekBar],
-  )
-
-  const handleChangeCurrentTime = useCallback(
-    (_e: Event, value: number | number[]) => seek(value as number),
-    [seek],
-  )
-
-  const handleChangeLoopRange = useCallback(
-    (_e: Event, value: number | number[]) =>
-      changeLoopRange(value as [number, number]),
-    [changeLoopRange],
   )
 
   const handleChangeVolume = useCallback(
@@ -160,101 +121,6 @@ const ControlBar = () => {
         }}
       />
       <Toolbar disableGutters sx={{ gap: 0.5, px: 1 }} variant="dense">
-        <Slider
-          max={duration}
-          onChange={handleChangeCurrentTime}
-          onClick={handleClickCurrentTime}
-          onKeyDown={(e) => e.preventDefault()}
-          size="small"
-          step={0.01}
-          sx={{
-            borderRadius: 0,
-            inset: (theme) => `-14px ${theme.spacing(1)} auto`,
-            position: 'absolute',
-            width: 'auto',
-            '.MuiSlider-thumb': {
-              transform: 'translate(-50%, -50%) scale(0)',
-              transition: 'none',
-              '&:focus, &:hover, &.Mui-active, &.Mui-focusVisible': {
-                boxShadow: 'inherit',
-              },
-              '.MuiSlider-valueLabel': {
-                backgroundColor: 'transparent',
-                opacity: 0,
-                transition: 'opacity 0.2s ease-in-out',
-                '::before': {
-                  display: 'none',
-                },
-              },
-              '.MuiSlider-valueLabelOpen': {
-                opacity: 1,
-              },
-            },
-            '.MuiSlider-rail, .MuiSlider-track': {
-              transition: 'transform 0.2s ease-in-out',
-            },
-            '&:hover': {
-              '.MuiSlider-thumb': {
-                transform: 'translate(-50%, -50%) scale(1)',
-              },
-              '.MuiSlider-rail, .MuiSlider-track': {
-                transform: 'translate(0, -50%) scale(1, 1.5)',
-              },
-            },
-          }}
-          value={currentTime}
-          valueLabelDisplay="auto"
-          valueLabelFormat={formatDuration}
-        />
-        {loopRange && (
-          <Slider
-            color="secondary"
-            max={duration}
-            onChange={handleChangeLoopRange}
-            onKeyDown={(e) => e.preventDefault()}
-            size="small"
-            step={0.01}
-            sx={{
-              borderRadius: 0,
-              inset: (theme) => `-14px ${theme.spacing(1)} auto`,
-              pointerEvents: partialLoopEnabled ? 'auto' : 'none',
-              position: 'absolute',
-              width: 'auto',
-              '.MuiSlider-thumb': {
-                transition: 'none',
-                '&:focus, &:hover, &.Mui-active, &.Mui-focusVisible': {
-                  boxShadow: 'inherit',
-                },
-                '.MuiSlider-valueLabel': {
-                  backgroundColor: 'transparent',
-                  opacity: 0,
-                  transition: 'opacity 0.2s ease-in-out',
-                  '::before': {
-                    display: 'none',
-                  },
-                },
-                '.MuiSlider-valueLabelOpen': {
-                  opacity: 1,
-                },
-              },
-              '.MuiSlider-rail, .MuiSlider-track': {
-                opacity: 0.5,
-                transition: 'transform 0.2s ease-in-out',
-              },
-              '.MuiSlider-rail': {
-                display: 'none',
-              },
-              '&:hover': {
-                '.MuiSlider-rail, .MuiSlider-track': {
-                  transform: 'translate(0, -50%) scale(1, 1.5)',
-                },
-              },
-            }}
-            value={loopRange}
-            valueLabelDisplay="on"
-            valueLabelFormat={formatDuration}
-          />
-        )}
         <IconButton
           disabled={!playlistFile.previous}
           onClick={previousTrack}

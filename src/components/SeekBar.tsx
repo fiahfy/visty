@@ -1,0 +1,206 @@
+import { Box, Slider } from '@mui/material'
+import {
+  MouseEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
+import { Transition } from 'react-transition-group'
+import useTheme from '~/hooks/useTheme'
+import useVideo from '~/hooks/useVideo'
+import { useAppSelector } from '~/store'
+import { selectAlwaysShowSeekBar } from '~/store/settings'
+import { formatDuration } from '~/utils/formatter'
+
+type Props = {
+  controlBarVisible: boolean
+}
+
+const SeekBar = (props: Props) => {
+  const { controlBarVisible } = props
+
+  const alwaysShowSeekBar = useAppSelector(selectAlwaysShowSeekBar)
+
+  const { changeLoopRange, currentTime, duration, loopRange, seek } = useVideo()
+  const { theme } = useTheme()
+
+  const [partialLoopEnabled, setPartialLoopEnabled] = useState(false)
+
+  const nodeRef = useRef(null)
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) =>
+      setPartialLoopEnabled(
+        (e.ctrlKey && !e.metaKey) || (!e.ctrlKey && e.metaKey),
+      )
+    const handleKeyUp = () => setPartialLoopEnabled(false)
+    document.addEventListener('keydown', handleKeyDown)
+    document.addEventListener('keyup', handleKeyUp)
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown)
+      document.removeEventListener('keyup', handleKeyUp)
+    }
+  }, [])
+
+  const handleClickCurrentTime = useCallback(
+    (e: MouseEvent) => {
+      if ((e.ctrlKey && !e.metaKey) || (!e.ctrlKey && e.metaKey)) {
+        changeLoopRange([currentTime, duration])
+      }
+    },
+    [changeLoopRange, currentTime, duration],
+  )
+
+  const handleChangeCurrentTime = useCallback(
+    (_e: Event, value: number | number[]) => seek(value as number),
+    [seek],
+  )
+
+  const handleChangeLoopRange = useCallback(
+    (_e: Event, value: number | number[]) =>
+      changeLoopRange(value as [number, number]),
+    [changeLoopRange],
+  )
+
+  const timeout = theme.transitions.duration.shortest
+
+  const styles = useMemo(() => {
+    const styles = {
+      inset: `auto ${theme.spacing(1)} 1px`,
+      opacity: 1,
+      transform: 'translateY(-47px)',
+    }
+    return {
+      appear: styles,
+      disappear: {
+        inset: alwaysShowSeekBar ? 'auto 0 1px' : styles.inset,
+        opacity: alwaysShowSeekBar ? styles.opacity : 0,
+        transform: alwaysShowSeekBar ? 'translateY(0)' : styles.transform,
+      },
+    }
+  }, [alwaysShowSeekBar, theme])
+
+  const transitionStyles = {
+    entering: styles.appear,
+    entered: styles.appear,
+    exiting: styles.disappear,
+    exited: styles.disappear,
+    unmounted: styles.disappear,
+  }
+
+  return (
+    <Transition in={controlBarVisible} nodeRef={nodeRef} timeout={timeout}>
+      {(state) => (
+        <Box
+          ref={nodeRef}
+          sx={{
+            position: 'absolute',
+            transition: `opacity ${timeout}ms ease-in-out, transform ${timeout}ms ease-in-out, inset ${timeout}ms ease-in-out`,
+            zIndex: (theme) => theme.zIndex.appBar,
+            ...transitionStyles[state],
+          }}
+        >
+          <Slider
+            max={duration}
+            onChange={handleChangeCurrentTime}
+            onClick={handleClickCurrentTime}
+            onKeyDown={(e) => e.preventDefault()}
+            size="small"
+            step={0.01}
+            sx={{
+              borderRadius: 0,
+              inset: '-14px 0 auto',
+              position: 'absolute',
+              width: 'auto',
+              '.MuiSlider-thumb': {
+                transform: 'translate(-50%, -50%) scale(0)',
+                transition: 'none',
+                '&:focus, &:hover, &.Mui-active, &.Mui-focusVisible': {
+                  boxShadow: 'inherit',
+                },
+                '.MuiSlider-valueLabel': {
+                  backgroundColor: 'transparent',
+                  opacity: 0,
+                  transition: 'opacity 0.2s ease-in-out',
+                  '::before': {
+                    display: 'none',
+                  },
+                },
+                '.MuiSlider-valueLabelOpen': {
+                  opacity: 1,
+                },
+              },
+              '.MuiSlider-rail, .MuiSlider-track': {
+                transition: 'transform 0.2s ease-in-out',
+              },
+              '&:hover': {
+                '.MuiSlider-thumb': {
+                  transform: 'translate(-50%, -50%) scale(1)',
+                },
+                '.MuiSlider-rail, .MuiSlider-track': {
+                  transform: 'translate(0, -50%) scale(1, 1.5)',
+                },
+              },
+            }}
+            value={currentTime}
+            valueLabelDisplay="auto"
+            valueLabelFormat={formatDuration}
+          />
+          {loopRange && (
+            <Slider
+              color="secondary"
+              max={duration}
+              onChange={handleChangeLoopRange}
+              onKeyDown={(e) => e.preventDefault()}
+              size="small"
+              step={0.01}
+              sx={{
+                borderRadius: 0,
+                inset: '-14px 0 auto',
+                pointerEvents: partialLoopEnabled ? 'auto' : 'none',
+                position: 'absolute',
+                width: 'auto',
+                '.MuiSlider-thumb': {
+                  transition: 'none',
+                  '&:focus, &:hover, &.Mui-active, &.Mui-focusVisible': {
+                    boxShadow: 'inherit',
+                  },
+                  '.MuiSlider-valueLabel': {
+                    backgroundColor: 'transparent',
+                    opacity: 0,
+                    transition: 'opacity 0.2s ease-in-out',
+                    '::before': {
+                      display: 'none',
+                    },
+                  },
+                  '.MuiSlider-valueLabelOpen': {
+                    opacity: 1,
+                  },
+                },
+                '.MuiSlider-rail, .MuiSlider-track': {
+                  opacity: 0.5,
+                  transition: 'transform 0.2s ease-in-out',
+                },
+                '.MuiSlider-rail': {
+                  display: 'none',
+                },
+                '&:hover': {
+                  '.MuiSlider-rail, .MuiSlider-track': {
+                    transform: 'translate(0, -50%) scale(1, 1.5)',
+                  },
+                },
+              }}
+              value={loopRange}
+              valueLabelDisplay={controlBarVisible ? 'on' : 'off'}
+              valueLabelFormat={formatDuration}
+            />
+          )}
+        </Box>
+      )}
+    </Transition>
+  )
+}
+
+export default SeekBar
