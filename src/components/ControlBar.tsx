@@ -102,7 +102,7 @@ const ControlBar = () => {
     [changeLoopRange, currentTime, duration],
   )
 
-  const onClickPlaybackSpeed = useMemo(
+  const handleClickPlaybackSpeed = useMemo(
     () =>
       createContextMenuHandler(
         [0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2].map((value) => ({
@@ -113,7 +113,7 @@ const ControlBar = () => {
     [playbackRate],
   )
 
-  const onClickSettings = useMemo(
+  const handleClickSettings = useMemo(
     () =>
       createContextMenuHandler([
         {
@@ -328,13 +328,13 @@ const ControlBar = () => {
           <LoopIcon fontSize="small" />
         </IconButton>
         <IconButton
-          onClick={onClickPlaybackSpeed}
+          onClick={handleClickPlaybackSpeed}
           size="small"
           title="Playback speed"
         >
           <SpeedIcon fontSize="small" />
         </IconButton>
-        <IconButton onClick={onClickSettings} size="small" title="Settings">
+        <IconButton onClick={handleClickSettings} size="small" title="Settings">
           <SettingsIcon fontSize="small" />
         </IconButton>
         <IconButton
