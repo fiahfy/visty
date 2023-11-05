@@ -62,7 +62,6 @@ const FlashIndicator = () => {
         display: 'flex',
         inset: 0,
         justifyContent: 'center',
-        pointerEvents: 'none',
         position: 'absolute',
       }}
     >

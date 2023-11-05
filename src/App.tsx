@@ -82,6 +82,7 @@ const App = () => {
 
   useEffect(() => {
     const handler = async (e: KeyboardEvent) => {
+      e.preventDefault()
       switch (e.key) {
         case 'ArrowLeft':
           return seekTo('backward')

@@ -87,6 +87,18 @@ const Player = () => {
     [dragOffset, hovered, resetTimer],
   )
 
+  const handleMouseUp = useCallback(() => setDragOffset(undefined), [])
+
+  const handleMouseEnter = useCallback(
+    () => resetTimer(hovered),
+    [hovered, resetTimer],
+  )
+
+  const handleMouseLeave = useCallback(() => {
+    setDragOffset(undefined)
+    setControlBarVisible(false)
+  }, [])
+
   const handleWheel = useCallback(
     (e: WheelEvent) => {
       if ((e.ctrlKey && !e.metaKey) || (!e.ctrlKey && e.metaKey)) {
@@ -96,82 +108,105 @@ const Player = () => {
     [zoomBy],
   )
 
-  const handleMouseEnter = useCallback(() => {
+  const handleMouseEnterBar = useCallback(() => {
     setHovered(true)
     resetTimer(true)
   }, [resetTimer])
 
-  const handleMouseLeave = useCallback(() => {
+  const handleMouseLeaveBar = useCallback(() => {
     setHovered(false)
     resetTimer(false)
   }, [resetTimer])
 
   return (
-    <Box
-      onDragEnter={onDragEnter}
-      onDragLeave={onDragLeave}
-      onDragOver={onDragOver}
-      onDrop={onDrop}
-      ref={wrapperRef}
-      sx={{
-        cursor: dragOffset
-          ? 'grabbing'
-          : controlBarVisible
-          ? undefined
-          : 'none',
-        height: '100%',
-        overflow: 'auto',
-        width: '100%',
-        '::-webkit-scrollbar': {
-          display: 'none',
-        },
-      }}
-    >
-      <video
+    <Box sx={{ height: '100%', width: '100%' }}>
+      <Box
         onClick={handleClick}
+        onDragEnter={onDragEnter}
+        onDragLeave={onDragLeave}
+        onDragOver={onDragOver}
+        onDrop={onDrop}
         onMouseDown={handleMouseDown}
-        onMouseLeave={() => setDragOffset(undefined)}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
         onMouseMove={handleMouseMove}
-        onMouseUp={() => setDragOffset(undefined)}
+        onMouseUp={handleMouseUp}
         onWheel={handleWheel}
-        ref={ref}
-        src={file.url}
-        style={{
-          background: 'black',
-          display: 'block',
-          minHeight: '100%',
-          width: `${100 * zoom}%`,
+        ref={wrapperRef}
+        sx={{
+          cursor: dragOffset
+            ? 'grabbing'
+            : controlBarVisible
+            ? undefined
+            : 'none',
+          height: '100%',
+          overflow: 'auto',
+          width: '100%',
+          '::-webkit-scrollbar': {
+            display: 'none',
+          },
         }}
-      />
-      {message && (
-        <Box
-          sx={{
-            alignItems: 'center',
-            display: 'flex',
-            inset: 0,
-            justifyContent: 'center',
-            pointerEvents: 'none',
-            position: 'absolute',
+      >
+        <video
+          ref={ref}
+          src={file.url}
+          style={{
+            background: 'black',
+            display: 'block',
+            minHeight: '100%',
+            width: `${100 * zoom}%`,
           }}
-        >
-          <Typography variant="caption">{message}</Typography>
-        </Box>
-      )}
-      <FlashIndicator />
-      <Fade in={controlBarVisible}>
-        <Box onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
-          <ControlBar />
-        </Box>
-      </Fade>
-      <Box onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
-        <SeekBar controlBarVisible={controlBarVisible} />
+        />
       </Box>
-      <DroppableMask dropping={dropping} />
-      <Fade in={visible}>
-        <Box onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
-          <TitleBar />
+      <Box
+        sx={{
+          inset: 0,
+          overflow: 'hidden',
+          pointerEvents: 'none',
+          position: 'absolute',
+        }}
+      >
+        {message && (
+          <Box
+            sx={{
+              alignItems: 'center',
+              display: 'flex',
+              inset: 0,
+              justifyContent: 'center',
+              position: 'absolute',
+            }}
+          >
+            <Typography variant="caption">{message}</Typography>
+          </Box>
+        )}
+        <FlashIndicator />
+        <DroppableMask dropping={dropping} />
+        <Fade in={controlBarVisible}>
+          <Box
+            onMouseEnter={handleMouseEnterBar}
+            onMouseLeave={handleMouseLeaveBar}
+            sx={{ pointerEvents: 'auto' }}
+          >
+            <ControlBar />
+          </Box>
+        </Fade>
+        <Box
+          onMouseEnter={handleMouseEnterBar}
+          onMouseLeave={handleMouseLeaveBar}
+          sx={{ pointerEvents: 'auto' }}
+        >
+          <SeekBar controlBarVisible={controlBarVisible} />
         </Box>
-      </Fade>
+        <Fade in={visible}>
+          <Box
+            onMouseEnter={handleMouseEnterBar}
+            onMouseLeave={handleMouseLeaveBar}
+            sx={{ pointerEvents: 'auto' }}
+          >
+            <TitleBar />
+          </Box>
+        </Fade>
+      </Box>
     </Box>
   )
 }

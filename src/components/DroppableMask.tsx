@@ -13,8 +13,6 @@ const DroppableMask = (props: Props) => {
       <Box
         sx={{
           inset: 0,
-          zIndex: (theme) => theme.zIndex.appBar,
-          pointerEvents: 'none',
           position: 'absolute',
         }}
       >

@@ -70,14 +70,14 @@ const SeekBar = (props: Props) => {
     const styles = {
       inset: `auto ${theme.spacing(1)} 1px`,
       opacity: 1,
-      transform: 'translateY(-47px)',
+      transform: 'translateY(-61px)',
     }
     return {
       appear: styles,
       disappear: {
         inset: alwaysShowSeekBar ? 'auto 0 1px' : styles.inset,
         opacity: alwaysShowSeekBar ? styles.opacity : 0,
-        transform: alwaysShowSeekBar ? 'translateY(0)' : styles.transform,
+        transform: alwaysShowSeekBar ? 'translateY(-14px)' : styles.transform,
       },
     }
   }, [alwaysShowSeekBar, theme])
@@ -111,7 +111,7 @@ const SeekBar = (props: Props) => {
             step={0.01}
             sx={{
               borderRadius: 0,
-              inset: '-14px 0 auto',
+              inset: 0,
               position: 'absolute',
               width: 'auto',
               '.MuiSlider-thumb': {
@@ -158,7 +158,7 @@ const SeekBar = (props: Props) => {
               step={0.01}
               sx={{
                 borderRadius: 0,
-                inset: '-14px 0 auto',
+                inset: 0,
                 pointerEvents: partialLoopEnabled ? 'auto' : 'none',
                 position: 'absolute',
                 width: 'auto',
@@ -193,7 +193,9 @@ const SeekBar = (props: Props) => {
                 },
               }}
               value={loopRange}
-              valueLabelDisplay={controlBarVisible ? 'on' : 'off'}
+              valueLabelDisplay={
+                !controlBarVisible && alwaysShowSeekBar ? 'off' : 'on'
+              }
               valueLabelFormat={formatDuration}
             />
           )}
