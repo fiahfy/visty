@@ -2,19 +2,21 @@ import { PayloadAction, createSelector, createSlice } from '@reduxjs/toolkit'
 import { AppState } from '~/store'
 
 type State = {
-  alwaysShowSeekBar: boolean
   defaultAutoplay: boolean
   defaultLoop: boolean
   defaultMuted: boolean
   defaultVolume: number
+  shouldAlwaysShowSeekBar: boolean
+  shouldCloseWindowOnEscapeKey: boolean
 }
 
 const initialState: State = {
-  alwaysShowSeekBar: false,
   defaultAutoplay: false,
   defaultLoop: false,
   defaultMuted: false,
   defaultVolume: 1,
+  shouldAlwaysShowSeekBar: false,
+  shouldCloseWindowOnEscapeKey: false,
 }
 
 export const settingsSlice = createSlice({
@@ -33,8 +35,17 @@ export const settingsSlice = createSlice({
     setDefaultVolume(state, action: PayloadAction<number>) {
       return { ...state, defaultVolume: action.payload }
     },
-    toggleAlwaysShowSeekBar(state) {
-      return { ...state, alwaysShowSeekBar: !state.alwaysShowSeekBar }
+    toggleShouldAlwaysShowSeekBar(state) {
+      return {
+        ...state,
+        shouldAlwaysShowSeekBar: !state.shouldAlwaysShowSeekBar,
+      }
+    },
+    toggleShouldCloseWindowOnEscapeKey(state) {
+      return {
+        ...state,
+        shouldCloseWindowOnEscapeKey: !state.shouldCloseWindowOnEscapeKey,
+      }
     },
     replace(_state, action: PayloadAction<State>) {
       return action.payload
@@ -48,17 +59,13 @@ export const {
   setDefaultLoop,
   setDefaultMuted,
   setDefaultVolume,
-  toggleAlwaysShowSeekBar,
+  toggleShouldAlwaysShowSeekBar,
+  toggleShouldCloseWindowOnEscapeKey,
 } = settingsSlice.actions
 
 export default settingsSlice.reducer
 
 export const selectSettings = (state: AppState) => state.settings
-
-export const selectAlwaysShowSeekBar = createSelector(
-  selectSettings,
-  (settings) => settings.alwaysShowSeekBar,
-)
 
 export const selectDefaultActualVolume = createSelector(
   selectSettings,
@@ -73,4 +80,14 @@ export const selectDefaultAutoplay = createSelector(
 export const selectDefaultLoop = createSelector(
   selectSettings,
   (settings) => settings.defaultLoop,
+)
+
+export const selectShouldAlwaysShowSeekBar = createSelector(
+  selectSettings,
+  (settings) => settings.shouldAlwaysShowSeekBar,
+)
+
+export const selectShouldCloseWindowOnEscapeKey = createSelector(
+  selectSettings,
+  (settings) => settings.shouldCloseWindowOnEscapeKey,
 )

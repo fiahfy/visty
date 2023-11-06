@@ -22,12 +22,18 @@ import {
 import { useCallback, useMemo } from 'react'
 import useVideo from '~/hooks/useVideo'
 import { useAppSelector } from '~/store'
-import { selectAlwaysShowSeekBar } from '~/store/settings'
+import {
+  selectShouldAlwaysShowSeekBar,
+  selectShouldCloseWindowOnEscapeKey,
+} from '~/store/settings'
 import { createContextMenuHandler } from '~/utils/contextMenu'
 import { formatDuration } from '~/utils/formatter'
 
 const ControlBar = () => {
-  const alwaysShowSeekBar = useAppSelector(selectAlwaysShowSeekBar)
+  const shouldAlwaysShowSeekBar = useAppSelector(selectShouldAlwaysShowSeekBar)
+  const shouldCloseWindowOnEscapeKey = useAppSelector(
+    selectShouldCloseWindowOnEscapeKey,
+  )
 
   const {
     autoplay,
@@ -82,10 +88,21 @@ const ControlBar = () => {
         { type: 'separator' },
         {
           type: 'alwaysShowSeekBar',
-          data: { checked: alwaysShowSeekBar },
+          data: { checked: shouldAlwaysShowSeekBar },
+        },
+        {
+          type: 'closeWindowOnEscapeKey',
+          data: { checked: shouldCloseWindowOnEscapeKey },
         },
       ]),
-    [alwaysShowSeekBar, autoplay, loop, partialLoop, playbackRate],
+    [
+      autoplay,
+      loop,
+      partialLoop,
+      playbackRate,
+      shouldAlwaysShowSeekBar,
+      shouldCloseWindowOnEscapeKey,
+    ],
   )
 
   const handleChangeVolume = useCallback(

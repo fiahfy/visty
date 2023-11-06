@@ -11,7 +11,7 @@ import { Transition } from 'react-transition-group'
 import useTheme from '~/hooks/useTheme'
 import useVideo from '~/hooks/useVideo'
 import { useAppSelector } from '~/store'
-import { selectAlwaysShowSeekBar } from '~/store/settings'
+import { selectShouldAlwaysShowSeekBar } from '~/store/settings'
 import { formatDuration } from '~/utils/formatter'
 
 type Props = {
@@ -21,7 +21,7 @@ type Props = {
 const SeekBar = (props: Props) => {
   const { controlBarVisible } = props
 
-  const alwaysShowSeekBar = useAppSelector(selectAlwaysShowSeekBar)
+  const shouldAlwaysShowSeekBar = useAppSelector(selectShouldAlwaysShowSeekBar)
 
   const { changeLoopRange, currentTime, duration, loopRange, seek } = useVideo()
   const { theme } = useTheme()
@@ -75,12 +75,14 @@ const SeekBar = (props: Props) => {
     return {
       appear: styles,
       disappear: {
-        inset: alwaysShowSeekBar ? 'auto 0 1px' : styles.inset,
-        opacity: alwaysShowSeekBar ? styles.opacity : 0,
-        transform: alwaysShowSeekBar ? 'translateY(-14px)' : styles.transform,
+        inset: shouldAlwaysShowSeekBar ? 'auto 0 1px' : styles.inset,
+        opacity: shouldAlwaysShowSeekBar ? styles.opacity : 0,
+        transform: shouldAlwaysShowSeekBar
+          ? 'translateY(-14px)'
+          : styles.transform,
       },
     }
-  }, [alwaysShowSeekBar, theme])
+  }, [shouldAlwaysShowSeekBar, theme])
 
   const transitionStyles = {
     entering: styles.appear,
@@ -194,7 +196,7 @@ const SeekBar = (props: Props) => {
               }}
               value={loopRange}
               valueLabelDisplay={
-                !controlBarVisible && alwaysShowSeekBar ? 'off' : 'on'
+                !controlBarVisible && shouldAlwaysShowSeekBar ? 'off' : 'on'
               }
               valueLabelFormat={formatDuration}
             />

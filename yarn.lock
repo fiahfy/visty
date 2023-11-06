@@ -550,10 +550,10 @@
   resolved "https://registry.yarnpkg.com/@fiahfy/electron-traffic-light/-/electron-traffic-light-0.0.1.tgz#cfb1d1ea80d23cdf29402425f2f4c78751234613"
   integrity sha512-uu2LCvayspPfcUF7FXnErxI56lTUpchUBIpQgBNuGMyr8r+o6tSS0Ofn7CH0xFNZMxURK/S4sefYtebVwfR+1g==
 
-"@fiahfy/electron-window@^0.0.1":
-  version "0.0.1"
-  resolved "https://registry.yarnpkg.com/@fiahfy/electron-window/-/electron-window-0.0.1.tgz#8e3e9c54d8a8b953f638aaa8dd21720bab399790"
-  integrity sha512-pMSW8uTklpfeWQtaKOcMZdLBNHLSc3s+gOp4OuQvGoI0UP/Xwa8GfxRFAmUG48sKQQIbM52tNNOdqIryy06TuQ==
+"@fiahfy/electron-window@^0.0.2":
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/@fiahfy/electron-window/-/electron-window-0.0.2.tgz#d7e39e16905ccbd71a30e233a2ae917f49aa317c"
+  integrity sha512-I3SNxpwCxAWSxdtd4lEMo1MeRBT+F7TgTIyKsO4DpoeSJEywgb3eGeh2xdtBC4XjmLPdYE0ANDJz1ezKYEVWlA==
   dependencies:
     electron-window-state "^5.0.3"
 
