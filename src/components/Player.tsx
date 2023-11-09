@@ -51,7 +51,11 @@ const Player = () => {
     [clearTimer],
   )
 
-  useEffect(() => resetTimer(hovered), [hovered, resetTimer])
+  useEffect(() => {
+    if (hovered) {
+      resetTimer(hovered)
+    }
+  }, [hovered, resetTimer])
 
   const handleClick = useCallback(
     (e: MouseEvent) => {
@@ -94,9 +98,16 @@ const Player = () => {
     [hovered, resetTimer],
   )
 
-  const handleMouseLeave = useCallback(() => {
-    setDragOffset(undefined)
-    setControlBarVisible(false)
+  const handleMouseLeave = useCallback((e: MouseEvent) => {
+    if (
+      e.clientX < 0 ||
+      e.clientX > window.innerWidth ||
+      e.clientY < 0 ||
+      e.clientY > window.innerHeight
+    ) {
+      setDragOffset(undefined)
+      setControlBarVisible(false)
+    }
   }, [])
 
   const handleWheel = useCallback(
@@ -119,19 +130,21 @@ const Player = () => {
   }, [resetTimer])
 
   return (
-    <Box sx={{ height: '100%', width: '100%' }}>
+    <Box
+      onClick={handleClick}
+      onDragEnter={onDragEnter}
+      onDragLeave={onDragLeave}
+      onDragOver={onDragOver}
+      onDrop={onDrop}
+      onMouseDown={handleMouseDown}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
+      onWheel={handleWheel}
+      sx={{ height: '100%', width: '100%' }}
+    >
       <Box
-        onClick={handleClick}
-        onDragEnter={onDragEnter}
-        onDragLeave={onDragLeave}
-        onDragOver={onDragOver}
-        onDrop={onDrop}
-        onMouseDown={handleMouseDown}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onWheel={handleWheel}
         ref={wrapperRef}
         sx={{
           cursor: dragOffset
@@ -198,11 +211,7 @@ const Player = () => {
           <SeekBar controlBarVisible={controlBarVisible} />
         </Box>
         <Fade in={visible}>
-          <Box
-            onMouseEnter={handleMouseEnterBar}
-            onMouseLeave={handleMouseLeaveBar}
-            sx={{ pointerEvents: 'auto' }}
-          >
+          <Box sx={{ pointerEvents: 'auto' }}>
             <TitleBar />
           </Box>
         </Fade>
