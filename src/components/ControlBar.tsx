@@ -194,7 +194,12 @@ const ControlBar = () => {
           {formatDuration(currentTime)} / {formatDuration(duration)}
         </Typography>
         <Box sx={{ flexGrow: 1 }} />
-        <IconButton onClick={handleClickSettings} size="small" title="Settings">
+        <IconButton
+          onClick={handleClickSettings}
+          onKeyDown={(e) => e.preventDefault()}
+          size="small"
+          title="Settings"
+        >
           <SettingsIcon fontSize="small" />
         </IconButton>
         <IconButton
