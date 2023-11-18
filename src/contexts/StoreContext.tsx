@@ -43,7 +43,7 @@ export const StoreProvider = (props: Props) => {
       dispatch(set(index))
       const file = params?.file
       if (file) {
-        dispatch(initialize({ index, file }))
+        dispatch(initialize(file))
       }
       setInitialized(true)
     })()
