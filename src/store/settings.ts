@@ -23,6 +23,9 @@ export const settingsSlice = createSlice({
   name: 'settings',
   initialState,
   reducers: {
+    replace(_state, action: PayloadAction<State>) {
+      return action.payload
+    },
     setDefaultAutoplay(state, action: PayloadAction<boolean>) {
       return { ...state, defaultAutoplay: action.payload }
     },
@@ -46,9 +49,6 @@ export const settingsSlice = createSlice({
         ...state,
         shouldCloseWindowOnEscapeKey: !state.shouldCloseWindowOnEscapeKey,
       }
-    },
-    replace(_state, action: PayloadAction<State>) {
-      return action.payload
     },
   },
 })

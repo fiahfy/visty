@@ -9,7 +9,7 @@ import {
   toggleShouldAlwaysShowSeekBar,
   toggleShouldCloseWindowOnEscapeKey,
 } from '~/store/settings'
-import { initialize } from '~/store/window'
+import { newWindow } from '~/store/window'
 import { createContextMenuHandler } from '~/utils/contextMenu'
 
 const App = () => {
@@ -46,7 +46,7 @@ const App = () => {
       const { type, data } = message
       switch (type) {
         case 'changeFile':
-          return dispatch(initialize(data.file))
+          return dispatch(newWindow(data.file))
         case 'changePlaybackRate':
           return changePlaybackRate(data.value)
         case 'resetZoom':

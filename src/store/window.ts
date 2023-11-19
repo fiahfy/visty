@@ -12,7 +12,7 @@ type State = {
   [index: number]: WindowState
 }
 
-const defaultState: WindowState = {
+const defaultWindowState: WindowState = {
   file: undefined,
 }
 
@@ -22,7 +22,10 @@ export const windowSlice = createSlice({
   name: 'window',
   initialState,
   reducers: {
-    initialize(
+    replace(_state, action: PayloadAction<State>) {
+      return action.payload
+    },
+    newWindow(
       state,
       action: PayloadAction<{
         index: number
@@ -33,13 +36,10 @@ export const windowSlice = createSlice({
       return {
         ...state,
         [index]: {
-          ...defaultState,
+          ...defaultWindowState,
           file,
         },
       }
-    },
-    replace(_state, action: PayloadAction<State>) {
-      return action.payload
     },
   },
 })
@@ -48,23 +48,23 @@ export const { replace } = windowSlice.actions
 
 export default windowSlice.reducer
 
-export const selectWindow = (state: AppState) => {
+export const selectCurrentWindow = (state: AppState) => {
   const windowState = state.window[state.windowIndex]
-  return windowState ?? defaultState
+  return windowState ?? defaultWindowState
 }
 
 export const selectFile = createSelector(
-  selectWindow,
+  selectCurrentWindow,
   (window) => window.file ?? { name: '', path: '', url: '' },
 )
 
-export const initialize =
+export const newWindow =
   (file: File): AppThunk =>
   async (dispatch, getState) => {
-    const { initialize } = windowSlice.actions
+    const { newWindow } = windowSlice.actions
     const index = selectWindowIndex(getState())
     dispatch(
-      initialize({
+      newWindow({
         index,
         file,
       }),

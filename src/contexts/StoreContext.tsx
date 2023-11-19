@@ -3,7 +3,7 @@ import { Provider } from 'react-redux'
 import { PersistGate } from 'redux-persist/integration/react'
 import { persistor, storageKey, store } from '~/store'
 import { replace as replaceSettings } from '~/store/settings'
-import { initialize, replace as replaceWindow } from '~/store/window'
+import { newWindow, replace as replaceWindow } from '~/store/window'
 import { set } from '~/store/windowIndex'
 
 type Props = { children: ReactNode }
@@ -43,7 +43,7 @@ export const StoreProvider = (props: Props) => {
       dispatch(set(index))
       const file = params?.file
       if (file) {
-        dispatch(initialize(file))
+        dispatch(newWindow(file))
       }
       setInitialized(true)
     })()
