@@ -21,7 +21,7 @@ const Player = () => {
 
   const { file, message, ref, togglePaused, zoom, zoomBy } = useVideo()
 
-  const { dropping, onDragEnter, onDragLeave, onDragOver, onDrop } = useDrop()
+  const { dropping, ...dropHandlers } = useDrop()
 
   const [controlBarVisible, setControlBarVisible] = useState(false)
   const [hovered, setHovered] = useState(false)
@@ -137,10 +137,6 @@ const Player = () => {
     >
       <Box
         onClick={handleClick}
-        onDragEnter={onDragEnter}
-        onDragLeave={onDragLeave}
-        onDragOver={onDragOver}
-        onDrop={onDrop}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
@@ -159,6 +155,7 @@ const Player = () => {
             display: 'none',
           },
         }}
+        {...dropHandlers}
       >
         <video
           ref={ref}

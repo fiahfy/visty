@@ -23,7 +23,7 @@ export const settingsSlice = createSlice({
   name: 'settings',
   initialState,
   reducers: {
-    replace(_state, action: PayloadAction<State>) {
+    replaceState(_state, action: PayloadAction<State>) {
       return action.payload
     },
     setDefaultAutoplay(state, action: PayloadAction<boolean>) {
@@ -54,7 +54,7 @@ export const settingsSlice = createSlice({
 })
 
 export const {
-  replace,
+  replaceState,
   setDefaultAutoplay,
   setDefaultLoop,
   setDefaultMuted,

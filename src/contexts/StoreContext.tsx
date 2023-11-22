@@ -2,8 +2,8 @@ import { ReactNode, useEffect, useState } from 'react'
 import { Provider } from 'react-redux'
 import { PersistGate } from 'redux-persist/integration/react'
 import { persistor, storageKey, store } from '~/store'
-import { replace as replaceSettings } from '~/store/settings'
-import { newWindow, replace as replaceWindow } from '~/store/window'
+import { replaceState as replaceSettingsState } from '~/store/settings'
+import { newWindow, replaceState as replaceWindowState } from '~/store/window'
 import { set } from '~/store/windowIndex'
 
 type Props = { children: ReactNode }
@@ -24,8 +24,8 @@ export const StoreProvider = (props: Props) => {
         return
       }
       const newState = JSON.parse(e.newValue)
-      dispatch(replaceSettings(JSON.parse(newState.settings)))
-      dispatch(replaceWindow(JSON.parse(newState.window)))
+      dispatch(replaceSettingsState(JSON.parse(newState.settings)))
+      dispatch(replaceWindowState(JSON.parse(newState.window)))
     }
 
     window.addEventListener('storage', handler)
