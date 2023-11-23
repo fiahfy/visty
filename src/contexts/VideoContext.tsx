@@ -279,7 +279,7 @@ export const VideoProvider = (props: Props) => {
   }, [autoplay, dispatch])
 
   const toggleFullscreen = useCallback(
-    async () => window.electronAPI.toggleFullscreen(),
+    () => window.electronAPI.toggleFullscreen(),
     [],
   )
 
