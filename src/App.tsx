@@ -21,7 +21,6 @@ const App = () => {
   const {
     changePlaybackRate,
     changeVolume,
-    currentTime,
     file,
     loop,
     nextTrack,
@@ -136,18 +135,14 @@ const App = () => {
     return () => document.body.removeEventListener('keydown', handler)
   }, [
     changeVolume,
-    currentTime,
     nextTrack,
     previousTrack,
-    resetZoom,
     seekTo,
     shouldCloseWindowOnEscapeKey,
     toggleLoop,
     toggleMuted,
     togglePaused,
     volume,
-    zoomIn,
-    zoomOut,
   ])
 
   const handleContextMenu = useMemo(() => createContextMenuHandler(), [])
