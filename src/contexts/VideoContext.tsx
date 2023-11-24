@@ -106,12 +106,14 @@ export const VideoProvider = (props: Props) => {
     next: undefined,
     previous: undefined,
   })
-  const [state, setState] = useState('loading')
+  const [status, setStatus] = useState<'loading' | 'loaded' | 'error'>(
+    'loading',
+  )
   const [volume, setVolume] = useState(defaultVolume)
   const [zoom, setZoom] = useState(1)
 
   const message = useMemo(() => {
-    switch (state) {
+    switch (status) {
       case 'loading':
         return 'Loading...'
       case 'error':
@@ -119,7 +121,7 @@ export const VideoProvider = (props: Props) => {
       default:
         return undefined
     }
-  }, [state])
+  }, [status])
   const partialLoop = useMemo(() => !!loopRange, [loopRange])
   const loopStartTime = useMemo(
     () => (loopRange ? loopRange[0] : undefined),
@@ -144,7 +146,7 @@ export const VideoProvider = (props: Props) => {
     video.volume = defaultVolume
     video.autoplay = defaultAutoplay
 
-    const handleLoadStart = () => setState('loading')
+    const handleLoadStart = () => setStatus('loading')
     const handleLoadedMetadata = async () => {
       await window.electronAPI.setContentSize({
         width: video.videoWidth,
@@ -153,9 +155,9 @@ export const VideoProvider = (props: Props) => {
       video.loop = defaultLoop
       video.volume = defaultVolume
       video.autoplay = defaultAutoplay
-      setState('loaded')
+      setStatus('loaded')
     }
-    const handleError = () => setState('error')
+    const handleError = () => setStatus('error')
     const handleEnterPictureInPicture = () => setPictureInPicture(true)
     const handleLeavePictureInPicture = () => setPictureInPicture(false)
     video.addEventListener('loadedstart', handleLoadStart)
