@@ -146,8 +146,8 @@ const Player = () => {
           cursor: dragOffset
             ? 'grabbing'
             : controlBarVisible
-            ? undefined
-            : 'none',
+              ? undefined
+              : 'none',
           height: '100%',
           overflow: 'auto',
           width: '100%',

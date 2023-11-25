@@ -1,7 +1,5 @@
-import { createManager as createTrafficLightManager } from '@fiahfy/electron-traffic-light'
 import { createManager as createWindowManager } from '@fiahfy/electron-window'
 import { BrowserWindow, BrowserWindowConstructorOptions, app } from 'electron'
-import { createManager as createFullscreenManager } from 'electron-fullscreen'
 import { basename, join } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import registerApplicationMenu from './applicationMenu'
@@ -25,9 +23,6 @@ process.env.VITE_PUBLIC = app.isPackaged
 // 🚧 Use ['ENV_NAME'] avoid vite:define plugin - Vite@2.x
 const VITE_DEV_SERVER_URL = process.env['VITE_DEV_SERVER_URL']
 
-const trafficLightManager = createTrafficLightManager()
-const fullscreenManager = createFullscreenManager()
-
 const baseCreateWindow = (options: BrowserWindowConstructorOptions) => {
   const browserWindow = new BrowserWindow({
     ...options,
@@ -48,9 +43,6 @@ const baseCreateWindow = (options: BrowserWindowConstructorOptions) => {
   } else {
     browserWindow.loadFile(join(process.env.DIST, 'index.html'))
   }
-
-  trafficLightManager.handle(browserWindow)
-  fullscreenManager.handle(browserWindow)
 
   return browserWindow
 }
