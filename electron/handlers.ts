@@ -101,8 +101,14 @@ const registerHandlers = () => {
           width: Math.round((newHeight * width) / height),
         }
       }
-      browserWindow.setContentBounds(bounds, true)
+
+      const maximized = browserWindow.isMaximized()
       browserWindow.setAspectRatio(width / height)
+      if (maximized) {
+        browserWindow.maximize()
+      } else {
+        browserWindow.setContentBounds(bounds, true)
+      }
     },
   )
 }
