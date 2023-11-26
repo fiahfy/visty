@@ -6,6 +6,7 @@ import useVideo from '~/hooks/useVideo'
 import { useAppDispatch, useAppSelector } from '~/store'
 import {
   selectShouldCloseWindowOnEscapeKey,
+  setViewModeOnOpen,
   toggleShouldAlwaysShowSeekBar,
   toggleShouldCloseWindowOnEscapeKey,
 } from '~/store/settings'
@@ -50,16 +51,20 @@ const App = () => {
           return changePlaybackRate(data.value)
         case 'resetZoom':
           return resetZoom()
+        case 'setViewModeOnOpen':
+          return dispatch(
+            setViewModeOnOpen({ viewModeOnOpen: data.viewModeOnOpen }),
+          )
         case 'toggleAutoplay':
           return toggleAutoplay()
-        case 'toggleShouldAlwaysShowSeekBar':
-          return dispatch(toggleShouldAlwaysShowSeekBar())
         case 'toggleFullscreen':
           return window.electronAPI.toggleFullscreen()
         case 'toggleLoop':
           return toggleLoop()
         case 'togglePartialLoop':
           return togglePartialLoop()
+        case 'toggleShouldAlwaysShowSeekBar':
+          return dispatch(toggleShouldAlwaysShowSeekBar())
         case 'toggleShouldCloseWindowOnEscapeKey':
           return dispatch(toggleShouldCloseWindowOnEscapeKey())
         case 'zoomIn':

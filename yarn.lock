@@ -545,10 +545,10 @@
   resolved "https://registry.yarnpkg.com/@fiahfy/electron-context-menu/-/electron-context-menu-0.1.0.tgz#fdc60427bd7915c4d28da0f623b9cf1066609456"
   integrity sha512-t65RwN1kApl+UhS9myIAe3uWP/RhCGaZk4U2gD/du0kETPhAhsBxykkRLAsx3ME+upDjGwLXWPMPkLx+HtDV6w==
 
-"@fiahfy/electron-window@^0.0.3":
-  version "0.0.3"
-  resolved "https://registry.yarnpkg.com/@fiahfy/electron-window/-/electron-window-0.0.3.tgz#dd9839f8f694c80c42f1edb31e4bb83e964148d4"
-  integrity sha512-4u2ejLa816kpa+Fp3Lr+2ACmsn2/FZ28I5O5Ci1/nNe4pd7N2O+7ssa5CvX1QPrigvR/AjxtknxVYFJDJoLikg==
+"@fiahfy/electron-window@^0.0.4":
+  version "0.0.4"
+  resolved "https://registry.yarnpkg.com/@fiahfy/electron-window/-/electron-window-0.0.4.tgz#01e3403f9803dfae1d77bc880ec6c7054c88bfc7"
+  integrity sha512-IoH/TiAWyX529t9ffl1vdeQKPVUgmgaKMI3/GD3TNW1usZ5uTMeZDwkyzoWC5o3xPXu99DwqCS0q73HDSl2LXA==
   dependencies:
     electron-window-state "^5.0.3"
 

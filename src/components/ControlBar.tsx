@@ -25,6 +25,7 @@ import { useAppSelector } from '~/store'
 import {
   selectShouldAlwaysShowSeekBar,
   selectShouldCloseWindowOnEscapeKey,
+  selectViewModeOnOpen,
 } from '~/store/settings'
 import { createContextMenuHandler } from '~/utils/contextMenu'
 import { formatDuration } from '~/utils/formatter'
@@ -34,6 +35,7 @@ const ControlBar = () => {
   const shouldCloseWindowOnEscapeKey = useAppSelector(
     selectShouldCloseWindowOnEscapeKey,
   )
+  const viewModeOnOpen = useAppSelector(selectViewModeOnOpen)
 
   const {
     autoplay,
@@ -94,6 +96,10 @@ const ControlBar = () => {
           type: 'closeWindowOnEscapeKey',
           data: { checked: shouldCloseWindowOnEscapeKey },
         },
+        {
+          type: 'viewModeOnOpen',
+          data: { viewModeOnOpen },
+        },
       ]),
     [
       autoplay,
@@ -102,6 +108,7 @@ const ControlBar = () => {
       playbackRate,
       shouldAlwaysShowSeekBar,
       shouldCloseWindowOnEscapeKey,
+      viewModeOnOpen,
     ],
   )
 

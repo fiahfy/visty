@@ -2,7 +2,10 @@ import { ReactNode, useEffect, useState } from 'react'
 import { Provider } from 'react-redux'
 import { PersistGate } from 'redux-persist/integration/react'
 import { persistor, storageKey, store } from '~/store'
-import { replaceState as replaceSettingsState } from '~/store/settings'
+import {
+  replaceState as replaceSettingsState,
+  selectViewModeOnOpen,
+} from '~/store/settings'
 import { newWindow, replaceState as replaceWindowState } from '~/store/window'
 import { set } from '~/store/windowIndex'
 
@@ -11,7 +14,7 @@ type Props = { children: ReactNode }
 export const StoreProvider = (props: Props) => {
   const { children } = props
 
-  const { dispatch } = store
+  const { dispatch, getState } = store
 
   const [initialized, setInitialized] = useState(false)
 
@@ -44,10 +47,17 @@ export const StoreProvider = (props: Props) => {
       const file = params?.file
       if (file) {
         dispatch(newWindow(file))
+        const viewModeOnOpen = selectViewModeOnOpen(getState())
+        switch (viewModeOnOpen) {
+          case 'fullscreen':
+            return window.electronAPI.enterFullscreen()
+          case 'maximized':
+            return window.electronAPI.maximize()
+        }
       }
       setInitialized(true)
     })()
-  }, [dispatch])
+  }, [dispatch, getState])
 
   return (
     <Provider store={store}>

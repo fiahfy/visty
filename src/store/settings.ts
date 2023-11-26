@@ -8,6 +8,7 @@ type State = {
   defaultVolume: number
   shouldAlwaysShowSeekBar: boolean
   shouldCloseWindowOnEscapeKey: boolean
+  viewModeOnOpen: 'fullscreen' | 'maximized' | 'default'
 }
 
 const initialState: State = {
@@ -17,6 +18,7 @@ const initialState: State = {
   defaultVolume: 1,
   shouldAlwaysShowSeekBar: false,
   shouldCloseWindowOnEscapeKey: false,
+  viewModeOnOpen: 'default',
 }
 
 export const settingsSlice = createSlice({
@@ -37,6 +39,16 @@ export const settingsSlice = createSlice({
     },
     setDefaultVolume(state, action: PayloadAction<number>) {
       return { ...state, defaultVolume: action.payload }
+    },
+    setViewModeOnOpen(
+      state,
+      action: PayloadAction<{ viewModeOnOpen: State['viewModeOnOpen'] }>,
+    ) {
+      const { viewModeOnOpen } = action.payload
+      return {
+        ...state,
+        viewModeOnOpen,
+      }
     },
     toggleShouldAlwaysShowSeekBar(state) {
       return {
@@ -59,6 +71,7 @@ export const {
   setDefaultLoop,
   setDefaultMuted,
   setDefaultVolume,
+  setViewModeOnOpen,
   toggleShouldAlwaysShowSeekBar,
   toggleShouldCloseWindowOnEscapeKey,
 } = settingsSlice.actions
@@ -90,4 +103,9 @@ export const selectShouldAlwaysShowSeekBar = createSelector(
 export const selectShouldCloseWindowOnEscapeKey = createSelector(
   selectSettings,
   (settings) => settings.shouldCloseWindowOnEscapeKey,
+)
+
+export const selectViewModeOnOpen = createSelector(
+  selectSettings,
+  (settings) => settings.viewModeOnOpen,
 )
