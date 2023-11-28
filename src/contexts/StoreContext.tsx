@@ -50,9 +50,11 @@ export const StoreProvider = (props: Props) => {
         const viewModeOnOpen = selectViewModeOnOpen(getState())
         switch (viewModeOnOpen) {
           case 'fullscreen':
-            return window.electronAPI.enterFullscreen()
+            window.electronAPI.enterFullscreen()
+            break
           case 'maximized':
-            return window.electronAPI.maximize()
+            window.electronAPI.maximize()
+            break
         }
       }
       setInitialized(true)
