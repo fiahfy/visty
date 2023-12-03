@@ -33,9 +33,10 @@ const Player = () => {
   const wrapperRef = useRef<HTMLDivElement>(null)
   const timer = useRef<number>()
 
-  useEffect(() => {
-    setVisible(controlBarVisible)
-  }, [controlBarVisible, setVisible])
+  useEffect(
+    () => setVisible(controlBarVisible),
+    [controlBarVisible, setVisible],
+  )
 
   const clearTimer = useCallback(() => window.clearTimeout(timer.current), [])
 
