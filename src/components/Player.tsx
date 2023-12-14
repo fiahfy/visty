@@ -1,18 +1,12 @@
 import { Box, Fade, Typography } from '@mui/material'
-import {
-  MouseEvent,
-  WheelEvent,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from 'react'
+import { MouseEvent, useCallback, useEffect, useRef, useState } from 'react'
 import ControlBar from '~/components/ControlBar'
 import DroppableMask from '~/components/DroppableMask'
 import FlashIndicator from '~/components/FlashIndicator'
 import SeekBar from '~/components/SeekBar'
 import TitleBar from '~/components/TitleBar'
 import useDrop from '~/hooks/useDrop'
+import usePrevious from '~/hooks/usePrevious'
 import useTrafficLight from '~/hooks/useTrafficLight'
 import useVideo from '~/hooks/useVideo'
 
@@ -29,14 +23,53 @@ const Player = () => {
     x: number
     y: number
   }>()
+  const [position, setPosition] = useState<{ x: number; y: number }>()
 
   const wrapperRef = useRef<HTMLDivElement>(null)
   const timer = useRef<number>()
+
+  const previousZoom = usePrevious(zoom)
 
   useEffect(
     () => setVisible(controlBarVisible),
     [controlBarVisible, setVisible],
   )
+
+  useEffect(() => {
+    const wrapper = wrapperRef.current
+    if (!wrapper) {
+      return
+    }
+    const handleWheel = (e: WheelEvent) => {
+      if ((e.ctrlKey && !e.metaKey) || (!e.ctrlKey && e.metaKey)) {
+        e.preventDefault()
+        zoomBy(e.deltaY * 0.01)
+      }
+    }
+    wrapper.addEventListener('wheel', handleWheel, { passive: false })
+    return () => wrapper.removeEventListener('wheel', handleWheel)
+  }, [zoomBy])
+
+  useEffect(() => {
+    const wrapper = wrapperRef.current
+    if (!wrapper) {
+      return
+    }
+    if (!position || !previousZoom || !zoom) {
+      return
+    }
+    const left =
+      ((wrapper.scrollLeft + position.x) /
+        (previousZoom * wrapper.offsetWidth)) *
+        (zoom * wrapper.offsetWidth) -
+      position.x
+    const top =
+      ((wrapper.scrollTop + position.y) /
+        (previousZoom * wrapper.offsetHeight)) *
+        (zoom * wrapper.offsetHeight) -
+      position.y
+    wrapper.scrollTo({ left, top })
+  }, [position, previousZoom, zoom])
 
   const clearTimer = useCallback(() => window.clearTimeout(timer.current), [])
 
@@ -82,6 +115,7 @@ const Player = () => {
 
   const handleMouseMove = useCallback(
     (e: MouseEvent) => {
+      setPosition({ x: e.clientX, y: e.clientY })
       resetTimer(hovered)
       const wrapper = wrapperRef.current
       if (wrapper && dragOffset) {
@@ -111,15 +145,6 @@ const Player = () => {
     }
   }, [])
 
-  const handleWheel = useCallback(
-    (e: WheelEvent) => {
-      if ((e.ctrlKey && !e.metaKey) || (!e.ctrlKey && e.metaKey)) {
-        zoomBy(e.deltaY * 0.01)
-      }
-    },
-    [zoomBy],
-  )
-
   const handleMouseEnterBar = useCallback(() => {
     setHovered(true)
     resetTimer(true)
@@ -141,7 +166,6 @@ const Player = () => {
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
-        onWheel={handleWheel}
         ref={wrapperRef}
         sx={{
           cursor: dragOffset
