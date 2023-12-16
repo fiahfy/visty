@@ -7,7 +7,7 @@ import {
   selectViewModeOnOpen,
 } from '~/store/settings'
 import { newWindow, replaceState as replaceWindowState } from '~/store/window'
-import { set } from '~/store/windowIndex'
+import { setWindowIndex } from '~/store/windowIndex'
 
 type Props = { children: ReactNode }
 
@@ -27,8 +27,8 @@ export const StoreProvider = (props: Props) => {
         return
       }
       const newState = JSON.parse(e.newValue)
-      dispatch(replaceSettingsState(JSON.parse(newState.settings)))
-      dispatch(replaceWindowState(JSON.parse(newState.window)))
+      dispatch(replaceSettingsState({ state: JSON.parse(newState.settings) }))
+      dispatch(replaceWindowState({ state: JSON.parse(newState.window) }))
     }
 
     window.addEventListener('storage', handler)
@@ -42,8 +42,8 @@ export const StoreProvider = (props: Props) => {
       if (!data) {
         return
       }
-      const { index, params } = data
-      dispatch(set(index))
+      const { index: windowIndex, params } = data
+      dispatch(setWindowIndex({ windowIndex }))
       const file = params?.file
       if (file) {
         dispatch(newWindow(file))

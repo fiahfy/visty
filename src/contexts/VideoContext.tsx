@@ -264,8 +264,8 @@ export const VideoProvider = (props: Props) => {
       }
       const volume = Math.min(Math.max(0, value), 1)
       video.volume = volume
-      dispatch(setDefaultVolume(volume))
-      dispatch(setDefaultMuted(volume === 0))
+      dispatch(setDefaultVolume({ defaultVolume: volume }))
+      dispatch(setDefaultMuted({ defaultMuted: volume === 0 }))
     },
     [dispatch],
   )
@@ -277,7 +277,7 @@ export const VideoProvider = (props: Props) => {
     }
     const newAutoplay = !autoplay
     video.autoplay = newAutoplay
-    dispatch(setDefaultAutoplay(newAutoplay))
+    dispatch(setDefaultAutoplay({ defaultAutoplay: newAutoplay }))
   }, [autoplay, dispatch])
 
   const toggleFullscreen = useCallback(
@@ -292,7 +292,7 @@ export const VideoProvider = (props: Props) => {
     }
     const newLoop = !loop
     video.loop = newLoop
-    dispatch(setDefaultLoop(newLoop))
+    dispatch(setDefaultLoop({ defaultLoop: newLoop }))
   }, [dispatch, loop])
 
   const toggleMuted = useCallback(() => {
@@ -303,7 +303,7 @@ export const VideoProvider = (props: Props) => {
     const newMuted = !muted
     video.volume = newMuted ? 0 : defaultVolume
     setMuted(newMuted)
-    dispatch(setDefaultMuted(newMuted))
+    dispatch(setDefaultMuted({ defaultMuted: newMuted }))
     const action = newMuted ? 'mute' : 'unmute'
     triggerAction(action)
   }, [defaultVolume, dispatch, muted, triggerAction])

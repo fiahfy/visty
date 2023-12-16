@@ -25,20 +25,27 @@ export const settingsSlice = createSlice({
   name: 'settings',
   initialState,
   reducers: {
-    replaceState(_state, action: PayloadAction<State>) {
-      return action.payload
+    replaceState(_state, action: PayloadAction<{ state: State }>) {
+      return action.payload.state
     },
-    setDefaultAutoplay(state, action: PayloadAction<boolean>) {
-      return { ...state, defaultAutoplay: action.payload }
+    setDefaultAutoplay(
+      state,
+      action: PayloadAction<{ defaultAutoplay: boolean }>,
+    ) {
+      const { defaultAutoplay } = action.payload
+      return { ...state, defaultAutoplay }
     },
-    setDefaultLoop(state, action: PayloadAction<boolean>) {
-      return { ...state, defaultLoop: action.payload }
+    setDefaultLoop(state, action: PayloadAction<{ defaultLoop: boolean }>) {
+      const { defaultLoop } = action.payload
+      return { ...state, defaultLoop }
     },
-    setDefaultMuted(state, action: PayloadAction<boolean>) {
-      return { ...state, defaultMuted: action.payload }
+    setDefaultMuted(state, action: PayloadAction<{ defaultMuted: boolean }>) {
+      const { defaultMuted } = action.payload
+      return { ...state, defaultMuted }
     },
-    setDefaultVolume(state, action: PayloadAction<number>) {
-      return { ...state, defaultVolume: action.payload }
+    setDefaultVolume(state, action: PayloadAction<{ defaultVolume: number }>) {
+      const { defaultVolume } = action.payload
+      return { ...state, defaultVolume }
     },
     setViewModeOnOpen(
       state,
