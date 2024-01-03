@@ -48,10 +48,13 @@ export const { replaceState } = windowSlice.actions
 
 export default windowSlice.reducer
 
-export const selectCurrentWindow = (state: AppState) => {
-  const windowState = state.window[state.windowIndex]
-  return windowState ?? defaultWindowState
-}
+export const selectWindow = (state: AppState) => state.window
+
+export const selectCurrentWindow = createSelector(
+  selectWindow,
+  selectWindowIndex,
+  (window, windowIndex) => window[windowIndex] ?? defaultWindowState,
+)
 
 export const selectFile = createSelector(
   selectCurrentWindow,
