@@ -83,7 +83,7 @@ app.on('before-quit', () => {
 
 app.on('open-file', async (_event, path) => {
   await app.whenReady()
-  await createWindow(path)
+  createWindow(path)
 })
 
 app.on('open-url', async (_event, url) => {
