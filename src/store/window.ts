@@ -1,6 +1,6 @@
 import { PayloadAction, createSelector, createSlice } from '@reduxjs/toolkit'
 import { AppState, AppThunk } from '~/store'
-import { selectWindowIndex } from '~/store/windowIndex'
+import { selectWindowId } from '~/store/windowId'
 
 type File = { name: string; path: string; url: string }
 
@@ -9,14 +9,14 @@ type WindowState = {
 }
 
 type State = {
-  [index: number]: WindowState
+  [id: number]: WindowState
 }
+
+const initialState: State = {}
 
 const defaultWindowState: WindowState = {
   file: undefined,
 }
-
-const initialState: State = {}
 
 export const windowSlice = createSlice({
   name: 'window',
@@ -28,14 +28,14 @@ export const windowSlice = createSlice({
     newWindow(
       state,
       action: PayloadAction<{
-        index: number
+        id: number
         file: File
       }>,
     ) {
-      const { index, file } = action.payload
+      const { id, file } = action.payload
       return {
         ...state,
-        [index]: {
+        [id]: {
           ...defaultWindowState,
           file,
         },
@@ -52,8 +52,8 @@ export const selectWindow = (state: AppState) => state.window
 
 export const selectCurrentWindow = createSelector(
   selectWindow,
-  selectWindowIndex,
-  (window, windowIndex) => window[windowIndex] ?? defaultWindowState,
+  selectWindowId,
+  (window, windowId) => window[windowId] ?? defaultWindowState,
 )
 
 export const selectFile = createSelector(
@@ -65,11 +65,6 @@ export const newWindow =
   (file: File): AppThunk =>
   async (dispatch, getState) => {
     const { newWindow } = windowSlice.actions
-    const index = selectWindowIndex(getState())
-    dispatch(
-      newWindow({
-        index,
-        file,
-      }),
-    )
+    const id = selectWindowId(getState())
+    dispatch(newWindow({ id, file }))
   }

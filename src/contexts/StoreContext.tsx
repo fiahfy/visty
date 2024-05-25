@@ -7,7 +7,7 @@ import {
   selectViewModeOnOpen,
 } from '~/store/settings'
 import { newWindow, replaceState as replaceWindowState } from '~/store/window'
-import { setWindowIndex } from '~/store/windowIndex'
+import { setWindowId } from '~/store/windowId'
 
 type Props = { children: ReactNode }
 
@@ -42,8 +42,8 @@ export const StoreProvider = (props: Props) => {
       if (!data) {
         return
       }
-      const { index: windowIndex, params } = data
-      dispatch(setWindowIndex({ windowIndex }))
+      const { id, params } = data
+      dispatch(setWindowId({ windowId: id }))
       const file = params?.file
       if (file) {
         dispatch(newWindow(file))

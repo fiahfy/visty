@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 const audioExtensions = require('audio-extensions')
 const videoExtensions = require('video-extensions')
 

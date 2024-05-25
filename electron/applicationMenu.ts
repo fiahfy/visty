@@ -24,9 +24,7 @@ const send = (message: any) => {
   activeWindow?.webContents.send('sendMessage', message)
 }
 
-const registerApplicationMenu = (
-  createWindow: (filePath: string) => Promise<void>,
-) => {
+const registerApplicationMenu = (createWindow: (filePath: string) => void) => {
   const isMac = process.platform === 'darwin'
 
   let state: State = {
@@ -65,8 +63,8 @@ const registerApplicationMenu = (
             click: async () => {
               const { filePaths } = await dialog.showOpenDialog({
                 filters: [
-                  { extensions: audioExtensions, name: 'Audios' },
-                  { extensions: videoExtensions, name: 'Videos' },
+                  { extensions: [...audioExtensions], name: 'Audios' },
+                  { extensions: [...videoExtensions], name: 'Videos' },
                 ],
                 properties: ['openFile'],
               })

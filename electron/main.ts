@@ -49,13 +49,13 @@ const baseCreateWindow = (options: BrowserWindowConstructorOptions) => {
 
 const windowManager = createWindowManager(baseCreateWindow)
 
-const createWindow = async (filePath: string) => {
+const createWindow = (filePath: string) => {
   const file = {
     name: basename(filePath),
     path: filePath,
     url: pathToFileURL(filePath).href,
   }
-  await windowManager.create({ file })
+  windowManager.create({ file })
 }
 
 app.setAsDefaultProtocolClient('visty')
@@ -77,8 +77,8 @@ app.on('activate', () => {
   }
 })
 
-app.on('before-quit', async () => {
-  await windowManager.save()
+app.on('before-quit', () => {
+  windowManager.save()
 })
 
 app.on('open-file', async (_event, path) => {
@@ -91,14 +91,14 @@ app.on('open-url', async (_event, url) => {
   const u = new URL(url)
   if (u.hostname === 'open') {
     const path = u.searchParams.get('path') ?? ''
-    await createWindow(path)
+    createWindow(path)
   }
 })
 
-app.whenReady().then(async () => {
+app.whenReady().then(() => {
   registerApplicationMenu(createWindow)
   registerContextMenu()
   registerHandlers()
 
-  await windowManager.restore()
+  windowManager.restore()
 })
