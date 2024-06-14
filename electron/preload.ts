@@ -15,8 +15,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getPlaylistFile: (filePath: string) =>
     ipcRenderer.invoke('getPlaylistFile', filePath),
   openFile: (filePath: string) => ipcRenderer.invoke('openFile', filePath),
-  setContentSize: (size: { height: number; width: number }) =>
-    ipcRenderer.invoke('setContentSize', size),
   updateApplicationMenu: (params: ApplicationMenuParams) =>
     ipcRenderer.invoke('updateApplicationMenu', params),
   ...exposeContextMenuOperations(),

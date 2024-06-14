@@ -64,6 +64,8 @@ export const VideoContext = createContext<
       resetZoom: () => void
       seek: (value: number) => void
       seekTo: (direction: 'backward' | 'forward') => void
+      size: { height: number; width: number } | undefined
+      status: 'loading' | 'loaded' | 'error'
       toggleAutoplay: () => void
       toggleFullscreen: () => void
       toggleLoop: () => void
@@ -106,11 +108,18 @@ export const VideoProvider = (props: Props) => {
     next: undefined,
     previous: undefined,
   })
+  const [size, setSize] = useState<{ height: number; width: number }>()
   const [status, setStatus] = useState<'loading' | 'loaded' | 'error'>(
     'loading',
   )
   const [volume, setVolume] = useState(defaultVolume)
   const [zoom, setZoom] = useState(1)
+
+  const partialLoop = useMemo(() => !!loopRange, [loopRange])
+  const loopStartTime = useMemo(
+    () => (loopRange ? loopRange[0] : undefined),
+    [loopRange],
+  )
 
   const message = useMemo(() => {
     switch (status) {
@@ -122,11 +131,6 @@ export const VideoProvider = (props: Props) => {
         return undefined
     }
   }, [status])
-  const partialLoop = useMemo(() => !!loopRange, [loopRange])
-  const loopStartTime = useMemo(
-    () => (loopRange ? loopRange[0] : undefined),
-    [loopRange],
-  )
 
   const ref = useRef<HTMLVideoElement>(null)
 
@@ -148,13 +152,13 @@ export const VideoProvider = (props: Props) => {
 
     const handleLoadStart = () => setStatus('loading')
     const handleLoadedMetadata = async () => {
-      await window.electronAPI.setContentSize({
-        width: video.videoWidth,
-        height: video.videoHeight,
-      })
       video.loop = defaultLoop
       video.volume = defaultVolume
       video.autoplay = defaultAutoplay
+      setSize({
+        height: video.videoHeight,
+        width: video.videoWidth,
+      })
       setStatus('loaded')
     }
     const handleError = () => setStatus('error')
@@ -416,6 +420,8 @@ export const VideoProvider = (props: Props) => {
     resetZoom,
     seek,
     seekTo,
+    size,
+    status,
     toggleAutoplay,
     toggleFullscreen,
     toggleLoop,

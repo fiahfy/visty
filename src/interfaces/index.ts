@@ -18,7 +18,6 @@ export type IElectronAPI = {
   addMessageListener: (callback: (message: any) => void) => () => void
   getPlaylistFile: (filePath: string) => Promise<PlaylistFile>
   openFile: (filePath: string) => Promise<void>
-  setContentSize: (size: { height: number; width: number }) => Promise<void>
   updateApplicationMenu: (params: ApplicationMenuParams) => Promise<void>
 } & ContextMenuOperations &
   WindowOperations<{ file: File }>

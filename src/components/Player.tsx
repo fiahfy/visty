@@ -1,5 +1,12 @@
 import { Box, Fade, Typography } from '@mui/material'
-import { MouseEvent, useCallback, useEffect, useRef, useState } from 'react'
+import {
+  MouseEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import ControlBar from '~/components/ControlBar'
 import DroppableMask from '~/components/DroppableMask'
 import FlashIndicator from '~/components/FlashIndicator'
@@ -13,7 +20,16 @@ import useVideo from '~/hooks/useVideo'
 const Player = () => {
   const { setVisible, visible } = useTrafficLight()
 
-  const { file, message, ref, togglePaused, zoom, zoomBy } = useVideo()
+  const {
+    file,
+    message,
+    ref,
+    size: nativeSize,
+    status,
+    togglePaused,
+    zoom,
+    zoomBy,
+  } = useVideo()
 
   const { dropping, ...dropHandlers } = useDrop()
 
@@ -23,17 +39,52 @@ const Player = () => {
     x: number
     y: number
   }>()
+  const [wrapperSize, setWrapperSize] = useState<{
+    height: number
+    width: number
+  }>()
   const [position, setPosition] = useState<{ x: number; y: number }>()
 
   const wrapperRef = useRef<HTMLDivElement>(null)
   const timer = useRef<number>()
 
-  const previousZoom = usePrevious(zoom)
+  const size = useMemo(() => {
+    if (!nativeSize || !wrapperSize) {
+      return undefined
+    }
+    const { height, width } = nativeSize
+    const { height: wrapperHeight, width: wrapperWidth } = wrapperSize
+    const ratio =
+      Math.min(1, Math.min(wrapperHeight / height, wrapperWidth / width)) * zoom
+    return {
+      height: height * ratio,
+      width: width * ratio,
+    }
+  }, [nativeSize, wrapperSize, zoom])
+
+  const previousSize = usePrevious(size)
 
   useEffect(
     () => setVisible(controlBarVisible),
     [controlBarVisible, setVisible],
   )
+
+  useEffect(() => {
+    const wrapper = wrapperRef.current
+    if (!wrapper) {
+      return
+    }
+    const handleResize = (entries: ResizeObserverEntry[]) => {
+      const entry = entries[0]
+      if (entry) {
+        const { height, width } = entry.contentRect
+        setWrapperSize({ height, width })
+      }
+    }
+    const observer = new ResizeObserver(handleResize)
+    observer.observe(wrapper)
+    return () => observer.disconnect()
+  }, [])
 
   useEffect(() => {
     const wrapper = wrapperRef.current
@@ -55,21 +106,17 @@ const Player = () => {
     if (!wrapper) {
       return
     }
-    if (!position || !previousZoom || !zoom) {
+    if (!position || !previousSize || !size) {
       return
     }
     const left =
-      ((wrapper.scrollLeft + position.x) /
-        (previousZoom * wrapper.offsetWidth)) *
-        (zoom * wrapper.offsetWidth) -
+      ((wrapper.scrollLeft + position.x) / previousSize.width) * size.width -
       position.x
     const top =
-      ((wrapper.scrollTop + position.y) /
-        (previousZoom * wrapper.offsetHeight)) *
-        (zoom * wrapper.offsetHeight) -
+      ((wrapper.scrollTop + position.y) / previousSize.height) * size.height -
       position.y
     wrapper.scrollTo({ left, top })
-  }, [position, previousZoom, zoom])
+  }, [position, previousSize, size])
 
   const clearTimer = useCallback(() => window.clearTimeout(timer.current), [])
 
@@ -90,16 +137,6 @@ const Player = () => {
       resetTimer(hovered)
     }
   }, [hovered, resetTimer])
-
-  const handleClick = useCallback(
-    (e: MouseEvent) => {
-      if ((e.ctrlKey && !e.metaKey) || (!e.ctrlKey && e.metaKey)) {
-        return
-      }
-      togglePaused()
-    },
-    [togglePaused],
-  )
 
   const handleMouseDown = useCallback((e: MouseEvent) => {
     if ((e.ctrlKey && !e.metaKey) || (!e.ctrlKey && e.metaKey)) {
@@ -155,6 +192,16 @@ const Player = () => {
     resetTimer(false)
   }, [resetTimer])
 
+  const handleClick = useCallback(
+    (e: MouseEvent) => {
+      if ((e.ctrlKey && !e.metaKey) || (!e.ctrlKey && e.metaKey)) {
+        return
+      }
+      togglePaused()
+    },
+    [togglePaused],
+  )
+
   return (
     <Box
       onMouseEnter={handleMouseEnter}
@@ -168,12 +215,15 @@ const Player = () => {
         onMouseUp={handleMouseUp}
         ref={wrapperRef}
         sx={{
+          alignItems: 'safe center',
           cursor: dragOffset
             ? 'grabbing'
             : controlBarVisible
               ? undefined
               : 'none',
+          display: 'flex',
           height: '100%',
+          justifyContent: 'safe center',
           overflow: 'auto',
           width: '100%',
           '::-webkit-scrollbar': {
@@ -187,9 +237,9 @@ const Player = () => {
           src={file.url}
           style={{
             background: 'black',
-            display: 'block',
-            minHeight: '100%',
-            width: `${100 * zoom}%`,
+            display: status === 'loaded' ? 'block' : 'none',
+            pointerEvents: 'none',
+            ...(size ? { ...size } : {}),
           }}
         />
       </Box>
