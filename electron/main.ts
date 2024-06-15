@@ -6,7 +6,7 @@ import registerApplicationMenu from './applicationMenu'
 import registerContextMenu from './contextMenu'
 import registerHandlers from './handlers'
 
-const __dirname = dirname(fileURLToPath(import.meta.url))
+const dirPath = dirname(fileURLToPath(import.meta.url))
 
 // The built directory structure
 //
@@ -17,7 +17,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 // │ │ ├── main.js
 // │ │ └── preload.mjs
 // │
-process.env.APP_ROOT = join(__dirname, '..')
+process.env.APP_ROOT = join(dirPath, '..')
 
 // 🚧 Use ['ENV_NAME'] avoid vite:define plugin - Vite@2.x
 export const VITE_DEV_SERVER_URL = process.env['VITE_DEV_SERVER_URL']
@@ -35,7 +35,7 @@ const baseCreateWindow = (options: BrowserWindowConstructorOptions) => {
     minWidth: 400,
     titleBarStyle: process.platform === 'darwin' ? 'hidden' : 'default',
     webPreferences: {
-      preload: join(__dirname, 'preload.mjs'),
+      preload: join(dirPath, 'preload.mjs'),
       webSecurity: !VITE_DEV_SERVER_URL,
     },
   })
