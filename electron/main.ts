@@ -1,10 +1,12 @@
 import { createManager as createWindowManager } from '@fiahfy/electron-window'
 import { BrowserWindow, BrowserWindowConstructorOptions, app } from 'electron'
-import { basename, join } from 'node:path'
-import { pathToFileURL } from 'node:url'
+import { basename, dirname, join } from 'node:path'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 import registerApplicationMenu from './applicationMenu'
 import registerContextMenu from './contextMenu'
 import registerHandlers from './handlers'
+
+const __dirname = dirname(fileURLToPath(import.meta.url))
 
 // The built directory structure
 //
@@ -13,15 +15,18 @@ import registerHandlers from './handlers'
 // │ │
 // │ ├─┬ dist-electron
 // │ │ ├── main.js
-// │ │ └── preload.js
+// │ │ └── preload.mjs
 // │
-process.env.DIST = join(__dirname, '../dist')
-process.env.VITE_PUBLIC = app.isPackaged
-  ? process.env.DIST
-  : join(process.env.DIST, '../public')
+process.env.APP_ROOT = join(__dirname, '..')
 
 // 🚧 Use ['ENV_NAME'] avoid vite:define plugin - Vite@2.x
-const VITE_DEV_SERVER_URL = process.env['VITE_DEV_SERVER_URL']
+export const VITE_DEV_SERVER_URL = process.env['VITE_DEV_SERVER_URL']
+export const MAIN_DIST = join(process.env.APP_ROOT, 'dist-electron')
+export const RENDERER_DIST = join(process.env.APP_ROOT, 'dist')
+
+process.env.VITE_PUBLIC = VITE_DEV_SERVER_URL
+  ? join(process.env.APP_ROOT, 'public')
+  : RENDERER_DIST
 
 const baseCreateWindow = (options: BrowserWindowConstructorOptions) => {
   const browserWindow = new BrowserWindow({
@@ -30,7 +35,7 @@ const baseCreateWindow = (options: BrowserWindowConstructorOptions) => {
     minWidth: 400,
     titleBarStyle: process.platform === 'darwin' ? 'hidden' : 'default',
     webPreferences: {
-      preload: join(__dirname, 'preload.js'),
+      preload: join(__dirname, 'preload.mjs'),
       webSecurity: !VITE_DEV_SERVER_URL,
     },
   })
@@ -41,7 +46,7 @@ const baseCreateWindow = (options: BrowserWindowConstructorOptions) => {
       browserWindow.webContents.openDevTools()
     })
   } else {
-    browserWindow.loadFile(join(process.env.DIST, 'index.html'))
+    browserWindow.loadFile(join(RENDERER_DIST, 'index.html'))
   }
 
   return browserWindow
