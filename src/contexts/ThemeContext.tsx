@@ -1,8 +1,9 @@
-import { CssBaseline, Theme } from '@mui/material'
 import {
+  CssBaseline,
   ThemeProvider as MuiThemeProvider,
+  Theme,
   createTheme,
-} from '@mui/material/styles'
+} from '@mui/material'
 import { ReactNode, createContext } from 'react'
 
 export const ThemeContext = createContext<
