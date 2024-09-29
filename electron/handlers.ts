@@ -1,8 +1,8 @@
-import { type IpcMainInvokeEvent, ipcMain } from 'electron'
-import mime from 'mime'
 import { readdir } from 'node:fs/promises'
 import { basename, dirname, join } from 'node:path'
 import { pathToFileURL } from 'node:url'
+import { type IpcMainInvokeEvent, ipcMain } from 'electron'
+import mime from 'mime'
 
 type File = { name: string; path: string; url: string }
 
