@@ -1,13 +1,16 @@
 import {
   type ReactNode,
-  type RefObject,
-  createContext,
   useCallback,
   useEffect,
   useMemo,
   useRef,
   useState,
 } from 'react'
+import VideoContext, {
+  type Action,
+  type ActionCode,
+  type PlaylistFile,
+} from '~/contexts/VideoContext'
 import { useAppDispatch, useAppSelector } from '~/store'
 import {
   selectDefaultActualVolume,
@@ -20,71 +23,9 @@ import {
 } from '~/store/settings'
 import { selectFile } from '~/store/window'
 
-type File = { name: string; path: string; url: string }
-
-type PlaylistFile = {
-  next: File | undefined
-  previous: File | undefined
-}
-
-type Action =
-  | 'mute'
-  | 'nextTrack'
-  | 'pause'
-  | 'play'
-  | 'previousTrack'
-  | 'seekBackward'
-  | 'seekForward'
-  | 'unmute'
-type ActionCode = `${Action}:${string}`
-
-export const VideoContext = createContext<
-  | {
-      actionCode: ActionCode | undefined
-      autoplay: boolean
-      changeLoopRange: (value: [number, number]) => void
-      changePlaybackRate: (value: number) => void
-      changeVolume: (value: number) => void
-      currentTime: number
-      duration: number
-      file: File
-      fullscreen: boolean
-      loop: boolean
-      loopRange: [number, number] | undefined
-      message: string | undefined
-      muted: boolean
-      nextTrack: () => void
-      partialLoop: boolean
-      paused: boolean
-      pictureInPicture: boolean
-      playbackRate: number
-      playlistFile: PlaylistFile
-      previousTrack: () => void
-      ref: RefObject<HTMLVideoElement>
-      resetZoom: () => void
-      seek: (value: number) => void
-      seekTo: (direction: 'backward' | 'forward') => void
-      size: { height: number; width: number } | undefined
-      status: 'loading' | 'loaded' | 'error'
-      toggleAutoplay: () => void
-      toggleFullscreen: () => void
-      toggleLoop: () => void
-      toggleMuted: () => void
-      togglePartialLoop: () => void
-      togglePaused: () => void
-      togglePictureInPicture: () => void
-      volume: number
-      zoom: number
-      zoomBy: (value: number) => void
-      zoomIn: () => void
-      zoomOut: () => void
-    }
-  | undefined
->(undefined)
-
 type Props = { children: ReactNode }
 
-export const VideoProvider = (props: Props) => {
+const VideoProvider = (props: Props) => {
   const { children } = props
 
   const defaultAutoplay = useAppSelector(selectDefaultAutoplay)
@@ -438,3 +379,5 @@ export const VideoProvider = (props: Props) => {
 
   return <VideoContext.Provider value={value}>{children}</VideoContext.Provider>
 }
+
+export default VideoProvider

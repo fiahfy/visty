@@ -1,21 +1,14 @@
 import {
   CssBaseline,
   ThemeProvider as MuiThemeProvider,
-  type Theme,
   createTheme,
 } from '@mui/material'
-import { type ReactNode, createContext } from 'react'
-
-export const ThemeContext = createContext<
-  | {
-      theme: Theme
-    }
-  | undefined
->(undefined)
+import type { ReactNode } from 'react'
+import ThemeContext from '~/contexts/ThemeContext'
 
 type Props = { children: ReactNode }
 
-export const ThemeProvider = (props: Props) => {
+const ThemeProvider = (props: Props) => {
   const { children } = props
 
   const theme = createTheme({
@@ -45,3 +38,5 @@ export const ThemeProvider = (props: Props) => {
     </ThemeContext.Provider>
   )
 }
+
+export default ThemeProvider

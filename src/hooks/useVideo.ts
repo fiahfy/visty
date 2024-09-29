@@ -1,5 +1,5 @@
 import { useContext } from 'react'
-import { VideoContext } from '~/contexts/VideoContext'
+import VideoContext from '~/contexts/VideoContext'
 
 const useVideo = () => {
   const context = useContext(VideoContext)

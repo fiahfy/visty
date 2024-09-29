@@ -1,22 +1,9 @@
-import {
-  type ReactNode,
-  createContext,
-  useCallback,
-  useEffect,
-  useState,
-} from 'react'
-
-export const TrafficLightContext = createContext<
-  | {
-      setVisible: (visible: boolean) => void
-      visible: boolean
-    }
-  | undefined
->(undefined)
+import { type ReactNode, useCallback, useEffect, useState } from 'react'
+import TrafficLightContext from '~/contexts/TrafficLightContext'
 
 type Props = { children: ReactNode }
 
-export const TrafficLightProvider = (props: Props) => {
+const TrafficLightProvider = (props: Props) => {
   const { children } = props
 
   const [visibility, setVisibility] = useState(false)
@@ -39,3 +26,5 @@ export const TrafficLightProvider = (props: Props) => {
     </TrafficLightContext.Provider>
   )
 }
+
+export default TrafficLightProvider
