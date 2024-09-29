@@ -231,6 +231,7 @@ const Player = () => {
         }}
         {...dropHandlers}
       >
+        {/* biome-ignore lint/a11y/useMediaCaption: <explanation> */}
         <video
           ref={ref}
           src={file.url}

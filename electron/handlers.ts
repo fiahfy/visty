@@ -19,17 +19,14 @@ const getMediaFiles = async (directoryPath: string) => {
   return dirents
     .reduce((acc, dirent) => {
       const path = join(directoryPath, dirent.name)
-      if (!isMediaFile(path)) {
-        return acc
-      }
-      return [
-        ...acc,
-        {
+      if (isMediaFile(path)) {
+        acc.push({
           name: dirent.name.normalize('NFC'),
           path,
           url: pathToFileURL(path).href,
-        },
-      ]
+        })
+      }
+      return acc
     }, [] as File[])
     .sort((a, b) => a.name.localeCompare(b.name))
 }

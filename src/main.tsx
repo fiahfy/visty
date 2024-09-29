@@ -10,6 +10,7 @@ import { ThemeProvider } from '~/contexts/ThemeContext'
 import { TrafficLightProvider } from '~/contexts/TrafficLightContext'
 import { VideoProvider } from '~/contexts/VideoContext'
 
+// biome-ignore lint/style/noNonNullAssertion: <explanation>
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <StoreProvider>

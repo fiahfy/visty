@@ -28,6 +28,7 @@ const useDrop = () => {
     e.stopPropagation()
     setEnterCount(0)
     const paths = Array.from(e.dataTransfer.files).map(
+      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
       (file) => (file as any).path,
     ) as string[]
     const path = paths[0]
