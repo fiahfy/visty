@@ -18,7 +18,6 @@ type State = {
 
 export type ApplicationMenuParams = Partial<State>
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const send = (message: any) => {
   const activeWindow = BrowserWindow.getFocusedWindow()
   activeWindow?.webContents.send('sendMessage', message)

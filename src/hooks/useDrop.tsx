@@ -28,7 +28,6 @@ const useDrop = () => {
     e.stopPropagation()
     setEnterCount(0)
     const paths = Array.from(e.dataTransfer.files).map(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (file) => (file as any).path,
     ) as string[]
     const path = paths[0]

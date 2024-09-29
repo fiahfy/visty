@@ -14,7 +14,6 @@ type PlaylistFile = {
 }
 
 export type IElectronAPI = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   addMessageListener: (callback: (message: any) => void) => () => void
   getPlaylistFile: (filePath: string) => Promise<PlaylistFile>
   openFile: (filePath: string) => Promise<void>
@@ -22,5 +21,4 @@ export type IElectronAPI = {
 } & ContextMenuOperations &
   WindowOperations<{ file: File }>
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type ApplicationMenuParams = any
