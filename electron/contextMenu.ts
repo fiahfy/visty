@@ -1,5 +1,5 @@
-import { ActionCreators, register } from '@fiahfy/electron-context-menu'
-import { IpcMainInvokeEvent } from 'electron'
+import { type ActionCreators, register } from '@fiahfy/electron-context-menu'
+import type { IpcMainInvokeEvent } from 'electron'
 
 const send = (event: IpcMainInvokeEvent, message: any) =>
   event.sender.send('sendMessage', message)

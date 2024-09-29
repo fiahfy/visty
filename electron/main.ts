@@ -1,5 +1,9 @@
 import { createManager as createWindowManager } from '@fiahfy/electron-window'
-import { BrowserWindow, BrowserWindowConstructorOptions, app } from 'electron'
+import {
+  BrowserWindow,
+  type BrowserWindowConstructorOptions,
+  app,
+} from 'electron'
 import { basename, dirname, join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import registerApplicationMenu from './applicationMenu'
@@ -20,7 +24,7 @@ const dirPath = dirname(fileURLToPath(import.meta.url))
 process.env.APP_ROOT = join(dirPath, '..')
 
 // 🚧 Use ['ENV_NAME'] avoid vite:define plugin - Vite@2.x
-export const VITE_DEV_SERVER_URL = process.env['VITE_DEV_SERVER_URL']
+export const VITE_DEV_SERVER_URL = process.env.VITE_DEV_SERVER_URL
 export const MAIN_DIST = join(process.env.APP_ROOT, 'dist-electron')
 export const RENDERER_DIST = join(process.env.APP_ROOT, 'dist')
 

@@ -1,9 +1,9 @@
 import audioExtensions from 'audio-extensions'
 import {
   BrowserWindow,
-  IpcMainInvokeEvent,
+  type IpcMainInvokeEvent,
   Menu,
-  MenuItemConstructorOptions,
+  type MenuItemConstructorOptions,
   app,
   dialog,
   ipcMain,

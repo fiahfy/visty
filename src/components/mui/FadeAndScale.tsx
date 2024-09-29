@@ -1,4 +1,4 @@
-import { ReactNode, useRef } from 'react'
+import { type ReactNode, useRef } from 'react'
 import { Transition } from 'react-transition-group'
 
 type Props = { children: ReactNode; in: boolean; timeout: number }

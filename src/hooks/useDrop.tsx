@@ -1,4 +1,4 @@
-import { DragEvent, useCallback, useMemo, useState } from 'react'
+import { type DragEvent, useCallback, useMemo, useState } from 'react'
 
 const useDrop = () => {
   const [enterCount, setEnterCount] = useState(0)

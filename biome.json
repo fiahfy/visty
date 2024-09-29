@@ -5,12 +5,6 @@
     {
       "include": ["**"],
       "ignore": ["biome.json"],
-      "linter": {
-        "enabled": false
-      },
-      "formatter": {
-        "enabled": false
-      },
       "organizeImports": {
         "enabled": false
       }

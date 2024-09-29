@@ -1,6 +1,6 @@
 import { Box, Slider } from '@mui/material'
 import {
-  MouseEvent,
+  type MouseEvent,
   useCallback,
   useEffect,
   useMemo,

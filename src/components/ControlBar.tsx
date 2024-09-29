@@ -66,11 +66,11 @@ const ControlBar = () => {
   const VolumeIcon = useMemo(() => {
     if (volumeValue > 0.5) {
       return VolumeUpIcon
-    } else if (volumeValue > 0) {
-      return VolumeDownIcon
-    } else {
-      return VolumeOffIcon
     }
+    if (volumeValue > 0) {
+      return VolumeDownIcon
+    }
+    return VolumeOffIcon
   }, [volumeValue])
 
   const FullscreenIcon = useMemo(

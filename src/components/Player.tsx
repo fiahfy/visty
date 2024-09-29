@@ -1,6 +1,6 @@
 import { Box, Fade, Typography } from '@mui/material'
 import {
-  MouseEvent,
+  type MouseEvent,
   useCallback,
   useEffect,
   useMemo,
