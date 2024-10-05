@@ -27,15 +27,11 @@ const useDrop = () => {
     e.preventDefault()
     e.stopPropagation()
     setEnterCount(0)
-    const paths = Array.from(e.dataTransfer.files).map(
-      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-      (file) => (file as any).path,
-    ) as string[]
-    const path = paths[0]
-    if (!path) {
+    const file = e.dataTransfer.files.item(0)
+    if (!file) {
       return
     }
-    window.electronAPI.openFile(path)
+    window.electronAPI.openFile(file)
   }, [])
 
   return {

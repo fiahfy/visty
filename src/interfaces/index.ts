@@ -17,7 +17,8 @@ export type IElectronAPI = {
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   addMessageListener: (callback: (message: any) => void) => () => void
   getPlaylistFile: (filePath: string) => Promise<PlaylistFile>
-  openFile: (filePath: string) => Promise<void>
+  openFile: (file: globalThis.File) => Promise<void>
+  openFilePath: (filePath: string) => Promise<void>
   updateApplicationMenu: (params: ApplicationMenuParams) => Promise<void>
 } & ContextMenuOperations &
   WindowOperations<{ file: File }>
