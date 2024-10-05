@@ -87,15 +87,8 @@ const VideoProvider = (props: Props) => {
       return
     }
 
-    video.loop = defaultLoop
-    video.volume = defaultVolume
-    video.autoplay = defaultAutoplay
-
     const handleLoadStart = () => setStatus('loading')
     const handleLoadedMetadata = async () => {
-      video.loop = defaultLoop
-      video.volume = defaultVolume
-      video.autoplay = defaultAutoplay
       setSize({
         height: video.videoHeight,
         width: video.videoWidth,
@@ -123,7 +116,18 @@ const VideoProvider = (props: Props) => {
         handleLeavePictureInPicture,
       )
     }
-  }, [defaultAutoplay, defaultLoop, defaultVolume])
+  }, [])
+
+  useEffect(() => {
+    const video = ref.current
+    if (!video) {
+      return
+    }
+
+    video.loop = loop
+    video.volume = volume
+    video.autoplay = autoplay
+  }, [autoplay, loop, volume])
 
   useEffect(() => {
     const video = ref.current
@@ -323,7 +327,7 @@ const VideoProvider = (props: Props) => {
   const previousTrack = useCallback(() => {
     const path = playlistFile.previous?.path
     if (path) {
-      window.electronAPI.openFile(path)
+      window.electronAPI.openFilePath(path)
       triggerAction('previousTrack')
     }
   }, [playlistFile.previous?.path, triggerAction])
@@ -331,7 +335,7 @@ const VideoProvider = (props: Props) => {
   const nextTrack = useCallback(() => {
     const path = playlistFile.next?.path
     if (path) {
-      window.electronAPI.openFile(path)
+      window.electronAPI.openFilePath(path)
       triggerAction('nextTrack')
     }
   }, [playlistFile.next?.path, triggerAction])
