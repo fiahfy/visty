@@ -63,8 +63,10 @@ const registerApplicationMenu = (createWindow: (filePath: string) => void) => {
             click: async () => {
               const { filePaths } = await dialog.showOpenDialog({
                 filters: [
-                  { extensions: [...audioExtensions], name: 'Audios' },
-                  { extensions: [...videoExtensions], name: 'Videos' },
+                  {
+                    extensions: [...audioExtensions, ...videoExtensions],
+                    name: 'Audios and Videos',
+                  },
                 ],
                 properties: ['openFile'],
               })
