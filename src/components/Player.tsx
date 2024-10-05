@@ -22,6 +22,7 @@ const Player = () => {
 
   const {
     file,
+    fullscreen,
     message,
     ref,
     size: nativeSize,
@@ -64,8 +65,8 @@ const Player = () => {
   const previousSize = usePrevious(size)
 
   useEffect(
-    () => setVisible(controlBarVisible),
-    [controlBarVisible, setVisible],
+    () => setVisible(fullscreen || controlBarVisible),
+    [controlBarVisible, setVisible, fullscreen],
   )
 
   useEffect(() => {
