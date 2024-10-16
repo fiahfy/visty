@@ -53,6 +53,7 @@ const VideoProvider = (props: Props) => {
   const [status, setStatus] = useState<'loading' | 'loaded' | 'error'>(
     'loading',
   )
+  const [storedVolume, setStoredVolume] = useState(defaultVolume)
   const [volume, setVolume] = useState(defaultVolume)
   const [zoom, setZoom] = useState(1)
 
@@ -213,6 +214,7 @@ const VideoProvider = (props: Props) => {
       }
       const volume = Math.min(Math.max(0, value), 1)
       video.volume = volume
+      setStoredVolume(volume)
       dispatch(setDefaultVolume({ defaultVolume: volume }))
       dispatch(setDefaultMuted({ defaultMuted: volume === 0 }))
     },
@@ -250,12 +252,12 @@ const VideoProvider = (props: Props) => {
       return
     }
     const newMuted = !muted
-    video.volume = newMuted ? 0 : defaultVolume
+    video.volume = newMuted ? 0 : storedVolume
     setMuted(newMuted)
     dispatch(setDefaultMuted({ defaultMuted: newMuted }))
     const action = newMuted ? 'mute' : 'unmute'
     triggerAction(action)
-  }, [defaultVolume, dispatch, muted, triggerAction])
+  }, [dispatch, muted, storedVolume, triggerAction])
 
   const togglePaused = useCallback(() => {
     const video = ref.current
