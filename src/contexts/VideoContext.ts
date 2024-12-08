@@ -41,7 +41,7 @@ const VideoContext = createContext<
       playbackRate: number
       playlistFile: PlaylistFile
       previousTrack: () => void
-      ref: RefObject<HTMLVideoElement>
+      ref: RefObject<HTMLVideoElement | null>
       resetZoom: () => void
       seek: (value: number) => void
       seekTo: (direction: 'backward' | 'forward') => void
