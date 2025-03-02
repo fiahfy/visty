@@ -44,7 +44,6 @@ const ControlBar = () => {
     duration,
     fullscreen,
     loop,
-    muted,
     nextTrack,
     partialLoop,
     paused,
@@ -59,19 +58,19 @@ const ControlBar = () => {
     volume,
   } = useVideo()
 
-  const volumeValue = useMemo(() => (muted ? 0 : volume), [muted, volume])
+  const muted = useMemo(() => volume === 0, [volume])
 
   const PlayIcon = useMemo(() => (paused ? PlayArrowIcon : PauseIcon), [paused])
 
   const VolumeIcon = useMemo(() => {
-    if (volumeValue > 0.5) {
+    if (volume > 0.5) {
       return VolumeUpIcon
     }
-    if (volumeValue > 0) {
+    if (volume > 0) {
       return VolumeDownIcon
     }
     return VolumeOffIcon
-  }, [volumeValue])
+  }, [volume])
 
   const FullscreenIcon = useMemo(
     () => (fullscreen ? FullscreenExitIcon : FullscreenEnterIcon),
@@ -188,7 +187,7 @@ const ControlBar = () => {
               },
             },
           }}
-          value={volumeValue}
+          value={volume}
         />
         <Typography
           noWrap

@@ -33,7 +33,6 @@ const VideoContext = createContext<
       loop: boolean
       loopRange: [number, number] | undefined
       message: string | undefined
-      muted: boolean
       nextTrack: () => void
       partialLoop: boolean
       paused: boolean

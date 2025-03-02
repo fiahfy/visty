@@ -41,7 +41,6 @@ const VideoProvider = (props: Props) => {
   const [fullscreen, setFullscreen] = useState(false)
   const [loop, setLoop] = useState(defaultLoop)
   const [loopRange, setLoopRange] = useState<[number, number]>()
-  const [muted, setMuted] = useState(false)
   const [paused, setPaused] = useState(true)
   const [pictureInPicture, setPictureInPicture] = useState(false)
   const [playbackRate, setPlaybackRate] = useState(1)
@@ -251,13 +250,12 @@ const VideoProvider = (props: Props) => {
     if (!video) {
       return
     }
-    const newMuted = !muted
-    video.volume = newMuted ? 0 : storedVolume
-    setMuted(newMuted)
-    dispatch(setDefaultMuted({ defaultMuted: newMuted }))
-    const action = newMuted ? 'mute' : 'unmute'
+    const muted = volume !== 0
+    video.volume = muted ? 0 : storedVolume
+    dispatch(setDefaultMuted({ defaultMuted: muted }))
+    const action = muted ? 'mute' : 'unmute'
     triggerAction(action)
-  }, [dispatch, muted, storedVolume, triggerAction])
+  }, [dispatch, storedVolume, triggerAction, volume])
 
   const togglePaused = useCallback(() => {
     const video = ref.current
@@ -355,7 +353,6 @@ const VideoProvider = (props: Props) => {
     loop,
     loopRange,
     message,
-    muted,
     nextTrack,
     partialLoop,
     paused,
