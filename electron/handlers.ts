@@ -1,7 +1,7 @@
 import { readdir } from 'node:fs/promises'
 import { basename, dirname, join } from 'node:path'
 import { pathToFileURL } from 'node:url'
-import { type IpcMainInvokeEvent, ipcMain } from 'electron'
+import { type IpcMainInvokeEvent, ipcMain, screen } from 'electron'
 import mime from 'mime'
 
 type File = { name: string; path: string; url: string }
@@ -32,6 +32,9 @@ const getMediaFiles = async (directoryPath: string) => {
 }
 
 const registerHandlers = () => {
+  ipcMain.handle('getCursorPosition', (_event: IpcMainInvokeEvent) =>
+    screen.getCursorScreenPoint(),
+  )
   ipcMain.handle(
     'getPlaylistFile',
     async (_event: IpcMainInvokeEvent, filePath: string) => {

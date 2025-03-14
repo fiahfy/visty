@@ -17,6 +17,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.on('sendMessage', listener)
     return () => ipcRenderer.off('sendMessage', listener)
   },
+  getCursorPosition: () => ipcRenderer.invoke('getCursorPosition'),
   getPlaylistFile: (filePath: string) =>
     ipcRenderer.invoke('getPlaylistFile', filePath),
   openFile: (file: File) =>

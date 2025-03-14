@@ -16,6 +16,7 @@ type PlaylistFile = {
 export type IElectronAPI = {
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   addMessageListener: (callback: (message: any) => void) => () => void
+  getCursorPosition: () => Promise<{ x: number; y: number }>
   getPlaylistFile: (filePath: string) => Promise<PlaylistFile>
   openFile: (file: globalThis.File) => Promise<void>
   openFilePath: (filePath: string) => Promise<void>

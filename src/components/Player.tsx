@@ -118,6 +118,33 @@ const Player = () => {
     wrapper.scrollTo({ left, top })
   }, [position, previousSize, size])
 
+  useEffect(() => {
+    let id: number
+
+    const callback = async () => {
+      const { x, y } = await window.electronAPI.getCursorPosition()
+
+      const left = window.screenX
+      const right = left + window.innerWidth
+      const top = window.screenY
+      const bottom = top + window.innerHeight
+
+      if (left <= x && x <= right && top <= y && y <= bottom) {
+        // noop
+      } else {
+        setControlBarVisible(false)
+      }
+
+      id = requestAnimationFrame(callback)
+    }
+
+    callback()
+
+    return () => {
+      window.cancelAnimationFrame(id)
+    }
+  }, [])
+
   const clearTimer = useCallback(() => window.clearTimeout(timer.current), [])
 
   const resetTimer = useCallback(
@@ -165,23 +192,6 @@ const Player = () => {
 
   const handleMouseUp = useCallback(() => setDragOffset(undefined), [])
 
-  const handleMouseEnter = useCallback(
-    () => resetTimer(hovered),
-    [hovered, resetTimer],
-  )
-
-  const handleMouseLeave = useCallback((e: MouseEvent) => {
-    if (
-      e.clientX < 0 ||
-      e.clientX > window.innerWidth ||
-      e.clientY < 0 ||
-      e.clientY > window.innerHeight
-    ) {
-      setDragOffset(undefined)
-      setControlBarVisible(false)
-    }
-  }, [])
-
   const handleMouseEnterBar = useCallback(() => {
     setHovered(true)
     resetTimer(true)
@@ -203,11 +213,7 @@ const Player = () => {
   )
 
   return (
-    <Box
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      sx={{ height: '100%', width: '100%' }}
-    >
+    <Box sx={{ height: '100%', width: '100%' }}>
       <Box
         onClick={handleClick}
         onMouseDown={handleMouseDown}
@@ -285,7 +291,10 @@ const Player = () => {
         </Box>
         <Fade in={visible}>
           <Box sx={{ pointerEvents: 'auto' }}>
-            <TitleBar />
+            <TitleBar
+              onMouseEnter={handleMouseEnterBar}
+              onMouseLeave={handleMouseLeaveBar}
+            />
           </Box>
         </Fade>
       </Box>
