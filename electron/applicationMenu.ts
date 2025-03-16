@@ -21,7 +21,7 @@ export type ApplicationMenuParams = Partial<State>
 // biome-ignore lint/suspicious/noExplicitAny: <explanation>
 const send = (message: any) => {
   const activeWindow = BrowserWindow.getFocusedWindow()
-  activeWindow?.webContents.send('sendMessage', message)
+  activeWindow?.webContents.send('onMessage', message)
 }
 
 const registerApplicationMenu = (createWindow: (filePath: string) => void) => {

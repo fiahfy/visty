@@ -3,7 +3,7 @@ import type { IpcMainInvokeEvent } from 'electron'
 
 // biome-ignore lint/suspicious/noExplicitAny: <explanation>
 const send = (event: IpcMainInvokeEvent, message: any) =>
-  event.sender.send('sendMessage', message)
+  event.sender.send('onMessage', message)
 
 const registerContextMenu = () => {
   const actionCreators: ActionCreators = {

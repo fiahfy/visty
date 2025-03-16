@@ -76,8 +76,7 @@ const VideoProvider = (props: Props) => {
   const ref = useRef<HTMLVideoElement>(null)
 
   useEffect(() => {
-    const removeListener =
-      window.electronAPI.addFullscreenListener(setFullscreen)
+    const removeListener = window.electronAPI.onFullscreenChange(setFullscreen)
     return () => removeListener()
   }, [])
 

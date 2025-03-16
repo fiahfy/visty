@@ -42,7 +42,7 @@ const App = () => {
   useTitle(file.name)
 
   useEffect(() => {
-    const removeListener = window.electronAPI.addMessageListener((message) => {
+    const removeListener = window.electronAPI.onMessage((message) => {
       const { type, data } = message
       switch (type) {
         case 'changeFile':
@@ -94,7 +94,7 @@ const App = () => {
   }, [loop, partialLoop])
 
   useEffect(() => {
-    const handler = async (e: KeyboardEvent) => {
+    const handler = (e: KeyboardEvent) => {
       switch (e.key) {
         case 'ArrowLeft':
           e.preventDefault()
@@ -111,12 +111,12 @@ const App = () => {
         case 'Escape':
           e.preventDefault()
           if (shouldCloseWindowOnEscapeKey) {
-            return await window.electronAPI.closeWindow()
+            return window.electronAPI.close()
           }
-          return await window.electronAPI.exitFullscreen()
+          return window.electronAPI.exitFullscreen()
         case 'f':
           e.preventDefault()
-          return await window.electronAPI.toggleFullscreen()
+          return window.electronAPI.toggleFullscreen()
         case 'l':
           e.preventDefault()
           return toggleLoop()

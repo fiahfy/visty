@@ -64,7 +64,7 @@ const registerHandlers = () => {
       path: filePath,
       url: pathToFileURL(filePath).href,
     }
-    event.sender.send('sendMessage', { type: 'changeFile', data: { file } })
+    event.sender.send('onMessage', { type: 'changeFile', data: { file } })
   })
 }
 
