@@ -38,7 +38,7 @@ const registerContextMenu = () => {
         checked: playbackRate === value,
         click: () =>
           send(event, { type: 'changePlaybackRate', data: { value } }),
-        type: 'checkbox',
+        type: 'radio',
       })),
     }),
     loop: (event, _params, { checked }) => ({
