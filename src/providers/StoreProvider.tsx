@@ -7,7 +7,7 @@ import {
   selectViewModeOnOpen,
 } from '~/store/settings'
 import { newWindow, replaceState as replaceWindowState } from '~/store/window'
-import { setWindowId } from '~/store/windowId'
+import { setWindowId } from '~/store/window-id'
 
 type Props = { children: ReactNode }
 

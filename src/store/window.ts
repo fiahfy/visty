@@ -4,7 +4,7 @@ import {
   createSlice,
 } from '@reduxjs/toolkit'
 import type { AppState, AppThunk } from '~/store'
-import { selectWindowId } from '~/store/windowId'
+import { selectWindowId } from '~/store/window-id'
 
 type File = { name: string; path: string; url: string }
 

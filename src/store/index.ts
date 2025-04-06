@@ -23,7 +23,7 @@ import {
 import storage from 'redux-persist/lib/storage'
 import settingsReducer from '~/store/settings'
 import windowReducer from '~/store/window'
-import windowIdReducer from '~/store/windowId'
+import windowIdReducer from '~/store/window-id'
 
 const reducers = combineReducers({
   settings: settingsReducer,
