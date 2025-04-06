@@ -6,8 +6,8 @@ import {
   type BrowserWindowConstructorOptions,
   app,
 } from 'electron'
-import registerApplicationMenu from './applicationMenu'
-import registerContextMenu from './contextMenu'
+import registerApplicationMenu from './application-menu'
+import registerContextMenu from './context-menu'
 import registerHandlers from './handlers'
 
 const dirPath = dirname(fileURLToPath(import.meta.url))

@@ -6,7 +6,7 @@ import {
   ipcRenderer,
   webUtils,
 } from 'electron'
-import type { ApplicationMenuParams } from './applicationMenu'
+import type { ApplicationMenuParams } from './application-menu'
 
 contextBridge.exposeInMainWorld('electronAPI', {
   getCursorPosition: () => ipcRenderer.invoke('getCursorPosition'),

@@ -27,7 +27,7 @@ import {
   selectShouldCloseWindowOnEscapeKey,
   selectViewModeOnOpen,
 } from '~/store/settings'
-import { createContextMenuHandler } from '~/utils/contextMenu'
+import { createContextMenuHandler } from '~/utils/context-menu'
 import { formatDuration } from '~/utils/formatter'
 
 const ControlBar = () => {

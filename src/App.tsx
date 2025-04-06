@@ -11,7 +11,7 @@ import {
   toggleShouldCloseWindowOnEscapeKey,
 } from '~/store/settings'
 import { newWindow } from '~/store/window'
-import { createContextMenuHandler } from '~/utils/contextMenu'
+import { createContextMenuHandler } from '~/utils/context-menu'
 
 const App = () => {
   const shouldCloseWindowOnEscapeKey = useAppSelector(
