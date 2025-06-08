@@ -6,31 +6,12 @@ import {
   type BrowserWindowConstructorOptions,
   app,
 } from 'electron'
+import started from 'electron-squirrel-startup'
 import registerApplicationMenu from './application-menu'
 import registerContextMenu from './context-menu'
 import registerHandlers from './handlers'
 
 const dirPath = dirname(fileURLToPath(import.meta.url))
-
-// The built directory structure
-//
-// ├─┬─┬ dist
-// │ │ └── index.html
-// │ │
-// │ ├─┬ dist-electron
-// │ │ ├── main.js
-// │ │ └── preload.mjs
-// │
-process.env.APP_ROOT = join(dirPath, '..')
-
-// 🚧 Use ['ENV_NAME'] avoid vite:define plugin - Vite@2.x
-export const VITE_DEV_SERVER_URL = process.env.VITE_DEV_SERVER_URL
-export const MAIN_DIST = join(process.env.APP_ROOT, 'dist-electron')
-export const RENDERER_DIST = join(process.env.APP_ROOT, 'dist')
-
-process.env.VITE_PUBLIC = VITE_DEV_SERVER_URL
-  ? join(process.env.APP_ROOT, 'public')
-  : RENDERER_DIST
 
 const baseCreateWindow = (options: BrowserWindowConstructorOptions) => {
   const browserWindow = new BrowserWindow({
@@ -39,18 +20,20 @@ const baseCreateWindow = (options: BrowserWindowConstructorOptions) => {
     minWidth: 400,
     titleBarStyle: process.platform === 'darwin' ? 'hidden' : 'default',
     webPreferences: {
-      preload: join(dirPath, 'preload.mjs'),
-      webSecurity: !VITE_DEV_SERVER_URL,
+      preload: join(dirPath, 'preload.js'),
+      webSecurity: !MAIN_WINDOW_VITE_DEV_SERVER_URL,
     },
   })
 
-  if (VITE_DEV_SERVER_URL) {
-    browserWindow.loadURL(VITE_DEV_SERVER_URL)
+  if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
+    browserWindow.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL)
     browserWindow.on('ready-to-show', () => {
       browserWindow.webContents.openDevTools()
     })
   } else {
-    browserWindow.loadFile(join(RENDERER_DIST, 'index.html'))
+    browserWindow.loadFile(
+      join(dirPath, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`),
+    )
   }
 
   return browserWindow
@@ -68,6 +51,11 @@ const createWindow = (filePath: string) => {
 }
 
 app.setAsDefaultProtocolClient('visty')
+
+// Handle creating/removing shortcuts on Windows when installing/uninstalling.
+if (started) {
+  app.quit()
+}
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
