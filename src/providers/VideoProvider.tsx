@@ -43,10 +43,6 @@ const useStereoPanner = (
 
     audioContextRef.current = audioContext
     stereoPannerRef.current = stereoPanner
-
-    return () => {
-      audioContextRef.current?.close()
-    }
   })
 
   return stereoPannerRef
