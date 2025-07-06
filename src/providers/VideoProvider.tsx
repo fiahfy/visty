@@ -23,6 +23,35 @@ import {
 } from '~/store/settings'
 import { selectFile } from '~/store/window'
 
+const useStereoPanner = (
+  videoRef: React.RefObject<HTMLVideoElement | null>,
+) => {
+  const audioContextRef = useRef<AudioContext>(null)
+  const stereoPannerRef = useRef<StereoPannerNode>(null)
+
+  useEffect(() => {
+    if (!videoRef.current || audioContextRef.current) {
+      return
+    }
+
+    const audioContext = new AudioContext()
+    const source = audioContext.createMediaElementSource(videoRef.current)
+    const stereoPanner = audioContext.createStereoPanner()
+
+    source.connect(stereoPanner)
+    stereoPanner.connect(audioContext.destination)
+
+    audioContextRef.current = audioContext
+    stereoPannerRef.current = stereoPanner
+
+    return () => {
+      audioContextRef.current?.close()
+    }
+  })
+
+  return stereoPannerRef
+}
+
 type Props = { children: ReactNode }
 
 const VideoProvider = (props: Props) => {
@@ -41,6 +70,7 @@ const VideoProvider = (props: Props) => {
   const [fullscreen, setFullscreen] = useState(false)
   const [loop, setLoop] = useState(defaultLoop)
   const [loopRange, setLoopRange] = useState<[number, number]>()
+  const [panVolume, setPanVolume] = useState(0)
   const [paused, setPaused] = useState(true)
   const [pictureInPicture, setPictureInPicture] = useState(false)
   const [playbackRate, setPlaybackRate] = useState(1)
@@ -74,6 +104,7 @@ const VideoProvider = (props: Props) => {
   }, [status])
 
   const ref = useRef<HTMLVideoElement>(null)
+  const stereoPannerRef = useStereoPanner(ref)
 
   useEffect(() => {
     const removeListener = window.electronAPI.onFullscreenChange(setFullscreen)
@@ -219,6 +250,23 @@ const VideoProvider = (props: Props) => {
     [dispatch],
   )
 
+  const changePanVolume = useCallback(
+    (value: number) => {
+      const panner = stereoPannerRef.current
+      if (!panner) {
+        return
+      }
+      panner.pan.value = value
+      setPanVolume(value)
+    },
+    [stereoPannerRef.current],
+  )
+
+  const resetPanVolume = useCallback(
+    () => changePanVolume(0),
+    [changePanVolume],
+  )
+
   const toggleAutoplay = useCallback(() => {
     const video = ref.current
     if (!video) {
@@ -343,6 +391,7 @@ const VideoProvider = (props: Props) => {
     actionCode,
     autoplay,
     changeLoopRange,
+    changePanVolume,
     changePlaybackRate,
     changeVolume,
     currentTime,
@@ -353,6 +402,7 @@ const VideoProvider = (props: Props) => {
     loopRange,
     message,
     nextTrack,
+    panVolume,
     partialLoop,
     paused,
     pictureInPicture,
@@ -360,6 +410,7 @@ const VideoProvider = (props: Props) => {
     playlistFile,
     previousTrack,
     ref,
+    resetPanVolume,
     resetZoom,
     seek,
     seekTo,

@@ -7,6 +7,7 @@ import {
   Settings as SettingsIcon,
   SkipNext as SkipNextIcon,
   SkipPrevious as SkipPreviousIcon,
+  SwapHoriz as SwapHorizIcon,
   VolumeDown as VolumeDownIcon,
   VolumeOff as VolumeOffIcon,
   VolumeUp as VolumeUpIcon,
@@ -39,18 +40,21 @@ const ControlBar = () => {
 
   const {
     autoplay,
+    changePanVolume,
     changeVolume,
     currentTime,
     duration,
     fullscreen,
     loop,
     nextTrack,
+    panVolume,
     partialLoop,
     paused,
     pictureInPicture,
     playbackRate,
     playlistFile,
     previousTrack,
+    resetPanVolume,
     toggleFullscreen,
     toggleMuted,
     togglePaused,
@@ -114,6 +118,11 @@ const ControlBar = () => {
   const handleChangeVolume = useCallback(
     (_e: Event, value: number | number[]) => changeVolume(value as number),
     [changeVolume],
+  )
+
+  const handleChangePanVolume = useCallback(
+    (_e: Event, value: number | number[]) => changePanVolume(value as number),
+    [changePanVolume],
   )
 
   return (
@@ -188,6 +197,34 @@ const ControlBar = () => {
             },
           }}
           value={volume}
+        />
+        <IconButton
+          onClick={resetPanVolume}
+          onKeyDown={(e) => e.preventDefault()}
+          size="small"
+          title="Reset Balance"
+        >
+          <SwapHorizIcon fontSize="small" />
+        </IconButton>
+        <Slider
+          max={1}
+          min={-1}
+          onChange={handleChangePanVolume}
+          onKeyDown={(e) => e.preventDefault()}
+          size="small"
+          step={0.01}
+          sx={{
+            borderRadius: 0,
+            color: 'white',
+            mx: 1,
+            width: (theme) => theme.spacing(10),
+            '.MuiSlider-thumb': {
+              '&:focus, &:hover, &.Mui-active, &.Mui-focusVisible': {
+                boxShadow: 'inherit',
+              },
+            },
+          }}
+          value={panVolume}
         />
         <Typography
           noWrap
