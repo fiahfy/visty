@@ -1,13 +1,13 @@
 import {
   Fullscreen as FullscreenEnterIcon,
   FullscreenExit as FullscreenExitIcon,
+  Hearing as HearingIcon,
   Pause as PauseIcon,
   PictureInPictureAlt as PictureInPictureAltIcon,
   PlayArrow as PlayArrowIcon,
   Settings as SettingsIcon,
   SkipNext as SkipNextIcon,
   SkipPrevious as SkipPreviousIcon,
-  SwapHoriz as SwapHorizIcon,
   VolumeDown as VolumeDownIcon,
   VolumeOff as VolumeOffIcon,
   VolumeUp as VolumeUpIcon,
@@ -40,23 +40,24 @@ const ControlBar = () => {
 
   const {
     autoplay,
-    changePanVolume,
+    changePan,
     changeVolume,
     currentTime,
     duration,
     fullscreen,
     loop,
     nextTrack,
-    panVolume,
+    pan,
     partialLoop,
     paused,
     pictureInPicture,
     playbackRate,
     playlistFile,
     previousTrack,
-    resetPanVolume,
     toggleFullscreen,
     toggleMuted,
+    togglePanLeft,
+    togglePanRight,
     togglePaused,
     togglePictureInPicture,
     volume,
@@ -120,9 +121,9 @@ const ControlBar = () => {
     [changeVolume],
   )
 
-  const handleChangePanVolume = useCallback(
-    (_e: Event, value: number | number[]) => changePanVolume(value as number),
-    [changePanVolume],
+  const handleChangePan = useCallback(
+    (_e: Event, value: number | number[]) => changePan(value as number),
+    [changePan],
   )
 
   return (
@@ -199,17 +200,17 @@ const ControlBar = () => {
           value={volume}
         />
         <IconButton
-          onClick={resetPanVolume}
+          onClick={togglePanLeft}
           onKeyDown={(e) => e.preventDefault()}
           size="small"
-          title="Reset Balance"
+          title="Pan Left"
         >
-          <SwapHorizIcon fontSize="small" />
+          <HearingIcon fontSize="small" />
         </IconButton>
         <Slider
           max={1}
           min={-1}
-          onChange={handleChangePanVolume}
+          onChange={handleChangePan}
           onKeyDown={(e) => e.preventDefault()}
           size="small"
           step={0.01}
@@ -224,8 +225,17 @@ const ControlBar = () => {
               },
             },
           }}
-          value={panVolume}
+          value={pan}
         />
+        <IconButton
+          onClick={togglePanRight}
+          onKeyDown={(e) => e.preventDefault()}
+          size="small"
+          sx={{ transform: 'scale(-1, 1)' }}
+          title="Pan Right"
+        >
+          <HearingIcon fontSize="small" />
+        </IconButton>
         <Typography
           noWrap
           sx={{

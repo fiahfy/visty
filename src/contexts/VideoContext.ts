@@ -24,7 +24,7 @@ const VideoContext = createContext<
       actionCode: ActionCode | undefined
       autoplay: boolean
       changeLoopRange: (value: [number, number]) => void
-      changePanVolume: (value: number) => void
+      changePan: (value: number) => void
       changePlaybackRate: (value: number) => void
       changeVolume: (value: number) => void
       currentTime: number
@@ -35,7 +35,7 @@ const VideoContext = createContext<
       loopRange: [number, number] | undefined
       message: string | undefined
       nextTrack: () => void
-      panVolume: number
+      pan: number
       partialLoop: boolean
       paused: boolean
       pictureInPicture: boolean
@@ -43,7 +43,6 @@ const VideoContext = createContext<
       playlistFile: PlaylistFile
       previousTrack: () => void
       ref: RefObject<HTMLVideoElement | null>
-      resetPanVolume: () => void
       resetZoom: () => void
       seek: (value: number) => void
       seekTo: (direction: 'backward' | 'forward') => void
@@ -53,6 +52,8 @@ const VideoContext = createContext<
       toggleFullscreen: () => void
       toggleLoop: () => void
       toggleMuted: () => void
+      togglePanLeft: () => void
+      togglePanRight: () => void
       togglePartialLoop: () => void
       togglePaused: () => void
       togglePictureInPicture: () => void
