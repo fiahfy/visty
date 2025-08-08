@@ -16,7 +16,7 @@ type PlaylistFile = {
 export type IElectronAPI = {
   getCursorPosition: () => Promise<{ x: number; y: number }>
   getPlaylistFile: (filePath: string) => Promise<PlaylistFile>
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+  // biome-ignore lint/suspicious/noExplicitAny: false positive
   onMessage: (callback: (message: any) => void) => () => void
   openFile: (file: globalThis.File) => Promise<void>
   openFilePath: (filePath: string) => Promise<void>
@@ -24,5 +24,5 @@ export type IElectronAPI = {
 } & ContextMenuOperations &
   WindowOperations<{ file: File }>
 
-// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+// biome-ignore lint/suspicious/noExplicitAny: false positive
 export type ApplicationMenuParams = any

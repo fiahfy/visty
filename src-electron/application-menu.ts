@@ -1,12 +1,12 @@
 import audioExtensions from 'audio-extensions'
 import {
+  app,
   BrowserWindow,
+  dialog,
   type IpcMainInvokeEvent,
+  ipcMain,
   Menu,
   type MenuItemConstructorOptions,
-  app,
-  dialog,
-  ipcMain,
   shell,
 } from 'electron'
 import videoExtensions from 'video-extensions'
@@ -18,7 +18,7 @@ type State = {
 
 export type ApplicationMenuParams = Partial<State>
 
-// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+// biome-ignore lint/suspicious/noExplicitAny: false positive
 const send = (message: any) => {
   const activeWindow = BrowserWindow.getFocusedWindow()
   activeWindow?.webContents.send('onMessage', message)

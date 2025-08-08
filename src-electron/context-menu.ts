@@ -1,7 +1,7 @@
 import { type ActionCreators, register } from '@fiahfy/electron-context-menu'
 import type { IpcMainInvokeEvent } from 'electron'
 
-// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+// biome-ignore lint/suspicious/noExplicitAny: false positive
 const send = (event: IpcMainInvokeEvent, message: any) =>
   event.sender.send('onMessage', message)
 

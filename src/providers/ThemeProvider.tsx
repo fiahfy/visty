@@ -1,7 +1,7 @@
 import {
   CssBaseline,
-  ThemeProvider as MuiThemeProvider,
   createTheme,
+  ThemeProvider as MuiThemeProvider,
 } from '@mui/material'
 import type { ReactNode } from 'react'
 import ThemeContext from '~/contexts/ThemeContext'

@@ -2,9 +2,9 @@ import { basename, dirname, join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { createManager as createWindowManager } from '@fiahfy/electron-window'
 import {
+  app,
   BrowserWindow,
   type BrowserWindowConstructorOptions,
-  app,
 } from 'electron'
 import started from 'electron-squirrel-startup'
 import registerApplicationMenu from './application-menu'
