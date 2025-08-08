@@ -108,9 +108,9 @@ const SeekBar = (props: Props) => {
             max={duration}
             onChange={handleChangeCurrentTime}
             onClick={handleClickCurrentTime}
-            onKeyDown={(e) => e.preventDefault()}
             size="small"
-            step={0.01}
+            // Emulating Keyboard Event Prevention
+            step={0.1 ** 10}
             sx={{
               borderRadius: 0,
               inset: 0,
