@@ -221,7 +221,7 @@ const VideoProvider = (props: Props) => {
   }, [])
 
   const changeVolume = useCallback(
-    (value: number) => {
+    (value: number, action?: 'volumeDown' | 'volumeUp') => {
       const video = ref.current
       if (!video) {
         return
@@ -231,27 +231,22 @@ const VideoProvider = (props: Props) => {
       setStoredVolume(volume)
       dispatch(setDefaultVolume({ defaultVolume: volume }))
       dispatch(setDefaultMuted({ defaultMuted: volume === 0 }))
+      if (action) {
+        triggerAction(action, volume)
+      }
     },
-    [dispatch],
+    [dispatch, triggerAction],
   )
 
   const volumeUp = useCallback(() => {
-    const newVolume = Math.min(
-      Math.max(0, (Math.floor(volume * 10) + 1) / 10),
-      1,
-    )
-    changeVolume(newVolume)
-    triggerAction('volumeUp', newVolume)
-  }, [changeVolume, triggerAction, volume])
+    const newVolume = (Math.floor(volume * 10) + 1) / 10
+    changeVolume(newVolume, 'volumeUp')
+  }, [changeVolume, volume])
 
   const volumeDown = useCallback(() => {
-    const newVolume = Math.min(
-      Math.max(0, (Math.floor(volume * 10) - 1) / 10),
-      1,
-    )
-    changeVolume(newVolume)
-    triggerAction('volumeDown', newVolume)
-  }, [changeVolume, triggerAction, volume])
+    const newVolume = (Math.floor(volume * 10) - 1) / 10
+    changeVolume(newVolume, 'volumeDown')
+  }, [changeVolume, volume])
 
   const toggleAutoplay = useCallback(() => {
     const video = ref.current
