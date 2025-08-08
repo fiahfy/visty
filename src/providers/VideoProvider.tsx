@@ -190,7 +190,8 @@ const VideoProvider = (props: Props) => {
   }, [file.path])
 
   const triggerAction = useCallback(
-    (action: Action) => setActionCode(`${action}:${Date.now()}`),
+    (action: Action, value?: number) =>
+      setActionCode(`${action}:${value ?? 0}:${Date.now()}`),
     [],
   )
 
@@ -233,6 +234,24 @@ const VideoProvider = (props: Props) => {
     },
     [dispatch],
   )
+
+  const volumeUp = useCallback(() => {
+    const newVolume = Math.min(
+      Math.max(0, (Math.floor(volume * 10) + 1) / 10),
+      1,
+    )
+    changeVolume(newVolume)
+    triggerAction('volumeUp', newVolume)
+  }, [changeVolume, triggerAction, volume])
+
+  const volumeDown = useCallback(() => {
+    const newVolume = Math.min(
+      Math.max(0, (Math.floor(volume * 10) - 1) / 10),
+      1,
+    )
+    changeVolume(newVolume)
+    triggerAction('volumeDown', newVolume)
+  }, [changeVolume, triggerAction, volume])
 
   const toggleAutoplay = useCallback(() => {
     const video = ref.current
@@ -402,6 +421,8 @@ const VideoProvider = (props: Props) => {
     togglePaused,
     togglePictureInPicture,
     volume,
+    volumeDown,
+    volumeUp,
     zoom,
     zoomBy,
     zoomIn,

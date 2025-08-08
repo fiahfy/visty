@@ -21,7 +21,6 @@ const App = () => {
 
   const {
     changePlaybackRate,
-    changeVolume,
     file,
     loop,
     nextTrack,
@@ -34,7 +33,8 @@ const App = () => {
     toggleMuted,
     togglePartialLoop,
     togglePaused,
-    volume,
+    volumeDown,
+    volumeUp,
     zoomIn,
     zoomOut,
   } = useVideo()
@@ -98,7 +98,7 @@ const App = () => {
       switch (e.key) {
         case 'ArrowDown':
           e.preventDefault()
-          return changeVolume(volume - 0.1)
+          return volumeDown()
         case 'ArrowLeft':
           e.preventDefault()
           return seekTo('backward')
@@ -107,7 +107,7 @@ const App = () => {
           return seekTo('forward')
         case 'ArrowUp':
           e.preventDefault()
-          return changeVolume(volume + 0.1)
+          return volumeUp()
         case 'Escape':
           e.preventDefault()
           if (shouldCloseWindowOnEscapeKey) {
@@ -138,7 +138,6 @@ const App = () => {
     document.body.addEventListener('keydown', handler)
     return () => document.body.removeEventListener('keydown', handler)
   }, [
-    changeVolume,
     nextTrack,
     previousTrack,
     seekTo,
@@ -146,7 +145,8 @@ const App = () => {
     toggleLoop,
     toggleMuted,
     togglePaused,
-    volume,
+    volumeDown,
+    volumeUp,
   ])
 
   const handleContextMenu = useMemo(() => createContextMenuHandler(), [])

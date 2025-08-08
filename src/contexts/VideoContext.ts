@@ -16,8 +16,10 @@ export type Action =
   | 'seekBackward'
   | 'seekForward'
   | 'unmute'
+  | 'volumeDown'
+  | 'volumeUp'
 
-export type ActionCode = `${Action}:${string}`
+export type ActionCode = `${Action}:${string}:${string}`
 
 const VideoContext = createContext<
   | {
@@ -58,6 +60,8 @@ const VideoContext = createContext<
       togglePaused: () => void
       togglePictureInPicture: () => void
       volume: number
+      volumeDown: () => void
+      volumeUp: () => void
       zoom: number
       zoomBy: (value: number) => void
       zoomIn: () => void
