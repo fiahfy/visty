@@ -96,6 +96,9 @@ const App = () => {
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       switch (e.key) {
+        case 'ArrowDown':
+          e.preventDefault()
+          return changeVolume(volume - 0.1)
         case 'ArrowLeft':
           e.preventDefault()
           return seekTo('backward')
@@ -105,9 +108,6 @@ const App = () => {
         case 'ArrowUp':
           e.preventDefault()
           return changeVolume(volume + 0.1)
-        case 'ArrowDown':
-          e.preventDefault()
-          return changeVolume(volume - 0.1)
         case 'Escape':
           e.preventDefault()
           if (shouldCloseWindowOnEscapeKey) {
