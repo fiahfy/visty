@@ -11,7 +11,7 @@ import {
 } from '@mui/icons-material'
 import { Box, Stack, Typography } from '@mui/material'
 import { useEffect, useMemo, useState } from 'react'
-import FadeAndScale from '~/components/mui/FadeAndScale'
+import FlashIndicatorTransition from '~/components/transitions/FlashIndicatorTransition'
 import useVideo from '~/hooks/useVideo'
 
 const FlashIndicator = () => {
@@ -70,7 +70,7 @@ const FlashIndicator = () => {
         position: 'absolute',
       }}
     >
-      <FadeAndScale in={iconVisible} timeout={300}>
+      <FlashIndicatorTransition in={iconVisible}>
         <Stack alignItems="center" direction="column">
           {ActionIcon && (
             <Box
@@ -103,7 +103,7 @@ const FlashIndicator = () => {
             </Typography>
           )}
         </Stack>
-      </FadeAndScale>
+      </FlashIndicatorTransition>
     </Box>
   )
 }

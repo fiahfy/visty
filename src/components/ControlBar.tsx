@@ -17,11 +17,14 @@ import {
   Box,
   IconButton,
   Slider,
+  Stack,
   Toolbar,
   Typography,
 } from '@mui/material'
-import { useCallback, useMemo } from 'react'
+import { useCallback, useEffect, useMemo } from 'react'
+import WidthTransition from '~/components/transitions/WidthTransition'
 import useVideo from '~/hooks/useVideo'
+import useVisibilityState from '~/hooks/useVisibilityState'
 import { useAppSelector } from '~/store'
 import {
   selectShouldAlwaysShowSeekBar,
@@ -31,7 +34,13 @@ import {
 import { createContextMenuHandler } from '~/utils/context-menu'
 import { formatDuration } from '~/utils/formatter'
 
-const ControlBar = () => {
+type Props = {
+  controlBarVisible: boolean
+}
+
+const ControlBar = (props: Props) => {
+  const { controlBarVisible } = props
+
   const shouldAlwaysShowSeekBar = useAppSelector(selectShouldAlwaysShowSeekBar)
   const shouldCloseWindowOnEscapeKey = useAppSelector(
     selectShouldCloseWindowOnEscapeKey,
@@ -62,6 +71,20 @@ const ControlBar = () => {
     togglePictureInPicture,
     volume,
   } = useVideo()
+
+  const {
+    visible: volumeSliderVisible,
+    show: showVolumeSlider,
+    hide: hideVolumeSlider,
+    forceHide: forceHideVolumeSlider,
+  } = useVisibilityState(1000)
+
+  const {
+    visible: panSliderVisible,
+    show: showPanSlider,
+    hide: hidePanSlider,
+    forceHide: forceHidePanSlider,
+  } = useVisibilityState(1000)
 
   const muted = useMemo(() => volume === 0, [volume])
 
@@ -115,6 +138,13 @@ const ControlBar = () => {
       viewModeOnOpen,
     ],
   )
+
+  useEffect(() => {
+    if (!controlBarVisible) {
+      forceHideVolumeSlider()
+      forceHidePanSlider()
+    }
+  }, [controlBarVisible, forceHidePanSlider, forceHideVolumeSlider])
 
   const handleChangeVolume = useCallback(
     (_e: Event, value: number | number[]) => changeVolume(value as number),
@@ -172,70 +202,90 @@ const ControlBar = () => {
         >
           <SkipNextIcon fontSize="small" />
         </IconButton>
-        <IconButton
-          onClick={toggleMuted}
-          onKeyDown={(e) => e.preventDefault()}
-          size="small"
-          title={`${muted ? 'Unmute' : 'Mute'} (m)`}
+        <Stack
+          alignItems="center"
+          direction="row"
+          onMouseEnter={() => showVolumeSlider()}
+          onMouseLeave={() => hideVolumeSlider()}
+          sx={{ overflow: 'hidden' }}
         >
-          <VolumeIcon fontSize="small" />
-        </IconButton>
-        <Slider
-          max={1}
-          onChange={handleChangeVolume}
-          onKeyDown={(e) => e.preventDefault()}
-          size="small"
-          step={0.01}
-          sx={{
-            borderRadius: 0,
-            color: 'white',
-            mx: 1,
-            width: (theme) => theme.spacing(10),
-            '.MuiSlider-thumb': {
-              '&:focus, &:hover, &.Mui-active, &.Mui-focusVisible': {
-                boxShadow: 'inherit',
-              },
-            },
-          }}
-          value={volume}
-        />
-        <IconButton
-          onClick={togglePanLeft}
-          onKeyDown={(e) => e.preventDefault()}
-          size="small"
-          title="Pan Left"
+          <IconButton
+            onClick={toggleMuted}
+            onKeyDown={(e) => e.preventDefault()}
+            size="small"
+            title={`${muted ? 'Unmute' : 'Mute'} (m)`}
+          >
+            <VolumeIcon fontSize="small" />
+          </IconButton>
+          <WidthTransition in={volumeSliderVisible}>
+            <Slider
+              max={1}
+              onChange={handleChangeVolume}
+              onKeyDown={(e) => e.preventDefault()}
+              size="small"
+              step={0.01}
+              sx={{
+                borderRadius: 0,
+                color: 'white',
+                mx: 1,
+                width: (theme) => theme.spacing(10),
+                '.MuiSlider-thumb': {
+                  '&:focus, &:hover, &.Mui-active, &.Mui-focusVisible': {
+                    boxShadow: 'inherit',
+                  },
+                },
+              }}
+              value={volume}
+            />
+          </WidthTransition>
+        </Stack>
+        <Stack
+          alignItems="center"
+          direction="row"
+          onMouseEnter={() => showPanSlider()}
+          onMouseLeave={() => hidePanSlider()}
+          sx={{ overflow: 'hidden' }}
         >
-          <HearingIcon fontSize="small" />
-        </IconButton>
-        <Slider
-          max={1}
-          min={-1}
-          onChange={handleChangePan}
-          onKeyDown={(e) => e.preventDefault()}
-          size="small"
-          step={0.01}
-          sx={{
-            borderRadius: 0,
-            color: 'white',
-            mx: 1,
-            width: (theme) => theme.spacing(10),
-            '.MuiSlider-thumb': {
-              '&:focus, &:hover, &.Mui-active, &.Mui-focusVisible': {
-                boxShadow: 'inherit',
-              },
-            },
-          }}
-          value={pan}
-        />
-        <IconButton
-          onClick={togglePanRight}
-          onKeyDown={(e) => e.preventDefault()}
-          size="small"
-          sx={{ transform: 'scale(-1, 1)' }}
-          title="Pan Right"
-        >
-          <HearingIcon fontSize="small" />
-        </IconButton>
+          <IconButton
+            onClick={togglePanLeft}
+            onKeyDown={(e) => e.preventDefault()}
+            size="small"
+            title="Pan Left"
+          >
+            <HearingIcon fontSize="small" />
+          </IconButton>
+          <WidthTransition in={panSliderVisible}>
+            <Slider
+              max={1}
+              min={-1}
+              onChange={handleChangePan}
+              onKeyDown={(e) => e.preventDefault()}
+              size="small"
+              step={0.01}
+              sx={{
+                borderRadius: 0,
+                color: 'white',
+                mx: 1,
+                width: (theme) => theme.spacing(10),
+                '.MuiSlider-thumb': {
+                  '&:focus, &:hover, &.Mui-active, &.Mui-focusVisible': {
+                    boxShadow: 'inherit',
+                  },
+                },
+              }}
+              value={pan}
+            />
+            <IconButton
+              onClick={togglePanRight}
+              onKeyDown={(e) => e.preventDefault()}
+              size="small"
+              sx={{ transform: 'scale(-1, 1)' }}
+              title="Pan Right"
+            >
+              <HearingIcon fontSize="small" />
+            </IconButton>
+          </WidthTransition>
+        </Stack>
         <Typography
           noWrap
           sx={{

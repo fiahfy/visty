@@ -1,10 +1,12 @@
 import { type ReactNode, useRef } from 'react'
 import { Transition } from 'react-transition-group'
 
-type Props = { children: ReactNode; in: boolean; timeout: number }
+const timeout = 300
 
-const FadeAndScale = (props: Props) => {
-  const { children, in: inProps, timeout } = props
+type Props = { children: ReactNode; in: boolean }
+
+const FlashIndicatorTransition = (props: Props) => {
+  const { children, in: inProps } = props
 
   const nodeRef = useRef(null)
 
@@ -49,4 +51,4 @@ const FadeAndScale = (props: Props) => {
   )
 }
 
-export default FadeAndScale
+export default FlashIndicatorTransition

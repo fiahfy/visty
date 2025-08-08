@@ -16,6 +16,7 @@ import useDrop from '~/hooks/useDrop'
 import usePrevious from '~/hooks/usePrevious'
 import useTrafficLight from '~/hooks/useTrafficLight'
 import useVideo from '~/hooks/useVideo'
+import useVisibilityState from '~/hooks/useVisibilityState'
 
 const Player = () => {
   const { setVisible, visible } = useTrafficLight()
@@ -34,7 +35,13 @@ const Player = () => {
 
   const { dropping, ...dropHandlers } = useDrop()
 
-  const [controlBarVisible, setControlBarVisible] = useState(false)
+  const {
+    visible: controlBarVisible,
+    show: showControlBar,
+    hide: hideControlBar,
+    forceHide: forceHideControlBar,
+  } = useVisibilityState(2000)
+
   const [hovered, setHovered] = useState(false)
   const [dragOffset, setDragOffset] = useState<{
     x: number
@@ -47,7 +54,6 @@ const Player = () => {
   const [position, setPosition] = useState<{ x: number; y: number }>()
 
   const wrapperRef = useRef<HTMLDivElement>(null)
-  const timer = useRef(0)
 
   const size = useMemo(() => {
     if (!nativeSize || !wrapperSize) {
@@ -132,7 +138,7 @@ const Player = () => {
       if (left <= x && x <= right && top <= y && y <= bottom) {
         // noop
       } else {
-        setControlBarVisible(false)
+        forceHideControlBar()
       }
 
       id = requestAnimationFrame(callback)
@@ -143,27 +149,13 @@ const Player = () => {
     return () => {
       window.cancelAnimationFrame(id)
     }
-  }, [])
-
-  const clearTimer = useCallback(() => window.clearTimeout(timer.current), [])
-
-  const resetTimer = useCallback(
-    (hovered: boolean) => {
-      setControlBarVisible(true)
-      clearTimer()
-      if (hovered) {
-        return
-      }
-      timer.current = window.setTimeout(() => setControlBarVisible(false), 2000)
-    },
-    [clearTimer],
-  )
+  }, [forceHideControlBar])
 
   useEffect(() => {
     if (hovered) {
-      resetTimer(hovered)
+      showControlBar()
     }
-  }, [hovered, resetTimer])
+  }, [hovered, showControlBar])
 
   const handleMouseDown = useCallback((e: MouseEvent) => {
     if ((e.ctrlKey && !e.metaKey) || (!e.ctrlKey && e.metaKey)) {
@@ -180,27 +172,27 @@ const Player = () => {
   const handleMouseMove = useCallback(
     (e: MouseEvent) => {
       setPosition({ x: e.clientX, y: e.clientY })
-      resetTimer(hovered)
+      hovered ? showControlBar() : hideControlBar()
       const wrapper = wrapperRef.current
       if (wrapper && dragOffset) {
         wrapper.scrollLeft = dragOffset.x - e.clientX
         wrapper.scrollTop = dragOffset.y - e.clientY
       }
     },
-    [dragOffset, hovered, resetTimer],
+    [dragOffset, hideControlBar, hovered, showControlBar],
   )
 
   const handleMouseUp = useCallback(() => setDragOffset(undefined), [])
 
   const handleMouseEnterBar = useCallback(() => {
     setHovered(true)
-    resetTimer(true)
-  }, [resetTimer])
+    showControlBar()
+  }, [showControlBar])
 
   const handleMouseLeaveBar = useCallback(() => {
     setHovered(false)
-    resetTimer(false)
-  }, [resetTimer])
+    hideControlBar()
+  }, [hideControlBar])
 
   const handleClick = useCallback(
     (e: MouseEvent) => {
@@ -279,7 +271,7 @@ const Player = () => {
             onMouseLeave={handleMouseLeaveBar}
             sx={{ pointerEvents: 'auto' }}
           >
-            <ControlBar />
+            <ControlBar controlBarVisible={controlBarVisible} />
           </Box>
         </Fade>
         <Box
