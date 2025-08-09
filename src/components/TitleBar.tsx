@@ -1,16 +1,18 @@
 import { AppBar, Toolbar, Typography } from '@mui/material'
 import { useEffect, useRef, useState } from 'react'
-import useVideo from '~/hooks/useVideo'
 
 type Props = {
   onMouseEnter?: () => void
   onMouseLeave?: () => void
+  title: string
 }
 
 const TitleBar = (props: Props) => {
-  const { onMouseEnter, onMouseLeave } = props
-
-  const { file } = useVideo()
+  const {
+    onMouseEnter = () => undefined,
+    onMouseLeave = () => undefined,
+    title,
+  } = props
 
   const [hovered, setHovered] = useState(false)
 
@@ -18,9 +20,9 @@ const TitleBar = (props: Props) => {
 
   useEffect(() => {
     if (hovered) {
-      onMouseEnter?.()
+      onMouseEnter()
     } else {
-      onMouseLeave?.()
+      onMouseLeave()
     }
   }, [hovered, onMouseEnter, onMouseLeave])
 
@@ -74,7 +76,7 @@ const TitleBar = (props: Props) => {
         }}
       >
         <Typography mt={0.25} noWrap variant="caption">
-          {file.name}
+          {title}
         </Typography>
       </Toolbar>
     </AppBar>

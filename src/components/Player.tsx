@@ -267,7 +267,7 @@ const Player = () => {
         </Box>
         <Fade in={visible}>
           <Box sx={{ pointerEvents: 'auto' }}>
-            <TitleBar onMouseEnter={handleMouseEnterBar} />
+            <TitleBar onMouseEnter={handleMouseEnterBar} title={file.name} />
           </Box>
         </Fade>
       </Box>
