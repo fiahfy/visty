@@ -1,6 +1,6 @@
 import { useCallback, useRef, useState } from 'react'
 
-const useVisibilityState = (timeout: number) => {
+const useVisibilityState = () => {
   const [visible, setVisible] = useState(false)
 
   const timer = useRef(0)
@@ -14,20 +14,22 @@ const useVisibilityState = (timeout: number) => {
 
   const hide = useCallback(() => {
     clearTimer()
-    setVisible(true)
-    timer.current = window.setTimeout(() => setVisible(false), timeout)
-  }, [clearTimer, timeout])
-
-  const forceHide = useCallback(() => {
-    clearTimer()
     setVisible(false)
   }, [clearTimer])
+
+  const hideAfter = useCallback(
+    (timeout: number) => {
+      clearTimer()
+      timer.current = window.setTimeout(() => setVisible(false), timeout)
+    },
+    [clearTimer],
+  )
 
   return {
     visible,
     show,
     hide,
-    forceHide,
+    hideAfter,
   }
 }
 

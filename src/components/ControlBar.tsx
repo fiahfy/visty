@@ -76,15 +76,13 @@ const ControlBar = (props: Props) => {
     visible: volumeSliderVisible,
     show: showVolumeSlider,
     hide: hideVolumeSlider,
-    forceHide: forceHideVolumeSlider,
-  } = useVisibilityState(1000)
+  } = useVisibilityState()
 
   const {
     visible: panSliderVisible,
     show: showPanSlider,
     hide: hidePanSlider,
-    forceHide: forceHidePanSlider,
-  } = useVisibilityState(1000)
+  } = useVisibilityState()
 
   const muted = useMemo(() => volume === 0, [volume])
 
@@ -141,10 +139,10 @@ const ControlBar = (props: Props) => {
 
   useEffect(() => {
     if (!controlBarVisible) {
-      forceHideVolumeSlider()
-      forceHidePanSlider()
+      hideVolumeSlider()
+      hidePanSlider()
     }
-  }, [controlBarVisible, forceHidePanSlider, forceHideVolumeSlider])
+  }, [controlBarVisible, hidePanSlider, hideVolumeSlider])
 
   const handleChangeVolume = useCallback(
     (_e: Event, value: number | number[]) => changeVolume(value as number),
@@ -161,6 +159,10 @@ const ControlBar = (props: Props) => {
       color="transparent"
       component="div"
       elevation={0}
+      onMouseLeave={() => {
+        hideVolumeSlider()
+        hidePanSlider()
+      }}
       sx={{
         bottom: 0,
         top: 'auto',
@@ -206,7 +208,6 @@ const ControlBar = (props: Props) => {
           alignItems="center"
           direction="row"
           onMouseEnter={() => showVolumeSlider()}
-          onMouseLeave={() => hideVolumeSlider()}
           sx={{ overflow: 'hidden' }}
         >
           <IconButton
@@ -243,7 +244,6 @@ const ControlBar = (props: Props) => {
           alignItems="center"
           direction="row"
           onMouseEnter={() => showPanSlider()}
-          onMouseLeave={() => hidePanSlider()}
           sx={{ overflow: 'hidden' }}
         >
           <IconButton

@@ -39,10 +39,9 @@ const Player = () => {
     visible: controlBarVisible,
     show: showControlBar,
     hide: hideControlBar,
-    forceHide: forceHideControlBar,
-  } = useVisibilityState(2000)
+    hideAfter: hideControlBarAfter,
+  } = useVisibilityState()
 
-  const [hovered, setHovered] = useState(false)
   const [dragOffset, setDragOffset] = useState<{
     x: number
     y: number
@@ -138,7 +137,7 @@ const Player = () => {
       if (left <= x && x <= right && top <= y && y <= bottom) {
         // noop
       } else {
-        forceHideControlBar()
+        hideControlBar()
       }
 
       id = requestAnimationFrame(callback)
@@ -149,13 +148,7 @@ const Player = () => {
     return () => {
       window.cancelAnimationFrame(id)
     }
-  }, [forceHideControlBar])
-
-  useEffect(() => {
-    if (hovered) {
-      showControlBar()
-    }
-  }, [hovered, showControlBar])
+  }, [hideControlBar])
 
   const handleMouseDown = useCallback((e: MouseEvent) => {
     if ((e.ctrlKey && !e.metaKey) || (!e.ctrlKey && e.metaKey)) {
@@ -171,28 +164,24 @@ const Player = () => {
 
   const handleMouseMove = useCallback(
     (e: MouseEvent) => {
+      showControlBar()
+      hideControlBarAfter(2000)
       setPosition({ x: e.clientX, y: e.clientY })
-      hovered ? showControlBar() : hideControlBar()
       const wrapper = wrapperRef.current
       if (wrapper && dragOffset) {
         wrapper.scrollLeft = dragOffset.x - e.clientX
         wrapper.scrollTop = dragOffset.y - e.clientY
       }
     },
-    [dragOffset, hideControlBar, hovered, showControlBar],
+    [dragOffset, hideControlBarAfter, showControlBar],
   )
 
   const handleMouseUp = useCallback(() => setDragOffset(undefined), [])
 
-  const handleMouseEnterBar = useCallback(() => {
-    setHovered(true)
-    showControlBar()
-  }, [showControlBar])
-
-  const handleMouseLeaveBar = useCallback(() => {
-    setHovered(false)
-    hideControlBar()
-  }, [hideControlBar])
+  const handleMouseEnterBar = useCallback(
+    () => showControlBar(),
+    [showControlBar],
+  )
 
   const handleClick = useCallback(
     (e: MouseEvent) => {
@@ -268,25 +257,17 @@ const Player = () => {
         <Fade in={controlBarVisible}>
           <Box
             onMouseEnter={handleMouseEnterBar}
-            onMouseLeave={handleMouseLeaveBar}
             sx={{ pointerEvents: 'auto' }}
           >
             <ControlBar controlBarVisible={controlBarVisible} />
           </Box>
         </Fade>
-        <Box
-          onMouseEnter={handleMouseEnterBar}
-          onMouseLeave={handleMouseLeaveBar}
-          sx={{ pointerEvents: 'auto' }}
-        >
+        <Box onMouseEnter={handleMouseEnterBar} sx={{ pointerEvents: 'auto' }}>
           <SeekBar controlBarVisible={controlBarVisible} />
         </Box>
         <Fade in={visible}>
           <Box sx={{ pointerEvents: 'auto' }}>
-            <TitleBar
-              onMouseEnter={handleMouseEnterBar}
-              onMouseLeave={handleMouseLeaveBar}
-            />
+            <TitleBar onMouseEnter={handleMouseEnterBar} />
           </Box>
         </Fade>
       </Box>

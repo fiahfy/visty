@@ -3,8 +3,8 @@ import { useEffect, useRef, useState } from 'react'
 import useVideo from '~/hooks/useVideo'
 
 type Props = {
-  onMouseEnter: () => void
-  onMouseLeave: () => void
+  onMouseEnter?: () => void
+  onMouseLeave?: () => void
 }
 
 const TitleBar = (props: Props) => {
@@ -18,9 +18,9 @@ const TitleBar = (props: Props) => {
 
   useEffect(() => {
     if (hovered) {
-      onMouseEnter()
+      onMouseEnter?.()
     } else {
-      onMouseLeave()
+      onMouseLeave?.()
     }
   }, [hovered, onMouseEnter, onMouseLeave])
 
@@ -41,7 +41,9 @@ const TitleBar = (props: Props) => {
       const top = window.screenY + rect.y
       const bottom = top + rect.height
 
-      setHovered(left <= x && x <= right && top <= y && y <= bottom)
+      const hovered = left <= x && x <= right && top <= y && y <= bottom
+
+      setHovered(hovered)
 
       id = requestAnimationFrame(callback)
     }
