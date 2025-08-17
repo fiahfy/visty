@@ -183,6 +183,20 @@ const VideoProvider = (props: Props) => {
   }, [loopStartTime])
 
   useEffect(() => {
+    const panner = stereoPannerRef.current
+    if (!panner) {
+      return
+    }
+    let requestId: number
+    const callback = () => {
+      setPan(panner.pan.value)
+      requestId = requestAnimationFrame(callback)
+    }
+    requestId = requestAnimationFrame(callback)
+    return () => cancelAnimationFrame(requestId)
+  }, [stereoPannerRef.current])
+
+  useEffect(() => {
     ;(async () => {
       const playlistFile = await window.electronAPI.getPlaylistFile(file.path)
       setPlaylistFile(playlistFile)
@@ -207,7 +221,6 @@ const VideoProvider = (props: Props) => {
         return
       }
       panner.pan.value = value
-      setPan(value)
     },
     [stereoPannerRef.current],
   )
