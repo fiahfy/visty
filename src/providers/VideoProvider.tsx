@@ -13,8 +13,8 @@ import VideoContext, {
 } from '~/contexts/VideoContext'
 import useStereoPanner from '~/hooks/useStereoPanner'
 import { useAppDispatch, useAppSelector } from '~/store'
-import { selectDefaultAutoplay, setDefaultAutoplay } from '~/store/settings'
 import {
+  selectAutoplay,
   selectCurrentTime,
   selectFile,
   selectLoop,
@@ -22,6 +22,7 @@ import {
   selectPan,
   selectPlaybackRate,
   selectVolume,
+  setAutoplay,
   setCurrentTime,
   setLoop,
   setLoopRange,
@@ -35,8 +36,8 @@ type Props = { children: ReactNode }
 const VideoProvider = (props: Props) => {
   const { children } = props
 
+  const autoplay = useAppSelector(selectAutoplay)
   const currentTime = useAppSelector(selectCurrentTime)
-  const defaultAutoplay = useAppSelector(selectDefaultAutoplay)
   const file = useAppSelector(selectFile)
   const loop = useAppSelector(selectLoop)
   const loopRange = useAppSelector(selectLoopRange)
@@ -48,7 +49,6 @@ const VideoProvider = (props: Props) => {
   const [initialized, setInitialized] = useState(false)
 
   const [actionCode, setActionCode] = useState<ActionCode>()
-  const [autoplay, setAutoplay] = useState(defaultAutoplay)
   const [duration, setDuration] = useState(0)
   const [fullscreen, setFullscreen] = useState(false)
   const [paused, setPaused] = useState(true)
@@ -157,13 +157,13 @@ const VideoProvider = (props: Props) => {
     let requestId: number
     const callback = () => {
       if (video.readyState >= 1) {
+        dispatch(setAutoplay(video.autoplay))
         dispatch(setCurrentTime(video.currentTime))
         dispatch(setLoop(video.loop))
         dispatch(setPlaybackRate(video.playbackRate))
         dispatch(setVolume(video.volume))
         setDuration(video.duration)
         setPaused(video.paused)
-        setAutoplay(video.autoplay)
       }
       requestId = requestAnimationFrame(callback)
     }
@@ -282,10 +282,8 @@ const VideoProvider = (props: Props) => {
     if (!video) {
       return
     }
-    const newAutoplay = !autoplay
-    video.autoplay = newAutoplay
-    dispatch(setDefaultAutoplay({ defaultAutoplay: newAutoplay }))
-  }, [autoplay, dispatch])
+    video.autoplay = !autoplay
+  }, [autoplay])
 
   const toggleFullscreen = useCallback(
     () => window.electronAPI.toggleFullscreen(),

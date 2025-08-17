@@ -5,8 +5,10 @@ import {
 } from '@reduxjs/toolkit'
 import type { AppState, AppThunk } from '~/store'
 import {
+  selectDefaultAutoplay,
   selectDefaultLoop,
   selectDefaultVolume,
+  setDefaultAutoplay,
   setDefaultLoop,
   setDefaultVolume,
 } from '~/store/settings'
@@ -15,6 +17,7 @@ import { selectWindowId } from '~/store/window-id'
 type File = { name: string; path: string; url: string }
 
 type WindowState = {
+  autoplay?: boolean
   currentTime: number
   file?: File
   loop?: boolean
@@ -31,6 +34,7 @@ type State = {
 const initialState: State = {}
 
 const defaultWindowState: WindowState = {
+  autoplay: undefined,
   currentTime: 0,
   file: undefined,
   loop: undefined,
@@ -60,6 +64,26 @@ export const windowSlice = createSlice({
         [id]: {
           ...defaultWindowState,
           file,
+        },
+      }
+    },
+    setAutoplay(
+      state,
+      action: PayloadAction<{
+        id: number
+        autoplay: boolean
+      }>,
+    ) {
+      const { id, autoplay } = action.payload
+      const window = state[id]
+      if (!window) {
+        return state
+      }
+      return {
+        ...state,
+        [id]: {
+          ...window,
+          autoplay,
         },
       }
     },
@@ -198,14 +222,20 @@ export const selectCurrentWindow = createSelector(
   (window, windowId) => window[windowId] ?? defaultWindowState,
 )
 
-export const selectFile = createSelector(
+export const selectAutoplay = createSelector(
   selectCurrentWindow,
-  (window) => window.file ?? { name: '', path: '', url: '' },
+  selectDefaultAutoplay,
+  (window, defaultAutoplay) => window.autoplay ?? defaultAutoplay,
 )
 
 export const selectCurrentTime = createSelector(
   selectCurrentWindow,
   (window) => window.currentTime,
+)
+
+export const selectFile = createSelector(
+  selectCurrentWindow,
+  (window) => window.file ?? { name: '', path: '', url: '' },
 )
 
 export const selectLoop = createSelector(
@@ -241,6 +271,15 @@ export const newWindow =
     const { newWindow } = windowSlice.actions
     const id = selectWindowId(getState())
     dispatch(newWindow({ id, file }))
+  }
+
+export const setAutoplay =
+  (autoplay: boolean): AppThunk =>
+  async (dispatch, getState) => {
+    const { setAutoplay } = windowSlice.actions
+    const id = selectWindowId(getState())
+    dispatch(setAutoplay({ id, autoplay }))
+    dispatch(setDefaultAutoplay({ defaultAutoplay: autoplay }))
   }
 
 export const setCurrentTime =
