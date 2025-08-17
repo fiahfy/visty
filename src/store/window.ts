@@ -4,12 +4,24 @@ import {
   type PayloadAction,
 } from '@reduxjs/toolkit'
 import type { AppState, AppThunk } from '~/store'
+import {
+  selectDefaultLoop,
+  selectDefaultVolume,
+  setDefaultLoop,
+  setDefaultVolume,
+} from '~/store/settings'
 import { selectWindowId } from '~/store/window-id'
 
 type File = { name: string; path: string; url: string }
 
 type WindowState = {
+  currentTime: number
   file?: File
+  loop?: boolean
+  loopRange?: [number, number]
+  pan: number
+  playbackRate: number
+  volume?: number
 }
 
 type State = {
@@ -19,7 +31,13 @@ type State = {
 const initialState: State = {}
 
 const defaultWindowState: WindowState = {
+  currentTime: 0,
   file: undefined,
+  loop: undefined,
+  loopRange: undefined,
+  pan: 0,
+  playbackRate: 1,
+  volume: undefined,
 }
 
 export const windowSlice = createSlice({
@@ -45,6 +63,126 @@ export const windowSlice = createSlice({
         },
       }
     },
+    setCurrentTime(
+      state,
+      action: PayloadAction<{
+        id: number
+        currentTime: number
+      }>,
+    ) {
+      const { id, currentTime } = action.payload
+      const window = state[id]
+      if (!window) {
+        return state
+      }
+      return {
+        ...state,
+        [id]: {
+          ...window,
+          currentTime,
+        },
+      }
+    },
+    setLoop(
+      state,
+      action: PayloadAction<{
+        id: number
+        loop: boolean
+      }>,
+    ) {
+      const { id, loop } = action.payload
+      const window = state[id]
+      if (!window) {
+        return state
+      }
+      return {
+        ...state,
+        [id]: {
+          ...window,
+          loop,
+        },
+      }
+    },
+    setLoopRange(
+      state,
+      action: PayloadAction<{
+        id: number
+        loopRange: [number, number] | undefined
+      }>,
+    ) {
+      const { id, loopRange } = action.payload
+      const window = state[id]
+      if (!window) {
+        return state
+      }
+      return {
+        ...state,
+        [id]: {
+          ...window,
+          loopRange,
+        },
+      }
+    },
+    setPan(
+      state,
+      action: PayloadAction<{
+        id: number
+        pan: number
+      }>,
+    ) {
+      const { id, pan } = action.payload
+      const window = state[id]
+      if (!window) {
+        return state
+      }
+      return {
+        ...state,
+        [id]: {
+          ...window,
+          pan,
+        },
+      }
+    },
+    setPlaybackRate(
+      state,
+      action: PayloadAction<{
+        id: number
+        playbackRate: number
+      }>,
+    ) {
+      const { id, playbackRate } = action.payload
+      const window = state[id]
+      if (!window) {
+        return state
+      }
+      return {
+        ...state,
+        [id]: {
+          ...window,
+          playbackRate,
+        },
+      }
+    },
+    setVolume(
+      state,
+      action: PayloadAction<{
+        id: number
+        volume: number
+      }>,
+    ) {
+      const { id, volume } = action.payload
+      const window = state[id]
+      if (!window) {
+        return state
+      }
+      return {
+        ...state,
+        [id]: {
+          ...window,
+          volume,
+        },
+      }
+    },
   },
 })
 
@@ -65,10 +203,92 @@ export const selectFile = createSelector(
   (window) => window.file ?? { name: '', path: '', url: '' },
 )
 
+export const selectCurrentTime = createSelector(
+  selectCurrentWindow,
+  (window) => window.currentTime,
+)
+
+export const selectLoop = createSelector(
+  selectCurrentWindow,
+  selectDefaultLoop,
+  (window, defaultLoop) => window.loop ?? defaultLoop,
+)
+
+export const selectLoopRange = createSelector(
+  selectCurrentWindow,
+  (window) => window.loopRange,
+)
+
+export const selectPan = createSelector(
+  selectCurrentWindow,
+  (window) => window.pan,
+)
+
+export const selectPlaybackRate = createSelector(
+  selectCurrentWindow,
+  (window) => window.playbackRate,
+)
+
+export const selectVolume = createSelector(
+  selectCurrentWindow,
+  selectDefaultVolume,
+  (window, defaultVolume) => window.volume ?? defaultVolume,
+)
+
 export const newWindow =
   (file: File): AppThunk =>
   async (dispatch, getState) => {
     const { newWindow } = windowSlice.actions
     const id = selectWindowId(getState())
     dispatch(newWindow({ id, file }))
+  }
+
+export const setCurrentTime =
+  (currentTime: number): AppThunk =>
+  async (dispatch, getState) => {
+    const { setCurrentTime } = windowSlice.actions
+    const id = selectWindowId(getState())
+    dispatch(setCurrentTime({ id, currentTime }))
+  }
+
+export const setLoop =
+  (loop: boolean): AppThunk =>
+  async (dispatch, getState) => {
+    const { setLoop } = windowSlice.actions
+    const id = selectWindowId(getState())
+    dispatch(setLoop({ id, loop }))
+    dispatch(setDefaultLoop({ defaultLoop: loop }))
+  }
+
+export const setLoopRange =
+  (loopRange: [number, number] | undefined): AppThunk =>
+  async (dispatch, getState) => {
+    const { setLoopRange } = windowSlice.actions
+    const id = selectWindowId(getState())
+    dispatch(setLoopRange({ id, loopRange }))
+  }
+
+export const setPlaybackRate =
+  (playbackRate: number): AppThunk =>
+  async (dispatch, getState) => {
+    const { setPlaybackRate } = windowSlice.actions
+    const id = selectWindowId(getState())
+    dispatch(setPlaybackRate({ id, playbackRate }))
+  }
+
+export const setPan =
+  (pan: number): AppThunk =>
+  async (dispatch, getState) => {
+    const { setPan } = windowSlice.actions
+    const id = selectWindowId(getState())
+    dispatch(setPan({ id, pan }))
+  }
+
+export const setVolume =
+  (volume: number): AppThunk =>
+  async (dispatch, getState) => {
+    const { setVolume } = windowSlice.actions
+    const id = selectWindowId(getState())
+    dispatch(setVolume({ id, volume }))
+    dispatch(setDefaultVolume({ defaultVolume: volume }))
   }

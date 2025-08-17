@@ -8,7 +8,6 @@ import type { AppState } from '~/store'
 type State = {
   defaultAutoplay: boolean
   defaultLoop: boolean
-  defaultMuted: boolean
   defaultVolume: number
   shouldAlwaysShowSeekBar: boolean
   shouldCloseWindowOnEscapeKey: boolean
@@ -18,7 +17,6 @@ type State = {
 const initialState: State = {
   defaultAutoplay: false,
   defaultLoop: false,
-  defaultMuted: false,
   defaultVolume: 1,
   shouldAlwaysShowSeekBar: false,
   shouldCloseWindowOnEscapeKey: false,
@@ -42,10 +40,6 @@ export const settingsSlice = createSlice({
     setDefaultLoop(state, action: PayloadAction<{ defaultLoop: boolean }>) {
       const { defaultLoop } = action.payload
       return { ...state, defaultLoop }
-    },
-    setDefaultMuted(state, action: PayloadAction<{ defaultMuted: boolean }>) {
-      const { defaultMuted } = action.payload
-      return { ...state, defaultMuted }
     },
     setDefaultVolume(state, action: PayloadAction<{ defaultVolume: number }>) {
       const { defaultVolume } = action.payload
@@ -80,7 +74,6 @@ export const {
   replaceState,
   setDefaultAutoplay,
   setDefaultLoop,
-  setDefaultMuted,
   setDefaultVolume,
   setViewModeOnOpen,
   toggleShouldAlwaysShowSeekBar,
@@ -91,11 +84,6 @@ export default settingsSlice.reducer
 
 export const selectSettings = (state: AppState) => state.settings
 
-export const selectDefaultActualVolume = createSelector(
-  selectSettings,
-  (settings) => (settings.defaultMuted ? 0 : settings.defaultVolume),
-)
-
 export const selectDefaultAutoplay = createSelector(
   selectSettings,
   (settings) => settings.defaultAutoplay,
@@ -104,6 +92,11 @@ export const selectDefaultAutoplay = createSelector(
 export const selectDefaultLoop = createSelector(
   selectSettings,
   (settings) => settings.defaultLoop,
+)
+
+export const selectDefaultVolume = createSelector(
+  selectSettings,
+  (settings) => settings.defaultVolume,
 )
 
 export const selectShouldAlwaysShowSeekBar = createSelector(

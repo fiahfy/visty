@@ -13,39 +13,46 @@ import VideoContext, {
 } from '~/contexts/VideoContext'
 import useStereoPanner from '~/hooks/useStereoPanner'
 import { useAppDispatch, useAppSelector } from '~/store'
+import { selectDefaultAutoplay, setDefaultAutoplay } from '~/store/settings'
 import {
-  selectDefaultActualVolume,
-  selectDefaultAutoplay,
-  selectDefaultLoop,
-  setDefaultAutoplay,
-  setDefaultLoop,
-  setDefaultMuted,
-  setDefaultVolume,
-} from '~/store/settings'
-import { selectFile } from '~/store/window'
+  selectCurrentTime,
+  selectFile,
+  selectLoop,
+  selectLoopRange,
+  selectPan,
+  selectPlaybackRate,
+  selectVolume,
+  setCurrentTime,
+  setLoop,
+  setLoopRange,
+  setPan,
+  setPlaybackRate,
+  setVolume,
+} from '~/store/window'
 
 type Props = { children: ReactNode }
 
 const VideoProvider = (props: Props) => {
   const { children } = props
 
+  const currentTime = useAppSelector(selectCurrentTime)
   const defaultAutoplay = useAppSelector(selectDefaultAutoplay)
-  const defaultLoop = useAppSelector(selectDefaultLoop)
-  const defaultVolume = useAppSelector(selectDefaultActualVolume)
   const file = useAppSelector(selectFile)
+  const loop = useAppSelector(selectLoop)
+  const loopRange = useAppSelector(selectLoopRange)
+  const pan = useAppSelector(selectPan)
+  const playbackRate = useAppSelector(selectPlaybackRate)
+  const volume = useAppSelector(selectVolume)
   const dispatch = useAppDispatch()
+
+  const [initialized, setInitialized] = useState(false)
 
   const [actionCode, setActionCode] = useState<ActionCode>()
   const [autoplay, setAutoplay] = useState(defaultAutoplay)
-  const [currentTime, setCurrentTime] = useState(0)
   const [duration, setDuration] = useState(0)
   const [fullscreen, setFullscreen] = useState(false)
-  const [loop, setLoop] = useState(defaultLoop)
-  const [loopRange, setLoopRange] = useState<[number, number]>()
-  const [pan, setPan] = useState(0)
   const [paused, setPaused] = useState(true)
   const [pictureInPicture, setPictureInPicture] = useState(false)
-  const [playbackRate, setPlaybackRate] = useState(1)
   const [playlistFile, setPlaylistFile] = useState<PlaylistFile>({
     next: undefined,
     previous: undefined,
@@ -54,8 +61,7 @@ const VideoProvider = (props: Props) => {
   const [status, setStatus] = useState<'loading' | 'loaded' | 'error'>(
     'loading',
   )
-  const [storedVolume, setStoredVolume] = useState(defaultVolume)
-  const [volume, setVolume] = useState(defaultVolume)
+  const [storedVolume, setStoredVolume] = useState(volume)
   const [zoom, setZoom] = useState(1)
 
   const partialLoop = useMemo(() => !!loopRange, [loopRange])
@@ -121,15 +127,27 @@ const VideoProvider = (props: Props) => {
   }, [])
 
   useEffect(() => {
+    if (initialized) {
+      return
+    }
+    setInitialized(true)
+
     const video = ref.current
     if (!video) {
       return
     }
 
+    video.autoplay = autoplay
+    video.currentTime = currentTime
     video.loop = loop
     video.volume = volume
-    video.autoplay = autoplay
-  }, [autoplay, loop, volume])
+
+    const panner = stereoPannerRef.current
+    if (!panner) {
+      return
+    }
+    panner.pan.value = pan
+  }, [autoplay, currentTime, initialized, loop, pan, stereoPannerRef, volume])
 
   useEffect(() => {
     const video = ref.current
@@ -139,19 +157,19 @@ const VideoProvider = (props: Props) => {
     let requestId: number
     const callback = () => {
       if (video.readyState >= 1) {
-        setCurrentTime(video.currentTime)
+        dispatch(setCurrentTime(video.currentTime))
+        dispatch(setLoop(video.loop))
+        dispatch(setPlaybackRate(video.playbackRate))
+        dispatch(setVolume(video.volume))
         setDuration(video.duration)
-        setLoop(video.loop)
         setPaused(video.paused)
-        setPlaybackRate(video.playbackRate)
-        setVolume(video.volume)
         setAutoplay(video.autoplay)
       }
       requestId = requestAnimationFrame(callback)
     }
     requestId = requestAnimationFrame(callback)
     return () => cancelAnimationFrame(requestId)
-  }, [])
+  }, [dispatch])
 
   useEffect(() => {
     const video = ref.current
@@ -189,12 +207,12 @@ const VideoProvider = (props: Props) => {
     }
     let requestId: number
     const callback = () => {
-      setPan(panner.pan.value)
+      dispatch(setPan(panner.pan.value))
       requestId = requestAnimationFrame(callback)
     }
     requestId = requestAnimationFrame(callback)
     return () => cancelAnimationFrame(requestId)
-  }, [stereoPannerRef.current])
+  }, [dispatch, stereoPannerRef.current])
 
   useEffect(() => {
     ;(async () => {
@@ -210,8 +228,8 @@ const VideoProvider = (props: Props) => {
   )
 
   const changeLoopRange = useCallback(
-    (value: [number, number]) => setLoopRange(value),
-    [],
+    (value: [number, number]) => dispatch(setLoopRange(value)),
+    [dispatch],
   )
 
   const changePan = useCallback(
@@ -242,13 +260,11 @@ const VideoProvider = (props: Props) => {
       const volume = Math.min(Math.max(0, value), 1)
       video.volume = volume
       setStoredVolume(volume)
-      dispatch(setDefaultVolume({ defaultVolume: volume }))
-      dispatch(setDefaultMuted({ defaultMuted: volume === 0 }))
       if (action) {
         triggerAction(action, volume)
       }
     },
-    [dispatch, triggerAction],
+    [triggerAction],
   )
 
   const volumeUp = useCallback(() => {
@@ -281,10 +297,8 @@ const VideoProvider = (props: Props) => {
     if (!video) {
       return
     }
-    const newLoop = !loop
-    video.loop = newLoop
-    dispatch(setDefaultLoop({ defaultLoop: newLoop }))
-  }, [dispatch, loop])
+    video.loop = !loop
+  }, [loop])
 
   const toggleMuted = useCallback(() => {
     const video = ref.current
@@ -292,11 +306,11 @@ const VideoProvider = (props: Props) => {
       return
     }
     const muted = volume !== 0
-    video.volume = muted ? 0 : storedVolume
-    dispatch(setDefaultMuted({ defaultMuted: muted }))
+    const newVolume = muted ? 0 : storedVolume
     const action = muted ? 'mute' : 'unmute'
+    video.volume = newVolume
     triggerAction(action)
-  }, [dispatch, storedVolume, triggerAction, volume])
+  }, [storedVolume, triggerAction, volume])
 
   const togglePanLeft = useCallback(
     () => changePan(pan > 0 ? 0 : pan > -1 ? -1 : 0),
@@ -310,11 +324,11 @@ const VideoProvider = (props: Props) => {
 
   const togglePartialLoop = useCallback(() => {
     if (loopRange) {
-      setLoopRange(undefined)
+      dispatch(setLoopRange(undefined))
     } else {
-      setLoopRange([currentTime, duration])
+      dispatch(setLoopRange([currentTime, duration]))
     }
-  }, [currentTime, duration, loopRange])
+  }, [currentTime, dispatch, duration, loopRange])
 
   const togglePictureInPicture = useCallback(async () => {
     const video = ref.current
@@ -378,6 +392,7 @@ const VideoProvider = (props: Props) => {
   const previousTrack = useCallback(() => {
     const path = playlistFile.previous?.path
     if (path) {
+      // TODO: not working sometimes
       window.electronAPI.openFilePath(path)
       triggerAction('previousTrack')
     }
@@ -386,6 +401,7 @@ const VideoProvider = (props: Props) => {
   const nextTrack = useCallback(() => {
     const path = playlistFile.next?.path
     if (path) {
+      // TODO: not working sometimes
       window.electronAPI.openFilePath(path)
       triggerAction('nextTrack')
     }
