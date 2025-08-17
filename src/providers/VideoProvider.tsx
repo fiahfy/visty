@@ -65,7 +65,7 @@ const VideoProvider = (props: Props) => {
   const [status, setStatus] = useState<'loading' | 'loaded' | 'error'>(
     'loading',
   )
-  const [storedVolume, setStoredVolume] = useState(0)
+  const [storedVolume, setStoredVolume] = useState(savedVolume)
   const [volume, setVolume] = useState(0)
   const [zoom, setZoom] = useState(1)
 
@@ -278,7 +278,7 @@ const VideoProvider = (props: Props) => {
     if (!video) {
       return
     }
-    setPlaybackRate(value)
+    video.playbackRate = value
   }, [])
 
   const changeVolume = useCallback(
