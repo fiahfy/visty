@@ -273,7 +273,7 @@ export const newWindow =
     dispatch(newWindow({ id, file }))
   }
 
-export const setAutoplay =
+export const saveAutoplay =
   (autoplay: boolean): AppThunk =>
   async (dispatch, getState) => {
     const { setAutoplay } = windowSlice.actions
@@ -282,7 +282,7 @@ export const setAutoplay =
     dispatch(setDefaultAutoplay({ defaultAutoplay: autoplay }))
   }
 
-export const setCurrentTime =
+export const saveCurrentTime =
   (currentTime: number): AppThunk =>
   async (dispatch, getState) => {
     const { setCurrentTime } = windowSlice.actions
@@ -290,7 +290,7 @@ export const setCurrentTime =
     dispatch(setCurrentTime({ id, currentTime }))
   }
 
-export const setLoop =
+export const saveLoop =
   (loop: boolean): AppThunk =>
   async (dispatch, getState) => {
     const { setLoop } = windowSlice.actions
@@ -299,7 +299,7 @@ export const setLoop =
     dispatch(setDefaultLoop({ defaultLoop: loop }))
   }
 
-export const setLoopRange =
+export const saveLoopRange =
   (loopRange: [number, number] | undefined): AppThunk =>
   async (dispatch, getState) => {
     const { setLoopRange } = windowSlice.actions
@@ -307,7 +307,7 @@ export const setLoopRange =
     dispatch(setLoopRange({ id, loopRange }))
   }
 
-export const setPlaybackRate =
+export const savePlaybackRate =
   (playbackRate: number): AppThunk =>
   async (dispatch, getState) => {
     const { setPlaybackRate } = windowSlice.actions
@@ -315,7 +315,7 @@ export const setPlaybackRate =
     dispatch(setPlaybackRate({ id, playbackRate }))
   }
 
-export const setPan =
+export const savePan =
   (pan: number): AppThunk =>
   async (dispatch, getState) => {
     const { setPan } = windowSlice.actions
@@ -323,7 +323,7 @@ export const setPan =
     dispatch(setPan({ id, pan }))
   }
 
-export const setVolume =
+export const saveVolume =
   (volume: number): AppThunk =>
   async (dispatch, getState) => {
     const { setVolume } = windowSlice.actions

@@ -14,6 +14,13 @@ import VideoContext, {
 import useStereoPanner from '~/hooks/useStereoPanner'
 import { useAppDispatch, useAppSelector } from '~/store'
 import {
+  saveAutoplay,
+  saveCurrentTime,
+  saveLoop,
+  saveLoopRange,
+  savePan,
+  savePlaybackRate,
+  saveVolume,
   selectAutoplay,
   selectCurrentTime,
   selectFile,
@@ -22,13 +29,6 @@ import {
   selectPan,
   selectPlaybackRate,
   selectVolume,
-  setAutoplay,
-  setCurrentTime,
-  setLoop,
-  setLoopRange,
-  setPan,
-  setPlaybackRate,
-  setVolume,
 } from '~/store/window'
 
 type Props = { children: ReactNode }
@@ -36,22 +36,27 @@ type Props = { children: ReactNode }
 const VideoProvider = (props: Props) => {
   const { children } = props
 
-  const autoplay = useAppSelector(selectAutoplay)
-  const currentTime = useAppSelector(selectCurrentTime)
   const file = useAppSelector(selectFile)
-  const loop = useAppSelector(selectLoop)
   const loopRange = useAppSelector(selectLoopRange)
-  const pan = useAppSelector(selectPan)
-  const playbackRate = useAppSelector(selectPlaybackRate)
-  const volume = useAppSelector(selectVolume)
+  const savedAutoplay = useAppSelector(selectAutoplay)
+  const savedCurrentTime = useAppSelector(selectCurrentTime)
+  const savedLoop = useAppSelector(selectLoop)
+  const savedPan = useAppSelector(selectPan)
+  const savedPlaybackRate = useAppSelector(selectPlaybackRate)
+  const savedVolume = useAppSelector(selectVolume)
   const dispatch = useAppDispatch()
 
+  const [autoplay, setAutoplay] = useState(false)
   const [actionCode, setActionCode] = useState<ActionCode>()
+  const [currentTime, setCurrentTime] = useState(0)
   const [duration, setDuration] = useState(0)
   const [fullscreen, setFullscreen] = useState(false)
   const [initialized, setInitialized] = useState(false)
+  const [loop, setLoop] = useState(false)
+  const [pan, setPan] = useState(0)
   const [paused, setPaused] = useState(true)
   const [pictureInPicture, setPictureInPicture] = useState(false)
+  const [playbackRate, setPlaybackRate] = useState(1)
   const [playlistFile, setPlaylistFile] = useState<PlaylistFile>({
     next: undefined,
     previous: undefined,
@@ -60,7 +65,8 @@ const VideoProvider = (props: Props) => {
   const [status, setStatus] = useState<'loading' | 'loaded' | 'error'>(
     'loading',
   )
-  const [storedVolume, setStoredVolume] = useState(volume)
+  const [storedVolume, setStoredVolume] = useState(0)
+  const [volume, setVolume] = useState(0)
   const [zoom, setZoom] = useState(1)
 
   const partialLoop = useMemo(() => !!loopRange, [loopRange])
@@ -135,27 +141,26 @@ const VideoProvider = (props: Props) => {
     if (!video) {
       return
     }
-
-    video.autoplay = autoplay
-    video.currentTime = currentTime
-    video.loop = loop
-    video.playbackRate = playbackRate
-    video.volume = volume
-
     const panner = stereoPannerRef.current
     if (!panner) {
       return
     }
-    panner.pan.value = pan
+
+    video.autoplay = savedAutoplay
+    video.currentTime = savedCurrentTime
+    video.loop = savedLoop
+    video.playbackRate = savedPlaybackRate
+    video.volume = savedVolume
+    panner.pan.value = savedPan
   }, [
-    autoplay,
-    currentTime,
     initialized,
-    loop,
-    pan,
-    playbackRate,
+    savedAutoplay,
+    savedCurrentTime,
+    savedLoop,
+    savedPan,
+    savedPlaybackRate,
+    savedVolume,
     stereoPannerRef,
-    volume,
   ])
 
   useEffect(() => {
@@ -163,22 +168,52 @@ const VideoProvider = (props: Props) => {
     if (!video) {
       return
     }
+    const panner = stereoPannerRef.current
+    if (!panner) {
+      return
+    }
+
+    const timer = window.setInterval(() => {
+      dispatch(saveAutoplay(video.autoplay))
+      dispatch(saveCurrentTime(video.currentTime))
+      dispatch(saveLoop(video.loop))
+      dispatch(savePlaybackRate(video.playbackRate))
+      dispatch(saveVolume(video.volume))
+      dispatch(savePan(panner.pan.value))
+    }, 1000)
+
+    return () => window.clearInterval(timer)
+  }, [dispatch, stereoPannerRef])
+
+  useEffect(() => {
+    const video = ref.current
+    if (!video) {
+      return
+    }
+    const panner = stereoPannerRef.current
+    if (!panner) {
+      return
+    }
+
     let requestId: number
     const callback = () => {
       if (video.readyState >= 1) {
-        dispatch(setAutoplay(video.autoplay))
-        dispatch(setCurrentTime(video.currentTime))
-        dispatch(setLoop(video.loop))
-        dispatch(setPlaybackRate(video.playbackRate))
-        dispatch(setVolume(video.volume))
         setDuration(video.duration)
         setPaused(video.paused)
+
+        setAutoplay(video.autoplay)
+        setCurrentTime(video.currentTime)
+        setLoop(video.loop)
+        setPlaybackRate(video.playbackRate)
+        setVolume(video.volume)
+        setPan(panner.pan.value)
       }
       requestId = requestAnimationFrame(callback)
     }
     requestId = requestAnimationFrame(callback)
+
     return () => cancelAnimationFrame(requestId)
-  }, [dispatch])
+  }, [stereoPannerRef.current])
 
   useEffect(() => {
     const video = ref.current
@@ -210,20 +245,6 @@ const VideoProvider = (props: Props) => {
   }, [loopStartTime])
 
   useEffect(() => {
-    const panner = stereoPannerRef.current
-    if (!panner) {
-      return
-    }
-    let requestId: number
-    const callback = () => {
-      dispatch(setPan(panner.pan.value))
-      requestId = requestAnimationFrame(callback)
-    }
-    requestId = requestAnimationFrame(callback)
-    return () => cancelAnimationFrame(requestId)
-  }, [dispatch, stereoPannerRef.current])
-
-  useEffect(() => {
     ;(async () => {
       const playlistFile = await window.electronAPI.getPlaylistFile(file.path)
       setPlaylistFile(playlistFile)
@@ -237,7 +258,7 @@ const VideoProvider = (props: Props) => {
   )
 
   const changeLoopRange = useCallback(
-    (value: [number, number]) => dispatch(setLoopRange(value)),
+    (value: [number, number]) => dispatch(saveLoopRange(value)),
     [dispatch],
   )
 
@@ -257,7 +278,7 @@ const VideoProvider = (props: Props) => {
     if (!video) {
       return
     }
-    video.playbackRate = value
+    setPlaybackRate(value)
   }, [])
 
   const changeVolume = useCallback(
@@ -331,9 +352,9 @@ const VideoProvider = (props: Props) => {
 
   const togglePartialLoop = useCallback(() => {
     if (loopRange) {
-      dispatch(setLoopRange(undefined))
+      dispatch(saveLoopRange(undefined))
     } else {
-      dispatch(setLoopRange([currentTime, duration]))
+      dispatch(saveLoopRange([currentTime, duration]))
     }
   }, [currentTime, dispatch, duration, loopRange])
 
@@ -354,14 +375,14 @@ const VideoProvider = (props: Props) => {
     if (!video) {
       return
     }
-    if (paused) {
+    if (video.paused) {
       video.play()
       triggerAction('play')
     } else {
       video.pause()
       triggerAction('pause')
     }
-  }, [paused, triggerAction])
+  }, [triggerAction])
 
   const seek = useCallback((value: number) => {
     const video = ref.current
@@ -399,7 +420,6 @@ const VideoProvider = (props: Props) => {
   const previousTrack = useCallback(() => {
     const path = playlistFile.previous?.path
     if (path) {
-      // TODO: not working sometimes
       window.electronAPI.openFilePath(path)
       triggerAction('previousTrack')
     }
@@ -408,7 +428,6 @@ const VideoProvider = (props: Props) => {
   const nextTrack = useCallback(() => {
     const path = playlistFile.next?.path
     if (path) {
-      // TODO: not working sometimes
       window.electronAPI.openFilePath(path)
       triggerAction('nextTrack')
     }
