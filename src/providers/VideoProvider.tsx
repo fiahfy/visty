@@ -46,11 +46,10 @@ const VideoProvider = (props: Props) => {
   const volume = useAppSelector(selectVolume)
   const dispatch = useAppDispatch()
 
-  const [initialized, setInitialized] = useState(false)
-
   const [actionCode, setActionCode] = useState<ActionCode>()
   const [duration, setDuration] = useState(0)
   const [fullscreen, setFullscreen] = useState(false)
+  const [initialized, setInitialized] = useState(false)
   const [paused, setPaused] = useState(true)
   const [pictureInPicture, setPictureInPicture] = useState(false)
   const [playlistFile, setPlaylistFile] = useState<PlaylistFile>({
@@ -140,6 +139,7 @@ const VideoProvider = (props: Props) => {
     video.autoplay = autoplay
     video.currentTime = currentTime
     video.loop = loop
+    video.playbackRate = playbackRate
     video.volume = volume
 
     const panner = stereoPannerRef.current
@@ -147,7 +147,16 @@ const VideoProvider = (props: Props) => {
       return
     }
     panner.pan.value = pan
-  }, [autoplay, currentTime, initialized, loop, pan, stereoPannerRef, volume])
+  }, [
+    autoplay,
+    currentTime,
+    initialized,
+    loop,
+    pan,
+    playbackRate,
+    stereoPannerRef,
+    volume,
+  ])
 
   useEffect(() => {
     const video = ref.current
