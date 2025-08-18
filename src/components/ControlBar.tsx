@@ -219,6 +219,12 @@ const ControlBar = (props: Props) => {
               max={1}
               onChange={handleChangeVolume}
               size="small"
+              slotProps={{
+                input: {
+                  // Make slider non-focusable
+                  onFocus: (e) => e.target.blur(),
+                },
+              }}
               step={0.01}
               sx={{
                 borderRadius: 0,
@@ -231,6 +237,8 @@ const ControlBar = (props: Props) => {
                   },
                 },
               }}
+              // Make slider non-focusable
+              tabIndex={-1}
               value={volume}
             />
           </WidthTransition>
@@ -250,6 +258,12 @@ const ControlBar = (props: Props) => {
               min={-1}
               onChange={handleChangePan}
               size="small"
+              slotProps={{
+                input: {
+                  // Make slider non-focusable
+                  onFocus: (e) => e.target.blur(),
+                },
+              }}
               step={0.01}
               sx={{
                 borderRadius: 0,
@@ -262,6 +276,8 @@ const ControlBar = (props: Props) => {
                   },
                 },
               }}
+              // Make slider non-focusable
+              tabIndex={-1}
               value={pan}
             />
             <IconButton

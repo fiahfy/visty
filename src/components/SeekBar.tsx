@@ -109,8 +109,13 @@ const SeekBar = (props: Props) => {
             onChange={handleChangeCurrentTime}
             onClick={handleClickCurrentTime}
             size="small"
-            // Emulating Keyboard Event Prevention
-            step={0.1 ** 10}
+            slotProps={{
+              input: {
+                // Make slider non-focusable
+                onFocus: (e) => e.target.blur(),
+              },
+            }}
+            step={0.1}
             sx={{
               borderRadius: 0,
               inset: 0,
@@ -146,6 +151,8 @@ const SeekBar = (props: Props) => {
                 },
               },
             }}
+            // Make slider non-focusable
+            tabIndex={-1}
             value={currentTime}
             valueLabelDisplay="auto"
             valueLabelFormat={formatDuration}
@@ -156,7 +163,13 @@ const SeekBar = (props: Props) => {
               max={duration}
               onChange={handleChangeLoopRange}
               size="small"
-              step={0.01}
+              slotProps={{
+                input: {
+                  // Make slider non-focusable
+                  onFocus: (e) => e.target.blur(),
+                },
+              }}
+              step={0.1}
               sx={{
                 borderRadius: 0,
                 inset: 0,
@@ -193,6 +206,8 @@ const SeekBar = (props: Props) => {
                   },
                 },
               }}
+              // Make slider non-focusable
+              tabIndex={-1}
               value={loopRange}
               valueLabelDisplay={
                 !controlBarVisible && shouldAlwaysShowSeekBar ? 'off' : 'on'
