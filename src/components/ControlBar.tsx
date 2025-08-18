@@ -181,7 +181,6 @@ const ControlBar = (props: Props) => {
         <IconButton
           disabled={!playlistFile.previous}
           onClick={previousTrack}
-          onKeyDown={(e) => e.preventDefault()}
           size="small"
           title={playlistFile.previous?.name}
         >
@@ -189,7 +188,6 @@ const ControlBar = (props: Props) => {
         </IconButton>
         <IconButton
           onClick={togglePaused}
-          onKeyDown={(e) => e.preventDefault()}
           size="small"
           title={`${paused ? 'Play' : 'Pause'} (k)`}
         >
@@ -198,7 +196,6 @@ const ControlBar = (props: Props) => {
         <IconButton
           disabled={!playlistFile.next}
           onClick={nextTrack}
-          onKeyDown={(e) => e.preventDefault()}
           size="small"
           title={playlistFile.next?.name}
         >
@@ -212,7 +209,6 @@ const ControlBar = (props: Props) => {
         >
           <IconButton
             onClick={toggleMuted}
-            onKeyDown={(e) => e.preventDefault()}
             size="small"
             title={`${muted ? 'Unmute' : 'Mute'} (m)`}
           >
@@ -222,7 +218,6 @@ const ControlBar = (props: Props) => {
             <Slider
               max={1}
               onChange={handleChangeVolume}
-              onKeyDown={(e) => e.preventDefault()}
               size="small"
               step={0.01}
               sx={{
@@ -246,12 +241,7 @@ const ControlBar = (props: Props) => {
           onMouseEnter={() => showPanSlider()}
           sx={{ overflow: 'hidden' }}
         >
-          <IconButton
-            onClick={togglePanLeft}
-            onKeyDown={(e) => e.preventDefault()}
-            size="small"
-            title="Pan Left"
-          >
+          <IconButton onClick={togglePanLeft} size="small" title="Pan Left">
             <HearingIcon fontSize="small" />
           </IconButton>
           <WidthTransition in={panSliderVisible}>
@@ -259,7 +249,6 @@ const ControlBar = (props: Props) => {
               max={1}
               min={-1}
               onChange={handleChangePan}
-              onKeyDown={(e) => e.preventDefault()}
               size="small"
               step={0.01}
               sx={{
@@ -277,7 +266,6 @@ const ControlBar = (props: Props) => {
             />
             <IconButton
               onClick={togglePanRight}
-              onKeyDown={(e) => e.preventDefault()}
               size="small"
               sx={{ transform: 'scale(-1, 1)' }}
               title="Pan Right"
@@ -297,17 +285,11 @@ const ControlBar = (props: Props) => {
           {formatDuration(currentTime)} / {formatDuration(duration)}
         </Typography>
         <Box sx={{ flexGrow: 1 }} />
-        <IconButton
-          onClick={handleClickSettings}
-          onKeyDown={(e) => e.preventDefault()}
-          size="small"
-          title="Settings"
-        >
+        <IconButton onClick={handleClickSettings} size="small" title="Settings">
           <SettingsIcon fontSize="small" />
         </IconButton>
         <IconButton
           onClick={togglePictureInPicture}
-          onKeyDown={(e) => e.preventDefault()}
           size="small"
           title={
             pictureInPicture ? 'Exit picture in picture' : 'Picture in picture'
@@ -317,7 +299,6 @@ const ControlBar = (props: Props) => {
         </IconButton>
         <IconButton
           onClick={toggleFullscreen}
-          onKeyDown={(e) => e.preventDefault()}
           size="small"
           title={`${fullscreen ? 'Exit full screen' : 'Full screen'} (f)`}
         >

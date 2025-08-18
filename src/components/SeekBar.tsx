@@ -155,7 +155,6 @@ const SeekBar = (props: Props) => {
               color="secondary"
               max={duration}
               onChange={handleChangeLoopRange}
-              onKeyDown={(e) => e.preventDefault()}
               size="small"
               step={0.01}
               sx={{
