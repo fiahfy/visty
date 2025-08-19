@@ -5,7 +5,7 @@ const timeout = 500
 
 type Props = { children: ReactNode; in: boolean }
 
-const FlashIndicatorTransition = (props: Props) => {
+const HideTransition = (props: Props) => {
   const { children, in: inProps } = props
 
   const nodeRef = useRef(null)
@@ -13,20 +13,16 @@ const FlashIndicatorTransition = (props: Props) => {
   const styles = {
     appear: {
       opacity: 1,
-      transform: 'scale(1)',
-      transition: `opacity ${0}ms linear, transform ${0}ms linear`,
     },
     disappear: {
       opacity: 0,
-      transform: 'scale(2)',
-      transition: `opacity ${timeout}ms linear, transform ${timeout}ms linear`,
     },
   }
 
   const transitionStyles = {
     entering: styles.appear,
     entered: styles.appear,
-    exiting: styles.disappear,
+    exiting: styles.appear,
     exited: styles.disappear,
     unmounted: styles.disappear,
   }
@@ -51,4 +47,4 @@ const FlashIndicatorTransition = (props: Props) => {
   )
 }
 
-export default FlashIndicatorTransition
+export default HideTransition

@@ -337,7 +337,7 @@ const VideoProvider = (props: Props) => {
     const newVolume = muted ? 0 : storedVolume
     const action = muted ? 'mute' : 'unmute'
     video.volume = newVolume
-    triggerAction(action)
+    triggerAction(action, newVolume)
   }, [storedVolume, triggerAction, volume])
 
   const togglePanLeft = useCallback(

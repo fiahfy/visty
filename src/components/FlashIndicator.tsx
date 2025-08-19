@@ -12,6 +12,7 @@ import {
 import { Box, Stack, Typography } from '@mui/material'
 import { useEffect, useMemo, useState } from 'react'
 import FlashIndicatorTransition from '~/components/transitions/FlashIndicatorTransition'
+import HideTransition from '~/components/transitions/HideTransition'
 import useVideo from '~/hooks/useVideo'
 
 const FlashIndicator = () => {
@@ -27,7 +28,7 @@ const FlashIndicator = () => {
   const [ActionIcon, message] = useMemo(() => {
     switch (action) {
       case 'mute':
-        return [VolumeOffIcon, undefined]
+        return [VolumeOffIcon, `${value * 100}%`]
       case 'nextTrack':
         return [SkipNextIcon, undefined]
       case 'pause':
@@ -41,7 +42,7 @@ const FlashIndicator = () => {
       case 'seekForward':
         return [Forward5Icon, undefined]
       case 'unmute':
-        return [VolumeUpIcon, undefined]
+        return [VolumeUpIcon, `${value * 100}%`]
       case 'volumeDown':
         return [VolumeDownIcon, `${value * 100}%`]
       case 'volumeUp':
@@ -70,15 +71,19 @@ const FlashIndicator = () => {
         position: 'absolute',
       }}
     >
-      <FlashIndicatorTransition in={iconVisible}>
-        <Stack alignItems="center" direction="column">
+      <Stack
+        alignItems="center"
+        direction="column"
+        sx={{ position: 'relative' }}
+      >
+        <FlashIndicatorTransition in={iconVisible}>
           {ActionIcon && (
             <Box
               sx={{
                 display: 'inline-block',
                 backgroundColor: 'black',
                 borderRadius: '50%',
-                opacity: 0.7,
+                opacity: 0.5,
                 p: 1,
               }}
             >
@@ -91,19 +96,31 @@ const FlashIndicator = () => {
               />
             </Box>
           )}
-          {message && (
-            <Typography
-              variant="caption"
-              sx={{
-                position: 'absolute',
-                bottom: (theme) => `calc(-1 * ${theme.spacing(3)})`,
-              }}
-            >
-              {message}
-            </Typography>
-          )}
-        </Stack>
-      </FlashIndicatorTransition>
+        </FlashIndicatorTransition>
+        <Box
+          sx={{
+            bottom: (theme) => `calc(-1 * ${theme.spacing(7.5)})`,
+            position: 'absolute',
+          }}
+        >
+          <HideTransition in={iconVisible}>
+            {message && (
+              <Typography
+                variant="body2"
+                sx={{
+                  backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                  borderRadius: (theme) => theme.spacing(0.5),
+                  opacity: 0.7,
+                  px: 1,
+                  py: 0.25,
+                }}
+              >
+                {message}
+              </Typography>
+            )}
+          </HideTransition>
+        </Box>
+      </Stack>
     </Box>
   )
 }
