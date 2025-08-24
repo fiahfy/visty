@@ -69,6 +69,9 @@ const VideoProvider = (props: Props) => {
   const [volume, setVolume] = useState(0)
   const [zoom, setZoom] = useState(1)
 
+  const ref = useRef<HTMLVideoElement>(null)
+  const stereoPannerRef = useStereoPanner(ref)
+
   const partialLoop = useMemo(() => !!loopRange, [loopRange])
   const loopStartTime = useMemo(
     () => (loopRange ? loopRange[0] : undefined),
@@ -85,171 +88,6 @@ const VideoProvider = (props: Props) => {
         return undefined
     }
   }, [status])
-
-  const ref = useRef<HTMLVideoElement>(null)
-  const stereoPannerRef = useStereoPanner(ref)
-
-  useEffect(() => {
-    const removeListener = window.electronAPI.onFullscreenChange(setFullscreen)
-    return () => removeListener()
-  }, [])
-
-  useEffect(() => {
-    const video = ref.current
-    if (!video) {
-      return
-    }
-
-    const handleLoadStart = () => setStatus('loading')
-    const handleLoadedMetadata = async () => {
-      setSize({
-        height: video.videoHeight,
-        width: video.videoWidth,
-      })
-      setStatus('loaded')
-    }
-    const handleError = () => setStatus('error')
-    const handleEnterPictureInPicture = () => setPictureInPicture(true)
-    const handleLeavePictureInPicture = () => setPictureInPicture(false)
-    video.addEventListener('loadedstart', handleLoadStart)
-    video.addEventListener('loadedmetadata', handleLoadedMetadata)
-    video.addEventListener('error', handleError)
-    video.addEventListener('enterpictureinpicture', handleEnterPictureInPicture)
-    video.addEventListener('leavepictureinpicture', handleLeavePictureInPicture)
-    return () => {
-      video.removeEventListener('loadedstart', handleLoadStart)
-      video.removeEventListener('loadedmetadata', handleLoadedMetadata)
-      video.removeEventListener('error', handleError)
-      video.removeEventListener(
-        'enterpictureinpicture',
-        handleEnterPictureInPicture,
-      )
-      video.removeEventListener(
-        'leavepictureinpicture',
-        handleLeavePictureInPicture,
-      )
-    }
-  }, [])
-
-  useEffect(() => {
-    if (initialized) {
-      return
-    }
-    setInitialized(true)
-
-    const video = ref.current
-    if (!video) {
-      return
-    }
-    const panner = stereoPannerRef.current
-    if (!panner) {
-      return
-    }
-
-    video.autoplay = savedAutoplay
-    video.currentTime = savedCurrentTime
-    video.loop = savedLoop
-    video.playbackRate = savedPlaybackRate
-    video.volume = savedVolume
-    panner.pan.value = savedPan
-  }, [
-    initialized,
-    savedAutoplay,
-    savedCurrentTime,
-    savedLoop,
-    savedPan,
-    savedPlaybackRate,
-    savedVolume,
-    stereoPannerRef,
-  ])
-
-  useEffect(() => {
-    const video = ref.current
-    if (!video) {
-      return
-    }
-    const panner = stereoPannerRef.current
-    if (!panner) {
-      return
-    }
-
-    const timer = window.setInterval(() => {
-      dispatch(saveAutoplay(video.autoplay))
-      dispatch(saveCurrentTime(video.currentTime))
-      dispatch(saveLoop(video.loop))
-      dispatch(savePlaybackRate(video.playbackRate))
-      dispatch(saveVolume(video.volume))
-      dispatch(savePan(panner.pan.value))
-    }, 1000)
-
-    return () => window.clearInterval(timer)
-  }, [dispatch, stereoPannerRef])
-
-  useEffect(() => {
-    const video = ref.current
-    if (!video) {
-      return
-    }
-    const panner = stereoPannerRef.current
-    if (!panner) {
-      return
-    }
-
-    let requestId: number
-    const callback = () => {
-      if (video.readyState >= 1) {
-        setDuration(video.duration)
-        setPaused(video.paused)
-
-        setAutoplay(video.autoplay)
-        setCurrentTime(video.currentTime)
-        setLoop(video.loop)
-        setPlaybackRate(video.playbackRate)
-        setVolume(video.volume)
-        setPan(panner.pan.value)
-      }
-      requestId = requestAnimationFrame(callback)
-    }
-    requestId = requestAnimationFrame(callback)
-
-    return () => cancelAnimationFrame(requestId)
-  }, [stereoPannerRef.current])
-
-  useEffect(() => {
-    const video = ref.current
-    if (!video) {
-      return
-    }
-    let requestId: number
-    const callback = () => {
-      if (loopRange) {
-        const [startTime, endTime] = loopRange
-        if (video.currentTime < startTime || video.currentTime > endTime) {
-          video.currentTime = startTime
-        }
-      }
-      requestId = requestAnimationFrame(callback)
-    }
-    requestId = requestAnimationFrame(callback)
-    return () => cancelAnimationFrame(requestId)
-  }, [loopRange])
-
-  useEffect(() => {
-    const video = ref.current
-    if (!video) {
-      return
-    }
-    if (loopStartTime !== undefined) {
-      video.currentTime = loopStartTime
-    }
-  }, [loopStartTime])
-
-  useEffect(() => {
-    ;(async () => {
-      const playlistFile = await window.electronAPI.getPlaylistFile(file.path)
-      setPlaylistFile(playlistFile)
-    })()
-  }, [file.path])
 
   const triggerAction = useCallback(
     (action: Action, value?: number) =>
@@ -432,6 +270,168 @@ const VideoProvider = (props: Props) => {
       triggerAction('nextTrack')
     }
   }, [playlistFile.next?.path, triggerAction])
+
+  useEffect(() => {
+    const removeListener = window.electronAPI.onFullscreenChange(setFullscreen)
+    return () => removeListener()
+  }, [])
+
+  useEffect(() => {
+    const video = ref.current
+    if (!video) {
+      return
+    }
+
+    const handleLoadStart = () => setStatus('loading')
+    const handleLoadedMetadata = async () => {
+      setSize({
+        height: video.videoHeight,
+        width: video.videoWidth,
+      })
+      setStatus('loaded')
+    }
+    const handleError = () => setStatus('error')
+    const handleEnterPictureInPicture = () => setPictureInPicture(true)
+    const handleLeavePictureInPicture = () => setPictureInPicture(false)
+    video.addEventListener('loadedstart', handleLoadStart)
+    video.addEventListener('loadedmetadata', handleLoadedMetadata)
+    video.addEventListener('error', handleError)
+    video.addEventListener('enterpictureinpicture', handleEnterPictureInPicture)
+    video.addEventListener('leavepictureinpicture', handleLeavePictureInPicture)
+    return () => {
+      video.removeEventListener('loadedstart', handleLoadStart)
+      video.removeEventListener('loadedmetadata', handleLoadedMetadata)
+      video.removeEventListener('error', handleError)
+      video.removeEventListener(
+        'enterpictureinpicture',
+        handleEnterPictureInPicture,
+      )
+      video.removeEventListener(
+        'leavepictureinpicture',
+        handleLeavePictureInPicture,
+      )
+    }
+  }, [])
+
+  useEffect(() => {
+    if (initialized) {
+      return
+    }
+    setInitialized(true)
+
+    const video = ref.current
+    if (!video) {
+      return
+    }
+    const panner = stereoPannerRef.current
+    if (!panner) {
+      return
+    }
+
+    video.autoplay = savedAutoplay
+    video.currentTime = savedCurrentTime
+    video.loop = savedLoop
+    video.playbackRate = savedPlaybackRate
+    video.volume = savedVolume
+    panner.pan.value = savedPan
+  }, [
+    initialized,
+    savedAutoplay,
+    savedCurrentTime,
+    savedLoop,
+    savedPan,
+    savedPlaybackRate,
+    savedVolume,
+    stereoPannerRef,
+  ])
+
+  useEffect(() => {
+    const video = ref.current
+    if (!video) {
+      return
+    }
+    const panner = stereoPannerRef.current
+    if (!panner) {
+      return
+    }
+
+    const timer = window.setInterval(() => {
+      dispatch(saveAutoplay(video.autoplay))
+      dispatch(saveCurrentTime(video.currentTime))
+      dispatch(saveLoop(video.loop))
+      dispatch(savePlaybackRate(video.playbackRate))
+      dispatch(saveVolume(video.volume))
+      dispatch(savePan(panner.pan.value))
+    }, 1000)
+
+    return () => window.clearInterval(timer)
+  }, [dispatch, stereoPannerRef])
+
+  useEffect(() => {
+    const video = ref.current
+    if (!video) {
+      return
+    }
+    const panner = stereoPannerRef.current
+    if (!panner) {
+      return
+    }
+
+    let requestId: number
+    const callback = () => {
+      if (video.readyState >= 1) {
+        setDuration(video.duration)
+        setPaused(video.paused)
+
+        setAutoplay(video.autoplay)
+        setCurrentTime(video.currentTime)
+        setLoop(video.loop)
+        setPlaybackRate(video.playbackRate)
+        setVolume(video.volume)
+        setPan(panner.pan.value)
+      }
+      requestId = requestAnimationFrame(callback)
+    }
+    requestId = requestAnimationFrame(callback)
+
+    return () => cancelAnimationFrame(requestId)
+  }, [stereoPannerRef.current])
+
+  useEffect(() => {
+    const video = ref.current
+    if (!video) {
+      return
+    }
+    let requestId: number
+    const callback = () => {
+      if (loopRange) {
+        const [startTime, endTime] = loopRange
+        if (video.currentTime < startTime || video.currentTime > endTime) {
+          video.currentTime = startTime
+        }
+      }
+      requestId = requestAnimationFrame(callback)
+    }
+    requestId = requestAnimationFrame(callback)
+    return () => cancelAnimationFrame(requestId)
+  }, [loopRange])
+
+  useEffect(() => {
+    const video = ref.current
+    if (!video) {
+      return
+    }
+    if (loopStartTime !== undefined) {
+      video.currentTime = loopStartTime
+    }
+  }, [loopStartTime])
+
+  useEffect(() => {
+    ;(async () => {
+      const playlistFile = await window.electronAPI.getPlaylistFile(file.path)
+      setPlaylistFile(playlistFile)
+    })()
+  }, [file.path])
 
   const value = {
     actionCode,

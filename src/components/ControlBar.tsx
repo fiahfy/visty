@@ -137,13 +137,6 @@ const ControlBar = (props: Props) => {
     ],
   )
 
-  useEffect(() => {
-    if (!controlBarVisible) {
-      hideVolumeSlider()
-      hidePanSlider()
-    }
-  }, [controlBarVisible, hidePanSlider, hideVolumeSlider])
-
   const handleChangeVolume = useCallback(
     (_e: Event, value: number | number[]) => changeVolume(value as number),
     [changeVolume],
@@ -153,6 +146,13 @@ const ControlBar = (props: Props) => {
     (_e: Event, value: number | number[]) => changePan(value as number),
     [changePan],
   )
+
+  useEffect(() => {
+    if (!controlBarVisible) {
+      hideVolumeSlider()
+      hidePanSlider()
+    }
+  }, [controlBarVisible, hidePanSlider, hideVolumeSlider])
 
   return (
     <AppBar

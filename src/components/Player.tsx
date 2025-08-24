@@ -69,6 +69,49 @@ const Player = () => {
 
   const previousSize = usePrevious(size)
 
+  const handleMouseDown = useCallback((e: MouseEvent) => {
+    if ((e.ctrlKey && !e.metaKey) || (!e.ctrlKey && e.metaKey)) {
+      const wrapper = wrapperRef.current
+      if (wrapper) {
+        setDragOffset({
+          x: wrapper.scrollLeft + e.clientX,
+          y: wrapper.scrollTop + e.clientY,
+        })
+      }
+    }
+  }, [])
+
+  const handleMouseMove = useCallback(
+    (e: MouseEvent) => {
+      showControlBar()
+      hideControlBarAfter(2000)
+      setPosition({ x: e.clientX, y: e.clientY })
+      const wrapper = wrapperRef.current
+      if (wrapper && dragOffset) {
+        wrapper.scrollLeft = dragOffset.x - e.clientX
+        wrapper.scrollTop = dragOffset.y - e.clientY
+      }
+    },
+    [dragOffset, hideControlBarAfter, showControlBar],
+  )
+
+  const handleMouseUp = useCallback(() => setDragOffset(undefined), [])
+
+  const handleMouseEnterBar = useCallback(
+    () => showControlBar(),
+    [showControlBar],
+  )
+
+  const handleClick = useCallback(
+    (e: MouseEvent) => {
+      if ((e.ctrlKey && !e.metaKey) || (!e.ctrlKey && e.metaKey)) {
+        return
+      }
+      togglePaused()
+    },
+    [togglePaused],
+  )
+
   useEffect(
     () => setVisible(fullscreen || controlBarVisible),
     [controlBarVisible, setVisible, fullscreen],
@@ -149,49 +192,6 @@ const Player = () => {
       window.cancelAnimationFrame(id)
     }
   }, [hideControlBar])
-
-  const handleMouseDown = useCallback((e: MouseEvent) => {
-    if ((e.ctrlKey && !e.metaKey) || (!e.ctrlKey && e.metaKey)) {
-      const wrapper = wrapperRef.current
-      if (wrapper) {
-        setDragOffset({
-          x: wrapper.scrollLeft + e.clientX,
-          y: wrapper.scrollTop + e.clientY,
-        })
-      }
-    }
-  }, [])
-
-  const handleMouseMove = useCallback(
-    (e: MouseEvent) => {
-      showControlBar()
-      hideControlBarAfter(2000)
-      setPosition({ x: e.clientX, y: e.clientY })
-      const wrapper = wrapperRef.current
-      if (wrapper && dragOffset) {
-        wrapper.scrollLeft = dragOffset.x - e.clientX
-        wrapper.scrollTop = dragOffset.y - e.clientY
-      }
-    },
-    [dragOffset, hideControlBarAfter, showControlBar],
-  )
-
-  const handleMouseUp = useCallback(() => setDragOffset(undefined), [])
-
-  const handleMouseEnterBar = useCallback(
-    () => showControlBar(),
-    [showControlBar],
-  )
-
-  const handleClick = useCallback(
-    (e: MouseEvent) => {
-      if ((e.ctrlKey && !e.metaKey) || (!e.ctrlKey && e.metaKey)) {
-        return
-      }
-      togglePaused()
-    },
-    [togglePaused],
-  )
 
   return (
     <Box sx={{ height: '100%', width: '100%' }}>

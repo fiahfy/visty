@@ -24,25 +24,30 @@ const SeekBar = (props: Props) => {
   const shouldAlwaysShowSeekBar = useAppSelector(selectShouldAlwaysShowSeekBar)
 
   const { changeLoopRange, currentTime, duration, loopRange, seek } = useVideo()
+
   const { theme } = useTheme()
 
   const [partialLoopEnabled, setPartialLoopEnabled] = useState(false)
 
   const nodeRef = useRef(null)
 
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) =>
-      setPartialLoopEnabled(
-        (e.ctrlKey && !e.metaKey) || (!e.ctrlKey && e.metaKey),
-      )
-    const handleKeyUp = () => setPartialLoopEnabled(false)
-    document.addEventListener('keydown', handleKeyDown)
-    document.addEventListener('keyup', handleKeyUp)
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown)
-      document.removeEventListener('keyup', handleKeyUp)
+  const styles = useMemo(() => {
+    const styles = {
+      inset: `auto ${theme.spacing(1)} 1px`,
+      opacity: 1,
+      transform: 'translateY(-61px)',
     }
-  }, [])
+    return {
+      appear: styles,
+      disappear: {
+        inset: shouldAlwaysShowSeekBar ? 'auto 0 1px' : styles.inset,
+        opacity: shouldAlwaysShowSeekBar ? styles.opacity : 0,
+        transform: shouldAlwaysShowSeekBar
+          ? 'translateY(-14px)'
+          : styles.transform,
+      },
+    }
+  }, [shouldAlwaysShowSeekBar, theme])
 
   const handleClickCurrentTime = useCallback(
     (e: MouseEvent) => {
@@ -64,25 +69,21 @@ const SeekBar = (props: Props) => {
     [changeLoopRange],
   )
 
-  const timeout = theme.transitions.duration.shortest
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) =>
+      setPartialLoopEnabled(
+        (e.ctrlKey && !e.metaKey) || (!e.ctrlKey && e.metaKey),
+      )
+    const handleKeyUp = () => setPartialLoopEnabled(false)
+    document.addEventListener('keydown', handleKeyDown)
+    document.addEventListener('keyup', handleKeyUp)
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown)
+      document.removeEventListener('keyup', handleKeyUp)
+    }
+  }, [])
 
-  const styles = useMemo(() => {
-    const styles = {
-      inset: `auto ${theme.spacing(1)} 1px`,
-      opacity: 1,
-      transform: 'translateY(-61px)',
-    }
-    return {
-      appear: styles,
-      disappear: {
-        inset: shouldAlwaysShowSeekBar ? 'auto 0 1px' : styles.inset,
-        opacity: shouldAlwaysShowSeekBar ? styles.opacity : 0,
-        transform: shouldAlwaysShowSeekBar
-          ? 'translateY(-14px)'
-          : styles.transform,
-      },
-    }
-  }, [shouldAlwaysShowSeekBar, theme])
+  const timeout = theme.transitions.duration.shortest
 
   const transitionStyles = {
     entering: styles.appear,
