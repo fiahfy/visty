@@ -222,7 +222,7 @@ const Player = () => {
         {/* biome-ignore lint/a11y/useMediaCaption: false positive */}
         <video
           ref={ref}
-          src={file.url}
+          src={file?.url}
           style={{
             background: 'black',
             display: status === 'loaded' ? 'block' : 'none',
@@ -267,7 +267,10 @@ const Player = () => {
         </Box>
         <Fade in={visible}>
           <Box sx={{ pointerEvents: 'auto' }}>
-            <TitleBar onMouseEnter={handleMouseEnterBar} title={file.name} />
+            <TitleBar
+              onMouseEnter={handleMouseEnterBar}
+              title={file?.name ?? ''}
+            />
           </Box>
         </Fade>
       </Box>

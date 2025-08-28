@@ -15,7 +15,7 @@ import VideoContext, {
 import useStereoPanner from '~/hooks/useStereoPanner'
 import { useAppDispatch, useAppSelector } from '~/store'
 import {
-  newWindow,
+  load,
   saveAutoplay,
   saveCurrentTime,
   saveLoop,
@@ -25,7 +25,9 @@ import {
   saveVolume,
   selectAutoplay,
   selectCurrentTime,
+  selectError,
   selectFile,
+  selectLoading,
   selectLoop,
   selectLoopRange,
   selectPan,
@@ -47,6 +49,9 @@ const VideoProvider = (props: Props) => {
   const { children } = props
 
   const file = useAppSelector(selectFile)
+  const loading = useAppSelector(selectLoading)
+  const error = useAppSelector(selectError)
+
   const loopRange = useAppSelector(selectLoopRange)
   const savedAutoplay = useAppSelector(selectAutoplay)
   const savedCurrentTime = useAppSelector(selectCurrentTime)
@@ -89,6 +94,12 @@ const VideoProvider = (props: Props) => {
   )
 
   const message = useMemo(() => {
+    if (loading) {
+      return 'Loading...'
+    }
+    if (error) {
+      return 'Failed to load.'
+    }
     switch (status) {
       case 'loading':
         return 'Loading...'
@@ -97,7 +108,7 @@ const VideoProvider = (props: Props) => {
       default:
         return undefined
     }
-  }, [status])
+  }, [error, loading, status])
 
   const triggerAction = useCallback(
     (action: Action, value?: number) =>
@@ -268,7 +279,7 @@ const VideoProvider = (props: Props) => {
   const previousTrack = useCallback(() => {
     const path = playlistFile.previous?.path
     if (path) {
-      dispatch(newWindow(path))
+      dispatch(load(path))
       triggerAction('previousTrack')
     }
   }, [dispatch, playlistFile.previous?.path, triggerAction])
@@ -276,7 +287,7 @@ const VideoProvider = (props: Props) => {
   const nextTrack = useCallback(() => {
     const path = playlistFile.next?.path
     if (path) {
-      dispatch(newWindow(path))
+      dispatch(load(path))
       triggerAction('nextTrack')
     }
   }, [dispatch, playlistFile.next?.path, triggerAction])
@@ -324,6 +335,10 @@ const VideoProvider = (props: Props) => {
   }, [])
 
   useEffect(() => {
+    if (loading) {
+      return
+    }
+
     if (initialized) {
       return
     }
@@ -345,6 +360,7 @@ const VideoProvider = (props: Props) => {
     video.volume = savedVolume
     panner.pan.value = savedPan
   }, [
+    loading,
     initialized,
     savedAutoplay,
     savedCurrentTime,
@@ -438,6 +454,10 @@ const VideoProvider = (props: Props) => {
 
   useEffect(() => {
     ;(async () => {
+      if (!file?.path) {
+        return
+      }
+
       const directory = await window.electronAPI.getParentEntry(file.path)
       const entries = (await window.electronAPI.getEntries(directory.path))
         .filter((entry) => isMediaFile(entry.path))
@@ -455,7 +475,7 @@ const VideoProvider = (props: Props) => {
 
       setPlaylistFile(playlistFile)
     })()
-  }, [file.path])
+  }, [file?.path])
 
   const value = {
     actionCode,

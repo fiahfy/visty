@@ -6,7 +6,7 @@ import {
   replaceState as replaceSettingsState,
   selectViewModeOnOpen,
 } from '~/store/settings'
-import { newWindow, replaceState as replaceWindowState } from '~/store/window'
+import { load, replaceState as replaceWindowState } from '~/store/window'
 import { setWindowId } from '~/store/window-id'
 
 type Props = { children: ReactNode }
@@ -46,7 +46,7 @@ const StoreProvider = (props: Props) => {
       dispatch(setWindowId({ windowId: id }))
       const filePath = params?.filePath
       if (filePath) {
-        dispatch(newWindow(filePath))
+        dispatch(load(filePath))
         const viewModeOnOpen = selectViewModeOnOpen(getState())
         switch (viewModeOnOpen) {
           case 'fullscreen':

@@ -18,7 +18,9 @@ import { selectWindowId } from '~/store/window-id'
 type WindowState = {
   autoplay?: boolean
   currentTime: number
+  error: boolean
   file?: Entry
+  loading: boolean
   loop?: boolean
   loopRange?: [number, number]
   pan: number
@@ -35,7 +37,9 @@ const initialState: State = {}
 const defaultWindowState: WindowState = {
   autoplay: undefined,
   currentTime: 0,
+  error: false,
   file: undefined,
+  loading: false,
   loop: undefined,
   loopRange: undefined,
   pan: 0,
@@ -50,7 +54,17 @@ export const windowSlice = createSlice({
     replaceState(_state, action: PayloadAction<{ state: State }>) {
       return action.payload.state
     },
-    newWindow(
+    load(state, action: PayloadAction<{ id: number }>) {
+      const { id } = action.payload
+      return {
+        ...state,
+        [id]: {
+          ...defaultWindowState,
+          loading: true,
+        },
+      }
+    },
+    loaded(
       state,
       action: PayloadAction<{
         id: number
@@ -58,11 +72,31 @@ export const windowSlice = createSlice({
       }>,
     ) {
       const { id, file } = action.payload
+      const window = state[id]
+      if (!window) {
+        return state
+      }
       return {
         ...state,
         [id]: {
-          ...defaultWindowState,
+          ...window,
           file,
+          loading: false,
+        },
+      }
+    },
+    loadFailed(state, action: PayloadAction<{ id: number }>) {
+      const { id } = action.payload
+      const window = state[id]
+      if (!window) {
+        return state
+      }
+      return {
+        ...state,
+        [id]: {
+          ...window,
+          error: true,
+          loading: false,
         },
       }
     },
@@ -232,9 +266,19 @@ export const selectCurrentTime = createSelector(
   (window) => window.currentTime,
 )
 
+export const selectError = createSelector(
+  selectCurrentWindow,
+  (window) => window.error,
+)
+
 export const selectFile = createSelector(
   selectCurrentWindow,
-  (window) => window.file ?? { name: '', path: '', url: '' },
+  (window) => window.file,
+)
+
+export const selectLoading = createSelector(
+  selectCurrentWindow,
+  (window) => window.loading,
 )
 
 export const selectLoop = createSelector(
@@ -264,16 +308,25 @@ export const selectVolume = createSelector(
   (window, defaultVolume) => window.volume ?? defaultVolume,
 )
 
-export const newWindow =
+export const load =
   (filePath: string): AppThunk =>
   async (dispatch, getState) => {
-    const { newWindow } = windowSlice.actions
+    const { load, loaded, loadFailed } = windowSlice.actions
+
+    const loading = selectLoading(getState())
+    if (loading) {
+      return
+    }
 
     const id = selectWindowId(getState())
 
-    const entry = await window.electronAPI.getEntry(filePath)
-
-    dispatch(newWindow({ id, file: entry }))
+    dispatch(load({ id }))
+    try {
+      const entry = await window.electronAPI.getEntry(filePath)
+      dispatch(loaded({ id, file: entry }))
+    } catch {
+      dispatch(loadFailed({ id }))
+    }
   }
 
 export const saveAutoplay =

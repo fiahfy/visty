@@ -38,7 +38,7 @@ const App = () => {
     zoomOut,
   } = useVideo()
 
-  useTitle(file.name)
+  useTitle(file?.name ?? '')
 
   useEffect(() => {
     const removeListener = window.messageAPI.onMessage((message) => {

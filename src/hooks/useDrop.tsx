@@ -1,6 +1,6 @@
 import { type DragEvent, useCallback, useMemo, useState } from 'react'
 import { useAppDispatch } from '~/store'
-import { newWindow } from '~/store/window'
+import { load } from '~/store/window'
 
 const useDrop = () => {
   const dispatch = useAppDispatch()
@@ -37,7 +37,7 @@ const useDrop = () => {
         return
       }
       const path = window.electronAPI.getPathForFile(file)
-      dispatch(newWindow(path))
+      dispatch(load(path))
     },
     [dispatch],
   )
