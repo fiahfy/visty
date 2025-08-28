@@ -1,3 +1,4 @@
+import mime from 'mime'
 import {
   type ReactNode,
   useCallback,
@@ -14,6 +15,7 @@ import VideoContext, {
 import useStereoPanner from '~/hooks/useStereoPanner'
 import { useAppDispatch, useAppSelector } from '~/store'
 import {
+  newWindow,
   saveAutoplay,
   saveCurrentTime,
   saveLoop,
@@ -30,6 +32,14 @@ import {
   selectPlaybackRate,
   selectVolume,
 } from '~/store/window'
+
+const isMediaFile = (path: string) => {
+  const type = mime.getType(path)
+  if (!type) {
+    return false
+  }
+  return type.startsWith('audio/') || type.startsWith('video/')
+}
 
 type Props = { children: ReactNode }
 
@@ -154,7 +164,7 @@ const VideoProvider = (props: Props) => {
   }, [autoplay])
 
   const toggleFullscreen = useCallback(
-    () => window.electronAPI.toggleFullscreen(),
+    () => window.windowAPI.toggleFullscreen(),
     [],
   )
 
@@ -258,21 +268,21 @@ const VideoProvider = (props: Props) => {
   const previousTrack = useCallback(() => {
     const path = playlistFile.previous?.path
     if (path) {
-      window.electronAPI.openFilePath(path)
+      dispatch(newWindow(path))
       triggerAction('previousTrack')
     }
-  }, [playlistFile.previous?.path, triggerAction])
+  }, [dispatch, playlistFile.previous?.path, triggerAction])
 
   const nextTrack = useCallback(() => {
     const path = playlistFile.next?.path
     if (path) {
-      window.electronAPI.openFilePath(path)
+      dispatch(newWindow(path))
       triggerAction('nextTrack')
     }
-  }, [playlistFile.next?.path, triggerAction])
+  }, [dispatch, playlistFile.next?.path, triggerAction])
 
   useEffect(() => {
-    const removeListener = window.electronAPI.onFullscreenChange(setFullscreen)
+    const removeListener = window.windowAPI.onFullscreenChange(setFullscreen)
     return () => removeListener()
   }, [])
 
@@ -428,7 +438,21 @@ const VideoProvider = (props: Props) => {
 
   useEffect(() => {
     ;(async () => {
-      const playlistFile = await window.electronAPI.getPlaylistFile(file.path)
+      const directory = await window.electronAPI.getParentEntry(file.path)
+      const entries = (await window.electronAPI.getEntries(directory.path))
+        .filter((entry) => isMediaFile(entry.path))
+        .sort((a, b) => a.name.localeCompare(b.name))
+
+      const index = entries.findIndex((entry) => entry.path === file.path)
+      const previousIndex = index === 0 ? entries.length - 1 : index - 1
+      const previous = entries[previousIndex]
+      const nextIndex = index === entries.length - 1 ? 0 : index + 1
+      const next = entries[nextIndex]
+      const playlistFile = {
+        next: next.path === file.path ? undefined : next,
+        previous: previous.path === file.path ? undefined : previous,
+      }
+
       setPlaylistFile(playlistFile)
     })()
   }, [file.path])

@@ -3,6 +3,7 @@ import {
   createSlice,
   type PayloadAction,
 } from '@reduxjs/toolkit'
+import type { Entry } from '~/interfaces'
 import type { AppState, AppThunk } from '~/store'
 import {
   selectDefaultAutoplay,
@@ -14,12 +15,10 @@ import {
 } from '~/store/settings'
 import { selectWindowId } from '~/store/window-id'
 
-type File = { name: string; path: string; url: string }
-
 type WindowState = {
   autoplay?: boolean
   currentTime: number
-  file?: File
+  file?: Entry
   loop?: boolean
   loopRange?: [number, number]
   pan: number
@@ -55,7 +54,7 @@ export const windowSlice = createSlice({
       state,
       action: PayloadAction<{
         id: number
-        file: File
+        file: Entry
       }>,
     ) {
       const { id, file } = action.payload
@@ -266,27 +265,38 @@ export const selectVolume = createSelector(
 )
 
 export const newWindow =
-  (file: File): AppThunk =>
+  (filePath: string): AppThunk =>
   async (dispatch, getState) => {
     const { newWindow } = windowSlice.actions
+
     const id = selectWindowId(getState())
-    dispatch(newWindow({ id, file }))
+
+    const entry = await window.electronAPI.getEntry(filePath)
+
+    dispatch(newWindow({ id, file: entry }))
   }
 
 export const saveAutoplay =
   (autoplay: boolean): AppThunk =>
   async (dispatch, getState) => {
     const { setAutoplay } = windowSlice.actions
+
     const id = selectWindowId(getState())
+    const savedAutoplay = selectAutoplay(getState())
+
     dispatch(setAutoplay({ id, autoplay }))
-    dispatch(setDefaultAutoplay({ defaultAutoplay: autoplay }))
+    if (autoplay !== savedAutoplay) {
+      dispatch(setDefaultAutoplay({ defaultAutoplay: autoplay }))
+    }
   }
 
 export const saveCurrentTime =
   (currentTime: number): AppThunk =>
   async (dispatch, getState) => {
     const { setCurrentTime } = windowSlice.actions
+
     const id = selectWindowId(getState())
+
     dispatch(setCurrentTime({ id, currentTime }))
   }
 
@@ -294,16 +304,23 @@ export const saveLoop =
   (loop: boolean): AppThunk =>
   async (dispatch, getState) => {
     const { setLoop } = windowSlice.actions
+
     const id = selectWindowId(getState())
+    const savedLoop = selectLoop(getState())
+
     dispatch(setLoop({ id, loop }))
-    dispatch(setDefaultLoop({ defaultLoop: loop }))
+    if (loop !== savedLoop) {
+      dispatch(setDefaultLoop({ defaultLoop: loop }))
+    }
   }
 
 export const saveLoopRange =
   (loopRange: [number, number] | undefined): AppThunk =>
   async (dispatch, getState) => {
     const { setLoopRange } = windowSlice.actions
+
     const id = selectWindowId(getState())
+
     dispatch(setLoopRange({ id, loopRange }))
   }
 
@@ -311,7 +328,9 @@ export const savePlaybackRate =
   (playbackRate: number): AppThunk =>
   async (dispatch, getState) => {
     const { setPlaybackRate } = windowSlice.actions
+
     const id = selectWindowId(getState())
+
     dispatch(setPlaybackRate({ id, playbackRate }))
   }
 
@@ -319,7 +338,9 @@ export const savePan =
   (pan: number): AppThunk =>
   async (dispatch, getState) => {
     const { setPan } = windowSlice.actions
+
     const id = selectWindowId(getState())
+
     dispatch(setPan({ id, pan }))
   }
 
@@ -327,7 +348,12 @@ export const saveVolume =
   (volume: number): AppThunk =>
   async (dispatch, getState) => {
     const { setVolume } = windowSlice.actions
+
     const id = selectWindowId(getState())
+    const savedVolume = selectVolume(getState())
+
     dispatch(setVolume({ id, volume }))
-    dispatch(setDefaultVolume({ defaultVolume: volume }))
+    if (volume !== savedVolume) {
+      dispatch(setDefaultVolume({ defaultVolume: volume }))
+    }
   }

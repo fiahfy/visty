@@ -3,26 +3,38 @@
 // example, to import the interface below do:
 //
 // import User from 'path/to/interfaces';
-import type { Operations as ContextMenuOperations } from '@fiahfy/electron-context-menu/preload'
-import type { Operations as WindowOperations } from '@fiahfy/electron-window/preload'
 
-type File = { name: string; path: string; url: string }
-
-type PlaylistFile = {
-  next: File | undefined
-  previous: File | undefined
+export type ApplicationMenuOperations = {
+  update: (params: ApplicationMenuParams) => void
 }
 
-export type IElectronAPI = {
+export type ElectronOperations = {
   getCursorPosition: () => Promise<{ x: number; y: number }>
-  getPlaylistFile: (filePath: string) => Promise<PlaylistFile>
-  // biome-ignore lint/suspicious/noExplicitAny: false positive
-  onMessage: (callback: (message: any) => void) => () => void
-  openFile: (file: globalThis.File) => Promise<void>
-  openFilePath: (filePath: string) => Promise<void>
-  updateApplicationMenu: (params: ApplicationMenuParams) => Promise<void>
-} & ContextMenuOperations &
-  WindowOperations<{ file: File }>
+  getEntries: (directoryPath: string) => Promise<Entry[]>
+  getEntry: (path: string) => Promise<Entry>
+  getParentEntry: (path: string) => Promise<Entry>
+  getPathForFile: (file: globalThis.File) => string
+}
 
-// biome-ignore lint/suspicious/noExplicitAny: false positive
-export type ApplicationMenuParams = any
+export type MessageOperations = {
+  // biome-ignore lint/suspicious/noExplicitAny: false positive
+  onMessage: (handler: (message: any) => void) => () => void
+}
+
+type BaseEntry = {
+  name: string
+  path: string
+  url: string
+}
+type File = BaseEntry & {
+  type: 'file'
+}
+type Directory = BaseEntry & {
+  type: 'directory'
+}
+export type Entry = File | Directory
+
+export type ApplicationMenuParams = Partial<{
+  loop: boolean
+  partialLoop: boolean
+}>

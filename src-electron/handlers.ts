@@ -1,34 +1,60 @@
-import { readdir } from 'node:fs/promises'
+import type { Stats } from 'node:fs'
+import { readdir, stat } from 'node:fs/promises'
 import { basename, dirname, join } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { type IpcMainInvokeEvent, ipcMain, screen } from 'electron'
-import mime from 'mime'
 
-type File = { name: string; path: string; url: string }
+type BaseEntry = {
+  name: string
+  path: string
+  url: string
+}
+type File = BaseEntry & {
+  type: 'file'
+}
+type Directory = BaseEntry & {
+  type: 'directory'
+}
+type Entry = File | Directory
 
-const isMediaFile = (path: string) => {
-  const type = mime.getType(path)
-  if (!type) {
-    return false
+const getEntryType = (obj: Stats) => {
+  if (obj.isFile()) {
+    return 'file' as const
   }
-  return type.startsWith('audio/') || type.startsWith('video/')
+  if (obj.isDirectory()) {
+    return 'directory' as const
+  }
+  return 'other' as const
 }
 
-const getMediaFiles = async (directoryPath: string) => {
+const getEntry = async (path: string): Promise<Entry> => {
+  const stats = await stat(path)
+  const type = getEntryType(stats)
+  if (type === 'other') {
+    throw new Error('Invalid entry type')
+  }
+  return {
+    name: basename(path).normalize('NFC'),
+    path,
+    type,
+    url: pathToFileURL(path).href,
+  }
+}
+
+const getEntries = async (directoryPath: string) => {
   const dirents = await readdir(directoryPath, { withFileTypes: true })
-  return dirents
-    .reduce((acc, dirent) => {
+
+  const entries = []
+  for (const dirent of dirents) {
+    try {
       const path = join(directoryPath, dirent.name)
-      if (isMediaFile(path)) {
-        acc.push({
-          name: dirent.name.normalize('NFC'),
-          path,
-          url: pathToFileURL(path).href,
-        })
-      }
-      return acc
-    }, [] as File[])
-    .sort((a, b) => a.name.localeCompare(b.name))
+      const file = await getEntry(path)
+      entries.push(file)
+    } catch {
+      // noop
+    }
+  }
+  return entries
 }
 
 const registerHandlers = () => {
@@ -36,36 +62,16 @@ const registerHandlers = () => {
     screen.getCursorScreenPoint(),
   )
   ipcMain.handle(
-    'getPlaylistFile',
-    async (_event: IpcMainInvokeEvent, filePath: string) => {
-      const directoryPath = dirname(filePath)
-      const files = await getMediaFiles(directoryPath)
-      if (files.length <= 1) {
-        return {
-          next: undefined,
-          previous: undefined,
-        }
-      }
-
-      const index = files.findIndex((file) => file.path === filePath)
-      const previousIndex = index === 0 ? files.length - 1 : index - 1
-      const previous = files[previousIndex]
-      const nextIndex = index === files.length - 1 ? 0 : index + 1
-      const next = files[nextIndex]
-      return {
-        next,
-        previous,
-      }
-    },
+    'getEntries',
+    (_event: IpcMainInvokeEvent, directoryPath: string) =>
+      getEntries(directoryPath),
   )
-  ipcMain.handle('openFile', (event: IpcMainInvokeEvent, filePath: string) => {
-    const file = {
-      name: basename(filePath),
-      path: filePath,
-      url: pathToFileURL(filePath).href,
-    }
-    event.sender.send('onMessage', { type: 'changeFile', data: { file } })
-  })
+  ipcMain.handle('getEntry', (_event: IpcMainInvokeEvent, path: string) =>
+    getEntry(path),
+  )
+  ipcMain.handle('getParentEntry', (_event: IpcMainInvokeEvent, path: string) =>
+    getEntry(dirname(path)),
+  )
 }
 
 export default registerHandlers

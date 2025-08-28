@@ -3,7 +3,7 @@ import {
   app,
   BrowserWindow,
   dialog,
-  type IpcMainInvokeEvent,
+  type IpcMainEvent,
   ipcMain,
   Menu,
   type MenuItemConstructorOptions,
@@ -172,9 +172,9 @@ const registerApplicationMenu = (createWindow: (filePath: string) => void) => {
 
   update()
 
-  ipcMain.handle(
-    'updateApplicationMenu',
-    (_event: IpcMainInvokeEvent, params: ApplicationMenuParams) => {
+  ipcMain.on(
+    'update',
+    (_event: IpcMainEvent, params: ApplicationMenuParams) => {
       state = { ...state, ...params }
       update()
     },

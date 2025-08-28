@@ -1,6 +1,10 @@
 import { type DragEvent, useCallback, useMemo, useState } from 'react'
+import { useAppDispatch } from '~/store'
+import { newWindow } from '~/store/window'
 
 const useDrop = () => {
+  const dispatch = useAppDispatch()
+
   const [enterCount, setEnterCount] = useState(0)
 
   const dropping = useMemo(() => enterCount > 0, [enterCount])
@@ -23,16 +27,20 @@ const useDrop = () => {
     e.dataTransfer.dropEffect = 'move'
   }, [])
 
-  const onDrop = useCallback((e: DragEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setEnterCount(0)
-    const file = e.dataTransfer.files.item(0)
-    if (!file) {
-      return
-    }
-    window.electronAPI.openFile(file)
-  }, [])
+  const onDrop = useCallback(
+    (e: DragEvent) => {
+      e.preventDefault()
+      e.stopPropagation()
+      setEnterCount(0)
+      const file = e.dataTransfer.files.item(0)
+      if (!file) {
+        return
+      }
+      const path = window.electronAPI.getPathForFile(file)
+      dispatch(newWindow(path))
+    },
+    [dispatch],
+  )
 
   return {
     dropping,

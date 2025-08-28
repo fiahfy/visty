@@ -1,5 +1,5 @@
-import { basename, dirname, join } from 'node:path'
-import { fileURLToPath, pathToFileURL } from 'node:url'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { createManager as createWindowManager } from '@fiahfy/electron-window'
 import {
   app,
@@ -41,14 +41,7 @@ const baseCreateWindow = (options: BrowserWindowConstructorOptions) => {
 
 const windowManager = createWindowManager(baseCreateWindow)
 
-const createWindow = (filePath: string) => {
-  const file = {
-    name: basename(filePath),
-    path: filePath,
-    url: pathToFileURL(filePath).href,
-  }
-  windowManager.create({ file })
-}
+const createWindow = (filePath: string) => windowManager.create({ filePath })
 
 app.setAsDefaultProtocolClient('visty')
 

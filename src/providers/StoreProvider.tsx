@@ -38,22 +38,22 @@ const StoreProvider = (props: Props) => {
 
   useEffect(() => {
     ;(async () => {
-      const data = await window.electronAPI.restore()
+      const data = await window.windowAPI.restore()
       if (!data) {
         return
       }
       const { id, params } = data
       dispatch(setWindowId({ windowId: id }))
-      const file = params?.file
-      if (file) {
-        dispatch(newWindow(file))
+      const filePath = params?.filePath
+      if (filePath) {
+        dispatch(newWindow(filePath))
         const viewModeOnOpen = selectViewModeOnOpen(getState())
         switch (viewModeOnOpen) {
           case 'fullscreen':
-            window.electronAPI.enterFullscreen()
+            window.windowAPI.enterFullscreen()
             break
           case 'maximized':
-            window.electronAPI.maximize()
+            window.windowAPI.maximize()
             break
         }
       }
