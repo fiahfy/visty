@@ -46,7 +46,7 @@ const StoreProvider = (props: Props) => {
       dispatch(setWindowId({ windowId: id }))
       const filePath = params?.filePath
       if (filePath) {
-        dispatch(load(filePath))
+        dispatch(load(filePath, true))
         const viewModeOnOpen = selectViewModeOnOpen(getState())
         switch (viewModeOnOpen) {
           case 'fullscreen':

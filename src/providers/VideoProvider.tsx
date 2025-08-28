@@ -283,7 +283,7 @@ const VideoProvider = (props: Props) => {
   const previousTrack = useCallback(() => {
     const path = playlistFile.previous?.path
     if (path) {
-      dispatch(load(path))
+      dispatch(load(path, false))
       triggerAction('previousTrack')
     }
   }, [dispatch, playlistFile.previous?.path, triggerAction])
@@ -291,7 +291,7 @@ const VideoProvider = (props: Props) => {
   const nextTrack = useCallback(() => {
     const path = playlistFile.next?.path
     if (path) {
-      dispatch(load(path))
+      dispatch(load(path, false))
       triggerAction('nextTrack')
     }
   }, [dispatch, playlistFile.next?.path, triggerAction])
@@ -508,7 +508,6 @@ const VideoProvider = (props: Props) => {
     seek,
     seekTo,
     size,
-    status,
     toggleAutoplay,
     toggleFullscreen,
     toggleLoop,

@@ -27,7 +27,6 @@ const Player = () => {
     message,
     ref,
     size: nativeSize,
-    status,
     togglePaused,
     zoom,
     zoomBy,
@@ -225,7 +224,7 @@ const Player = () => {
           src={file?.url}
           style={{
             background: 'black',
-            display: status === 'loaded' ? 'block' : 'none',
+            display: 'block',
             pointerEvents: 'none',
             ...(size ? { ...size } : {}),
           }}
