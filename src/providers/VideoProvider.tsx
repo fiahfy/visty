@@ -77,9 +77,9 @@ const VideoProvider = (props: Props) => {
     previous: undefined,
   })
   const [size, setSize] = useState<{ height: number; width: number }>()
-  const [status, setStatus] = useState<'loading' | 'loaded' | 'error'>(
-    'loading',
-  )
+  const [videoStatus, setVideoStatus] = useState<
+    'loading' | 'loaded' | 'error'
+  >('loading')
   const [storedVolume, setStoredVolume] = useState(savedVolume)
   const [volume, setVolume] = useState(0)
   const [zoom, setZoom] = useState(1)
@@ -93,13 +93,17 @@ const VideoProvider = (props: Props) => {
     [loopRange],
   )
 
-  const message = useMemo(() => {
+  const status = useMemo(() => {
     if (loading) {
-      return 'Loading...'
+      return 'loading'
     }
     if (error) {
-      return 'Failed to load.'
+      return 'error'
     }
+    return videoStatus
+  }, [error, loading, videoStatus])
+
+  const message = useMemo(() => {
     switch (status) {
       case 'loading':
         return 'Loading...'
@@ -108,7 +112,7 @@ const VideoProvider = (props: Props) => {
       default:
         return undefined
     }
-  }, [error, loading, status])
+  }, [status])
 
   const triggerAction = useCallback(
     (action: Action, value?: number) =>
@@ -303,15 +307,15 @@ const VideoProvider = (props: Props) => {
       return
     }
 
-    const handleLoadStart = () => setStatus('loading')
+    const handleLoadStart = () => setVideoStatus('loading')
     const handleLoadedMetadata = async () => {
       setSize({
         height: video.videoHeight,
         width: video.videoWidth,
       })
-      setStatus('loaded')
+      setVideoStatus('loaded')
     }
-    const handleError = () => setStatus('error')
+    const handleError = () => setVideoStatus('error')
     const handleEnterPictureInPicture = () => setPictureInPicture(true)
     const handleLeavePictureInPicture = () => setPictureInPicture(false)
     video.addEventListener('loadedstart', handleLoadStart)
