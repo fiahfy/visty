@@ -1,11 +1,10 @@
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { createManager as createWindowManager } from '@fiahfy/electron-window'
 import {
-  app,
-  BrowserWindow,
-  type BrowserWindowConstructorOptions,
-} from 'electron'
+  createManager as createWindowManager,
+  type WindowCreator,
+} from '@fiahfy/electron-window'
+import { app, BrowserWindow } from 'electron'
 import started from 'electron-squirrel-startup'
 import registerApplicationMenu from './application-menu'
 import registerContextMenu from './context-menu'
@@ -13,10 +12,13 @@ import registerHandlers from './handlers'
 
 const dirPath = dirname(fileURLToPath(import.meta.url))
 
-const baseCreateWindow = (options: BrowserWindowConstructorOptions) => {
+const windowCreator: WindowCreator = (optionsResolver) => {
   const browserWindow = new BrowserWindow({
-    ...options,
-    minHeight: 300,
+    ...optionsResolver({
+      height: 768,
+      width: 1024 + (MAIN_WINDOW_VITE_DEV_SERVER_URL ? 512 : 0),
+    }),
+    minHeight: 270,
     minWidth: 400,
     titleBarStyle: process.platform === 'darwin' ? 'hidden' : 'default',
     webPreferences: {
@@ -39,7 +41,7 @@ const baseCreateWindow = (options: BrowserWindowConstructorOptions) => {
   return browserWindow
 }
 
-const windowManager = createWindowManager(baseCreateWindow)
+const windowManager = createWindowManager(windowCreator)
 
 const createWindow = (filePath: string) => windowManager.create({ filePath })
 
