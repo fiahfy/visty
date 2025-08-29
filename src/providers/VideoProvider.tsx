@@ -451,23 +451,32 @@ const VideoProvider = (props: Props) => {
         return
       }
 
-      const directory = await window.electronAPI.getParentEntry(file.path)
-      const entries = (await window.electronAPI.getEntries(directory.path))
-        .filter((entry) => isMediaFile(entry.path))
-        .sort((a, b) => a.name.localeCompare(b.name))
+      const playlistFile = await (async () => {
+        try {
+          const directory = await window.electronAPI.getParentEntry(file.path)
+          const entries = (await window.electronAPI.getEntries(directory.path))
+            .filter((entry) => isMediaFile(entry.path))
+            .sort((a, b) => a.name.localeCompare(b.name))
 
-      const index = entries.findIndex((entry) => entry.path === file.path)
-      const previousIndex = index === 0 ? entries.length - 1 : index - 1
-      const previous = entries[previousIndex]
-      const nextIndex = index === entries.length - 1 ? 0 : index + 1
-      const next = entries[nextIndex]
-      const playlistFile =
-        file.path === next.path || file.path === previous.path
-          ? undefined
-          : {
-              next,
-              previous,
-            }
+          if (!entries.find((entry) => entry.path === file.path)) {
+            return undefined
+          }
+
+          if (entries.length <= 1) {
+            return undefined
+          }
+
+          const index = entries.findIndex((entry) => entry.path === file.path)
+          const previousIndex = index === 0 ? entries.length - 1 : index - 1
+          const previous = entries[previousIndex]
+          const nextIndex = index === entries.length - 1 ? 0 : index + 1
+          const next = entries[nextIndex]
+
+          return { next, previous }
+        } catch {
+          return undefined
+        }
+      })()
 
       setPlaylistFile(playlistFile)
     })()
@@ -500,6 +509,7 @@ const VideoProvider = (props: Props) => {
     seek,
     seekTo,
     size,
+    status,
     toggleAutoplay,
     toggleFullscreen,
     toggleLoop,

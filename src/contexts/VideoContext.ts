@@ -49,6 +49,7 @@ const VideoContext = createContext<
       seek: (value: number) => void
       seekTo: (direction: 'backward' | 'forward') => void
       size: { height: number; width: number } | undefined
+      status: 'loading' | 'loaded' | 'error'
       toggleAutoplay: () => void
       toggleFullscreen: () => void
       toggleLoop: () => void
