@@ -179,10 +179,10 @@ const ControlBar = (props: Props) => {
       />
       <Toolbar disableGutters sx={{ gap: 0.5, px: 1 }} variant="dense">
         <IconButton
-          disabled={!playlistFile.previous}
+          disabled={!playlistFile}
           onClick={previousTrack}
           size="small"
-          title={playlistFile.previous?.name}
+          title={playlistFile?.previous.name}
         >
           <SkipPreviousIcon fontSize="small" />
         </IconButton>
@@ -194,10 +194,10 @@ const ControlBar = (props: Props) => {
           <PlayIcon fontSize="small" />
         </IconButton>
         <IconButton
-          disabled={!playlistFile.next}
+          disabled={!playlistFile}
           onClick={nextTrack}
           size="small"
-          title={playlistFile.next?.name}
+          title={playlistFile?.next.name}
         >
           <SkipNextIcon fontSize="small" />
         </IconButton>

@@ -1,4 +1,3 @@
-import mime from 'mime'
 import {
   type ReactNode,
   useCallback,
@@ -34,14 +33,7 @@ import {
   selectPlaybackRate,
   selectVolume,
 } from '~/store/window'
-
-const isMediaFile = (path: string) => {
-  const type = mime.getType(path)
-  if (!type) {
-    return false
-  }
-  return type.startsWith('audio/') || type.startsWith('video/')
-}
+import { isMediaFile } from '~/utils/file'
 
 type Props = { children: ReactNode }
 
@@ -72,10 +64,7 @@ const VideoProvider = (props: Props) => {
   const [paused, setPaused] = useState(true)
   const [pictureInPicture, setPictureInPicture] = useState(false)
   const [playbackRate, setPlaybackRate] = useState(1)
-  const [playlistFile, setPlaylistFile] = useState<PlaylistFile>({
-    next: undefined,
-    previous: undefined,
-  })
+  const [playlistFile, setPlaylistFile] = useState<PlaylistFile>()
   const [size, setSize] = useState<{ height: number; width: number }>()
   const [videoStatus, setVideoStatus] = useState<
     'loading' | 'loaded' | 'error'
@@ -281,20 +270,20 @@ const VideoProvider = (props: Props) => {
   const resetZoom = useCallback(() => setZoom(1), [])
 
   const previousTrack = useCallback(() => {
-    const path = playlistFile.previous?.path
+    const path = playlistFile?.previous.path
     if (path) {
       dispatch(load(path, false))
       triggerAction('previousTrack')
     }
-  }, [dispatch, playlistFile.previous?.path, triggerAction])
+  }, [dispatch, playlistFile?.previous.path, triggerAction])
 
   const nextTrack = useCallback(() => {
-    const path = playlistFile.next?.path
+    const path = playlistFile?.next.path
     if (path) {
       dispatch(load(path, false))
       triggerAction('nextTrack')
     }
-  }, [dispatch, playlistFile.next?.path, triggerAction])
+  }, [dispatch, playlistFile?.next.path, triggerAction])
 
   useEffect(() => {
     const removeListener = window.windowAPI.onFullscreenChange(setFullscreen)
@@ -472,10 +461,13 @@ const VideoProvider = (props: Props) => {
       const previous = entries[previousIndex]
       const nextIndex = index === entries.length - 1 ? 0 : index + 1
       const next = entries[nextIndex]
-      const playlistFile = {
-        next: next.path === file.path ? undefined : next,
-        previous: previous.path === file.path ? undefined : previous,
-      }
+      const playlistFile =
+        file.path === next.path || file.path === previous.path
+          ? undefined
+          : {
+              next,
+              previous,
+            }
 
       setPlaylistFile(playlistFile)
     })()

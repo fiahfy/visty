@@ -3,8 +3,8 @@ import { createContext, type RefObject } from 'react'
 type File = { name: string; path: string; url: string }
 
 export type PlaylistFile = {
-  next: File | undefined
-  previous: File | undefined
+  next: File
+  previous: File
 }
 
 export type Action =
@@ -42,7 +42,7 @@ const VideoContext = createContext<
       paused: boolean
       pictureInPicture: boolean
       playbackRate: number
-      playlistFile: PlaylistFile
+      playlistFile: PlaylistFile | undefined
       previousTrack: () => void
       ref: RefObject<HTMLVideoElement | null>
       resetZoom: () => void
