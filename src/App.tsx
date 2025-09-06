@@ -5,16 +5,16 @@ import useTitle from '~/hooks/useTitle'
 import useVideo from '~/hooks/useVideo'
 import { useAppDispatch, useAppSelector } from '~/store'
 import {
-  selectShouldCloseWindowOnEscapeKey,
-  setViewModeOnOpen,
+  selectShouldQuitAppWithEscapeKey,
+  setDefaultViewMode,
   toggleShouldAlwaysShowSeekBar,
-  toggleShouldCloseWindowOnEscapeKey,
+  toggleShouldQuitAppWithEscapeKey,
 } from '~/store/settings'
 import { createContextMenuHandler } from '~/utils/context-menu'
 
 const App = () => {
-  const shouldCloseWindowOnEscapeKey = useAppSelector(
-    selectShouldCloseWindowOnEscapeKey,
+  const shouldQuitAppWithEscapeKey = useAppSelector(
+    selectShouldQuitAppWithEscapeKey,
   )
   const dispatch = useAppDispatch()
 
@@ -48,9 +48,9 @@ const App = () => {
           return changePlaybackRate(data.value)
         case 'resetZoom':
           return resetZoom()
-        case 'setViewModeOnOpen':
+        case 'setDefaultViewMode':
           return dispatch(
-            setViewModeOnOpen({ viewModeOnOpen: data.viewModeOnOpen }),
+            setDefaultViewMode({ defaultViewMode: data.defaultViewMode }),
           )
         case 'toggleAutoplay':
           return toggleAutoplay()
@@ -62,8 +62,8 @@ const App = () => {
           return togglePartialLoop()
         case 'toggleShouldAlwaysShowSeekBar':
           return dispatch(toggleShouldAlwaysShowSeekBar())
-        case 'toggleShouldCloseWindowOnEscapeKey':
-          return dispatch(toggleShouldCloseWindowOnEscapeKey())
+        case 'toggleShouldQuitAppWithEscapeKey':
+          return dispatch(toggleShouldQuitAppWithEscapeKey())
         case 'zoomIn':
           return zoomIn()
         case 'zoomOut':
@@ -117,8 +117,8 @@ const App = () => {
           return volumeUp()
         case 'Escape':
           e.preventDefault()
-          if (shouldCloseWindowOnEscapeKey) {
-            return window.windowAPI.close()
+          if (shouldQuitAppWithEscapeKey) {
+            return window.electronAPI.quit()
           }
           return window.windowAPI.exitFullscreen()
         case 'f':
@@ -148,7 +148,7 @@ const App = () => {
     nextTrack,
     previousTrack,
     seekTo,
-    shouldCloseWindowOnEscapeKey,
+    shouldQuitAppWithEscapeKey,
     toggleLoop,
     toggleMuted,
     togglePaused,

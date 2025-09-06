@@ -27,9 +27,9 @@ import useVideo from '~/hooks/useVideo'
 import useVisibilityState from '~/hooks/useVisibilityState'
 import { useAppSelector } from '~/store'
 import {
+  selectDefaultViewMode,
   selectShouldAlwaysShowSeekBar,
-  selectShouldCloseWindowOnEscapeKey,
-  selectViewModeOnOpen,
+  selectShouldQuitAppWithEscapeKey,
 } from '~/store/settings'
 import { createContextMenuHandler } from '~/utils/context-menu'
 import { formatDuration } from '~/utils/formatter'
@@ -42,10 +42,10 @@ const ControlBar = (props: Props) => {
   const { controlBarVisible } = props
 
   const shouldAlwaysShowSeekBar = useAppSelector(selectShouldAlwaysShowSeekBar)
-  const shouldCloseWindowOnEscapeKey = useAppSelector(
-    selectShouldCloseWindowOnEscapeKey,
+  const shouldQuitAppWithEscapeKey = useAppSelector(
+    selectShouldQuitAppWithEscapeKey,
   )
-  const viewModeOnOpen = useAppSelector(selectViewModeOnOpen)
+  const defaultViewMode = useAppSelector(selectDefaultViewMode)
 
   const {
     autoplay,
@@ -118,22 +118,22 @@ const ControlBar = (props: Props) => {
           data: { checked: shouldAlwaysShowSeekBar },
         },
         {
-          type: 'closeWindowOnEscapeKey',
-          data: { checked: shouldCloseWindowOnEscapeKey },
+          type: 'quitAppWithEscapeKey',
+          data: { checked: shouldQuitAppWithEscapeKey },
         },
         {
-          type: 'viewModeOnOpen',
-          data: { viewModeOnOpen },
+          type: 'defaultViewMode',
+          data: { defaultViewMode },
         },
       ]),
     [
       autoplay,
+      defaultViewMode,
       loop,
       partialLoop,
       playbackRate,
       shouldAlwaysShowSeekBar,
-      shouldCloseWindowOnEscapeKey,
-      viewModeOnOpen,
+      shouldQuitAppWithEscapeKey,
     ],
   )
 

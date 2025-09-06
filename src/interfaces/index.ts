@@ -14,6 +14,7 @@ export type ElectronOperations = {
   getEntry: (path: string) => Promise<Entry>
   getParentEntry: (path: string) => Promise<Entry>
   getPathForFile: (file: globalThis.File) => string
+  quit: () => void
 }
 
 export type MessageOperations = {

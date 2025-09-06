@@ -8,19 +8,19 @@ import type { AppState } from '~/store'
 type State = {
   defaultAutoplay: boolean
   defaultLoop: boolean
+  defaultViewMode: 'fullscreen' | 'maximized' | 'normal'
   defaultVolume: number
   shouldAlwaysShowSeekBar: boolean
-  shouldCloseWindowOnEscapeKey: boolean
-  viewModeOnOpen: 'fullscreen' | 'maximized' | 'default'
+  shouldQuitAppWithEscapeKey: boolean
 }
 
 const initialState: State = {
   defaultAutoplay: false,
   defaultLoop: false,
+  defaultViewMode: 'normal',
   defaultVolume: 1,
   shouldAlwaysShowSeekBar: false,
-  shouldCloseWindowOnEscapeKey: false,
-  viewModeOnOpen: 'default',
+  shouldQuitAppWithEscapeKey: false,
 }
 
 export const settingsSlice = createSlice({
@@ -41,19 +41,19 @@ export const settingsSlice = createSlice({
       const { defaultLoop } = action.payload
       return { ...state, defaultLoop }
     },
+    setDefaultViewMode(
+      state,
+      action: PayloadAction<{ defaultViewMode: State['defaultViewMode'] }>,
+    ) {
+      const { defaultViewMode } = action.payload
+      return {
+        ...state,
+        defaultViewMode,
+      }
+    },
     setDefaultVolume(state, action: PayloadAction<{ defaultVolume: number }>) {
       const { defaultVolume } = action.payload
       return { ...state, defaultVolume }
-    },
-    setViewModeOnOpen(
-      state,
-      action: PayloadAction<{ viewModeOnOpen: State['viewModeOnOpen'] }>,
-    ) {
-      const { viewModeOnOpen } = action.payload
-      return {
-        ...state,
-        viewModeOnOpen,
-      }
     },
     toggleShouldAlwaysShowSeekBar(state) {
       return {
@@ -61,10 +61,10 @@ export const settingsSlice = createSlice({
         shouldAlwaysShowSeekBar: !state.shouldAlwaysShowSeekBar,
       }
     },
-    toggleShouldCloseWindowOnEscapeKey(state) {
+    toggleShouldQuitAppWithEscapeKey(state) {
       return {
         ...state,
-        shouldCloseWindowOnEscapeKey: !state.shouldCloseWindowOnEscapeKey,
+        shouldQuitAppWithEscapeKey: !state.shouldQuitAppWithEscapeKey,
       }
     },
   },
@@ -74,10 +74,10 @@ export const {
   replaceState,
   setDefaultAutoplay,
   setDefaultLoop,
+  setDefaultViewMode,
   setDefaultVolume,
-  setViewModeOnOpen,
   toggleShouldAlwaysShowSeekBar,
-  toggleShouldCloseWindowOnEscapeKey,
+  toggleShouldQuitAppWithEscapeKey,
 } = settingsSlice.actions
 
 export default settingsSlice.reducer
@@ -94,6 +94,11 @@ export const selectDefaultLoop = createSelector(
   (settings) => settings.defaultLoop,
 )
 
+export const selectDefaultViewMode = createSelector(
+  selectSettings,
+  (settings) => settings.defaultViewMode,
+)
+
 export const selectDefaultVolume = createSelector(
   selectSettings,
   (settings) => settings.defaultVolume,
@@ -104,12 +109,7 @@ export const selectShouldAlwaysShowSeekBar = createSelector(
   (settings) => settings.shouldAlwaysShowSeekBar,
 )
 
-export const selectShouldCloseWindowOnEscapeKey = createSelector(
+export const selectShouldQuitAppWithEscapeKey = createSelector(
   selectSettings,
-  (settings) => settings.shouldCloseWindowOnEscapeKey,
-)
-
-export const selectViewModeOnOpen = createSelector(
-  selectSettings,
-  (settings) => settings.viewModeOnOpen,
+  (settings) => settings.shouldQuitAppWithEscapeKey,
 )

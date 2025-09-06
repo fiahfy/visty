@@ -20,6 +20,7 @@ const electronOperations = {
   getParentEntry: (filePath: string) =>
     ipcRenderer.invoke('getParentEntry', filePath),
   getPathForFile: (file: File) => webUtils.getPathForFile(file),
+  quit: () => ipcRenderer.send('quit'),
 }
 
 const messageOperations = {

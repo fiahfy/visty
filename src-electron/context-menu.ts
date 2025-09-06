@@ -19,10 +19,28 @@ const registerContextMenu = () => {
       click: () => send(event, { type: 'toggleAutoplay' }),
       type: 'checkbox',
     }),
-    closeWindowOnEscapeKey: (event, _params, { checked }) => ({
-      label: 'Close Window on Escape Key',
+    defaultViewMode: (event, _params, { defaultViewMode }) => ({
+      label: 'Default View Mode',
+      submenu: [
+        { label: 'Fullscreen', value: 'fullscreen' },
+        { label: 'Maximized', value: 'maximized' },
+        { label: 'Normal', value: 'normal' },
+      ].map(({ label, value }) => ({
+        checked: value === defaultViewMode,
+        click: () =>
+          send(event, {
+            type: 'setDefaultViewMode',
+            data: { defaultViewMode: value },
+          }),
+        label,
+        type: 'radio',
+      })),
+    }),
+    loop: (event, _params, { checked }) => ({
+      accelerator: 'L',
+      label: 'Loop',
       checked,
-      click: () => send(event, { type: 'toggleShouldCloseWindowOnEscapeKey' }),
+      click: () => send(event, { type: 'toggleLoop' }),
       type: 'checkbox',
     }),
     partialLoop: (event, _params, { checked }) => ({
@@ -41,29 +59,11 @@ const registerContextMenu = () => {
         type: 'radio',
       })),
     }),
-    loop: (event, _params, { checked }) => ({
-      accelerator: 'L',
-      label: 'Loop',
+    quitAppWithEscapeKey: (event, _params, { checked }) => ({
+      label: 'Quit App with Escape Key',
       checked,
-      click: () => send(event, { type: 'toggleLoop' }),
+      click: () => send(event, { type: 'toggleShouldQuitAppWithEscapeKey' }),
       type: 'checkbox',
-    }),
-    viewModeOnOpen: (event, _params, { viewModeOnOpen }) => ({
-      label: 'View Mode on Open',
-      submenu: [
-        { label: 'Fullscreen', value: 'fullscreen' },
-        { label: 'Maximized', value: 'maximized' },
-        { label: 'Default', value: 'default' },
-      ].map(({ label, value }) => ({
-        checked: value === viewModeOnOpen,
-        click: () =>
-          send(event, {
-            type: 'setViewModeOnOpen',
-            data: { viewModeOnOpen: value },
-          }),
-        label,
-        type: 'radio',
-      })),
     }),
   }
 

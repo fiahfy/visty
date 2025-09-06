@@ -4,7 +4,7 @@ import { PersistGate } from 'redux-persist/integration/react'
 import { persistor, storageKey, store } from '~/store'
 import {
   replaceState as replaceSettingsState,
-  selectViewModeOnOpen,
+  selectDefaultViewMode,
 } from '~/store/settings'
 import { load, replaceState as replaceWindowState } from '~/store/window'
 import { setWindowId } from '~/store/window-id'
@@ -47,8 +47,8 @@ const StoreProvider = (props: Props) => {
       const filePath = params?.filePath
       if (filePath) {
         dispatch(load(filePath, true))
-        const viewModeOnOpen = selectViewModeOnOpen(getState())
-        switch (viewModeOnOpen) {
+        const defaultViewMode = selectDefaultViewMode(getState())
+        switch (defaultViewMode) {
           case 'fullscreen':
             window.windowAPI.enterFullscreen()
             break
