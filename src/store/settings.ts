@@ -11,7 +11,7 @@ type State = {
   defaultViewMode: 'fullscreen' | 'maximized' | 'normal'
   defaultVolume: number
   shouldAlwaysShowSeekBar: boolean
-  shouldQuitAppWithEscapeKey: boolean
+  shouldCloseWindowWithEscapeKey: boolean
 }
 
 const initialState: State = {
@@ -20,7 +20,7 @@ const initialState: State = {
   defaultViewMode: 'normal',
   defaultVolume: 1,
   shouldAlwaysShowSeekBar: false,
-  shouldQuitAppWithEscapeKey: false,
+  shouldCloseWindowWithEscapeKey: false,
 }
 
 export const settingsSlice = createSlice({
@@ -61,10 +61,10 @@ export const settingsSlice = createSlice({
         shouldAlwaysShowSeekBar: !state.shouldAlwaysShowSeekBar,
       }
     },
-    toggleShouldQuitAppWithEscapeKey(state) {
+    toggleShouldCloseWindowWithEscapeKey(state) {
       return {
         ...state,
-        shouldQuitAppWithEscapeKey: !state.shouldQuitAppWithEscapeKey,
+        shouldCloseWindowWithEscapeKey: !state.shouldCloseWindowWithEscapeKey,
       }
     },
   },
@@ -77,7 +77,7 @@ export const {
   setDefaultViewMode,
   setDefaultVolume,
   toggleShouldAlwaysShowSeekBar,
-  toggleShouldQuitAppWithEscapeKey,
+  toggleShouldCloseWindowWithEscapeKey,
 } = settingsSlice.actions
 
 export default settingsSlice.reducer
@@ -109,7 +109,7 @@ export const selectShouldAlwaysShowSeekBar = createSelector(
   (settings) => settings.shouldAlwaysShowSeekBar,
 )
 
-export const selectShouldQuitAppWithEscapeKey = createSelector(
+export const selectShouldCloseWindowWithEscapeKey = createSelector(
   selectSettings,
-  (settings) => settings.shouldQuitAppWithEscapeKey,
+  (settings) => settings.shouldCloseWindowWithEscapeKey,
 )

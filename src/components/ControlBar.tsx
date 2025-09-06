@@ -29,7 +29,7 @@ import { useAppSelector } from '~/store'
 import {
   selectDefaultViewMode,
   selectShouldAlwaysShowSeekBar,
-  selectShouldQuitAppWithEscapeKey,
+  selectShouldCloseWindowWithEscapeKey,
 } from '~/store/settings'
 import { createContextMenuHandler } from '~/utils/context-menu'
 import { formatDuration } from '~/utils/formatter'
@@ -42,8 +42,8 @@ const ControlBar = (props: Props) => {
   const { controlBarVisible } = props
 
   const shouldAlwaysShowSeekBar = useAppSelector(selectShouldAlwaysShowSeekBar)
-  const shouldQuitAppWithEscapeKey = useAppSelector(
-    selectShouldQuitAppWithEscapeKey,
+  const shouldCloseWindowWithEscapeKey = useAppSelector(
+    selectShouldCloseWindowWithEscapeKey,
   )
   const defaultViewMode = useAppSelector(selectDefaultViewMode)
 
@@ -118,8 +118,8 @@ const ControlBar = (props: Props) => {
           data: { checked: shouldAlwaysShowSeekBar },
         },
         {
-          type: 'quitAppWithEscapeKey',
-          data: { checked: shouldQuitAppWithEscapeKey },
+          type: 'closeWindowWithEscapeKey',
+          data: { checked: shouldCloseWindowWithEscapeKey },
         },
         {
           type: 'defaultViewMode',
@@ -133,7 +133,7 @@ const ControlBar = (props: Props) => {
       partialLoop,
       playbackRate,
       shouldAlwaysShowSeekBar,
-      shouldQuitAppWithEscapeKey,
+      shouldCloseWindowWithEscapeKey,
     ],
   )
 

@@ -2,7 +2,7 @@ import type { Stats } from 'node:fs'
 import { readdir, stat } from 'node:fs/promises'
 import { basename, dirname, join } from 'node:path'
 import { pathToFileURL } from 'node:url'
-import { type App, type IpcMainInvokeEvent, ipcMain, screen } from 'electron'
+import { type IpcMainInvokeEvent, ipcMain, screen } from 'electron'
 
 type BaseEntry = {
   name: string
@@ -57,7 +57,7 @@ const getEntries = async (directoryPath: string) => {
   return entries
 }
 
-const registerHandlers = (app: App) => {
+const registerHandlers = () => {
   ipcMain.handle('getCursorPosition', (_event: IpcMainInvokeEvent) =>
     screen.getCursorScreenPoint(),
   )
@@ -72,7 +72,6 @@ const registerHandlers = (app: App) => {
   ipcMain.handle('getParentEntry', (_event: IpcMainInvokeEvent, path: string) =>
     getEntry(dirname(path)),
   )
-  ipcMain.on('quit', (_event: IpcMainInvokeEvent) => app.quit())
 }
 
 export default registerHandlers

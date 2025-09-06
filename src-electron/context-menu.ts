@@ -19,6 +19,13 @@ const registerContextMenu = () => {
       click: () => send(event, { type: 'toggleAutoplay' }),
       type: 'checkbox',
     }),
+    closeWindowWithEscapeKey: (event, _params, { checked }) => ({
+      label: 'Close Window with Escape Key',
+      checked,
+      click: () =>
+        send(event, { type: 'toggleShouldCloseWindowWithEscapeKey' }),
+      type: 'checkbox',
+    }),
     defaultViewMode: (event, _params, { defaultViewMode }) => ({
       label: 'Default View Mode',
       submenu: [
@@ -58,12 +65,6 @@ const registerContextMenu = () => {
           send(event, { type: 'changePlaybackRate', data: { value } }),
         type: 'radio',
       })),
-    }),
-    quitAppWithEscapeKey: (event, _params, { checked }) => ({
-      label: 'Quit App with Escape Key',
-      checked,
-      click: () => send(event, { type: 'toggleShouldQuitAppWithEscapeKey' }),
-      type: 'checkbox',
     }),
   }
 

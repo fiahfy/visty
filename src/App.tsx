@@ -5,16 +5,16 @@ import useTitle from '~/hooks/useTitle'
 import useVideo from '~/hooks/useVideo'
 import { useAppDispatch, useAppSelector } from '~/store'
 import {
-  selectShouldQuitAppWithEscapeKey,
+  selectShouldCloseWindowWithEscapeKey,
   setDefaultViewMode,
   toggleShouldAlwaysShowSeekBar,
-  toggleShouldQuitAppWithEscapeKey,
+  toggleShouldCloseWindowWithEscapeKey,
 } from '~/store/settings'
 import { createContextMenuHandler } from '~/utils/context-menu'
 
 const App = () => {
-  const shouldQuitAppWithEscapeKey = useAppSelector(
-    selectShouldQuitAppWithEscapeKey,
+  const shouldCloseWindowWithEscapeKey = useAppSelector(
+    selectShouldCloseWindowWithEscapeKey,
   )
   const dispatch = useAppDispatch()
 
@@ -62,8 +62,8 @@ const App = () => {
           return togglePartialLoop()
         case 'toggleShouldAlwaysShowSeekBar':
           return dispatch(toggleShouldAlwaysShowSeekBar())
-        case 'toggleShouldQuitAppWithEscapeKey':
-          return dispatch(toggleShouldQuitAppWithEscapeKey())
+        case 'toggleShouldCloseWindowWithEscapeKey':
+          return dispatch(toggleShouldCloseWindowWithEscapeKey())
         case 'zoomIn':
           return zoomIn()
         case 'zoomOut':
@@ -117,8 +117,8 @@ const App = () => {
           return volumeUp()
         case 'Escape':
           e.preventDefault()
-          if (shouldQuitAppWithEscapeKey) {
-            return window.electronAPI.quit()
+          if (shouldCloseWindowWithEscapeKey) {
+            return window.windowAPI.close()
           }
           return window.windowAPI.exitFullscreen()
         case 'f':
@@ -148,7 +148,7 @@ const App = () => {
     nextTrack,
     previousTrack,
     seekTo,
-    shouldQuitAppWithEscapeKey,
+    shouldCloseWindowWithEscapeKey,
     toggleLoop,
     toggleMuted,
     togglePaused,

@@ -90,7 +90,7 @@ app.on('open-url', async (_event, url) => {
 app.whenReady().then(() => {
   registerApplicationMenu(createWindow)
   registerContextMenu()
-  registerHandlers(app)
+  registerHandlers()
 
   windowManager.restore()
 })
