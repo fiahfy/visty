@@ -1,3 +1,4 @@
+import { createStorage } from '@fiahfy/electron-storage/renderer'
 import {
   type Action,
   combineReducers,
@@ -20,10 +21,11 @@ import {
   REGISTER,
   REHYDRATE,
 } from 'redux-persist'
-import storage from 'redux-persist/lib/storage'
 import settingsReducer from '~/store/settings'
 import windowReducer from '~/store/window'
 import windowIdReducer from '~/store/window-id'
+
+const storage = createStorage(window.storageAPI)
 
 const reducers = combineReducers({
   settings: settingsReducer,

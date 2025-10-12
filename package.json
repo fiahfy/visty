@@ -6,7 +6,8 @@
     "@emotion/react": "11.14.0",
     "@emotion/styled": "11.14.1",
     "@fiahfy/electron-context-menu": "0.1.7",
-    "@fiahfy/electron-window": "0.1.8",
+    "@fiahfy/electron-storage": "0.0.3",
+    "@fiahfy/electron-window": "0.1.9",
     "@fontsource/roboto": "5.2.8",
     "@mui/icons-material": "7.3.4",
     "@mui/material": "7.3.4",
@@ -49,6 +50,7 @@
   "private": true,
   "productName": "Visty",
   "scripts": {
+    "build-electron": "YARN_ENABLE_SCRIPTS=1 yarn rebuild electron",
     "dev": "electron-forge start",
     "lint": "biome check",
     "make": "electron-forge make",

@@ -1,14 +1,20 @@
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import {
+  createStore,
+  register as registerStorage,
+} from '@fiahfy/electron-storage'
+import {
   createManager as createWindowManager,
   type WindowCreator,
 } from '@fiahfy/electron-window'
-import { app, BrowserWindow } from 'electron'
+import { app, BrowserWindow, screen } from 'electron'
 import started from 'electron-squirrel-startup'
 import registerApplicationMenu from './application-menu'
 import registerContextMenu from './context-menu'
 import registerHandlers from './handlers'
+
+const store = createStore()
 
 const dirPath = dirname(fileURLToPath(import.meta.url))
 
@@ -43,7 +49,35 @@ const windowCreator: WindowCreator = (optionsResolver) => {
 
 const windowManager = createWindowManager(windowCreator)
 
-const createWindow = (filePath: string) => windowManager.create({ filePath })
+const getOptions = () => {
+  try {
+    const value = store.get('persist:root')
+    if (typeof value !== 'string') {
+      return undefined
+    }
+    const state = JSON.parse(value)
+    const settings = JSON.parse(state.settings)
+    const defaultViewMode = settings.defaultViewMode
+    switch (defaultViewMode) {
+      case 'fullscreen':
+        return { fullscreen: true }
+      case 'maximized': {
+        const cursor = screen.getCursorScreenPoint()
+        const display = screen.getDisplayNearestPoint(cursor)
+        const bounds = display.bounds
+        return { height: bounds.height, width: bounds.width }
+      }
+    }
+    return undefined
+  } catch {
+    return undefined
+  }
+}
+
+const createWindow = (filePath: string) => {
+  const options = getOptions()
+  windowManager.create({ filePath }, options)
+}
 
 app.setAsDefaultProtocolClient('visty')
 
@@ -91,6 +125,7 @@ app.whenReady().then(() => {
   registerApplicationMenu(createWindow)
   registerContextMenu()
   registerHandlers()
+  registerStorage(store)
 
   windowManager.restore()
 })

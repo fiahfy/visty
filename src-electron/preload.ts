@@ -1,4 +1,5 @@
 import { exposeOperations as exposeContextMenuOperations } from '@fiahfy/electron-context-menu/preload'
+import { exposeOperations as exposeStorageOperations } from '@fiahfy/electron-storage/preload'
 import { exposeOperations as exposeWindowOperations } from '@fiahfy/electron-window/preload'
 import {
   contextBridge,
@@ -37,4 +38,5 @@ contextBridge.exposeInMainWorld('applicationMenuAPI', applicationMenuOperations)
 contextBridge.exposeInMainWorld('contextMenuAPI', exposeContextMenuOperations())
 contextBridge.exposeInMainWorld('electronAPI', electronOperations)
 contextBridge.exposeInMainWorld('messageAPI', messageOperations)
+contextBridge.exposeInMainWorld('storageAPI', exposeStorageOperations())
 contextBridge.exposeInMainWorld('windowAPI', exposeWindowOperations())
