@@ -22,9 +22,15 @@ const StoreProvider = (props: Props) => {
         return
       }
 
-      const newState = JSON.parse(value)
-      dispatch(replaceSettingsState({ state: JSON.parse(newState.settings) }))
-      dispatch(replaceWindowState({ state: JSON.parse(newState.window) }))
+      const state = Object.fromEntries(
+        Object.entries(JSON.parse(value)).map(([key, value]) => [
+          key,
+          typeof value === 'string' ? JSON.parse(value) : undefined,
+        ]),
+      )
+
+      dispatch(replaceSettingsState({ state: state.settings }))
+      dispatch(replaceWindowState({ state: state.window }))
     })
 
     return () => removeListener()
