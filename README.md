@@ -2,7 +2,7 @@
 
 [![Create Release](https://github.com/fiahfy/visty/actions/workflows/create-release.yml/badge.svg)](https://github.com/fiahfy/visty/actions/workflows/create-release.yml)
 
-> Simple Video Player based on Electron.
+> Simple video player based on Electron.
 
 ## Features
 

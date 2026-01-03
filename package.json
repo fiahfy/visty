@@ -1,6 +1,6 @@
 {
   "name": "visty",
-  "description": "Simple Video Player based on Electron.",
+  "description": "Simple video player based on Electron.",
   "version": "0.0.5-dev",
   "dependencies": {
     "@emotion/react": "11.14.0",
