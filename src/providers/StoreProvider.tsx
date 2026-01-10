@@ -46,7 +46,7 @@ const StoreProvider = (props: Props) => {
       dispatch(setWindowId({ windowId: id }))
       const filePath = params?.filePath
       if (filePath) {
-        dispatch(load(filePath, true))
+        dispatch(load(filePath))
       }
       setInitialized(true)
     })()

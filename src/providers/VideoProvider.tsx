@@ -24,9 +24,9 @@ import {
   saveVolume,
   selectAutoplay,
   selectCurrentTime,
-  selectError,
-  selectFile,
-  selectLoading,
+  selectFileName,
+  selectFilePath,
+  selectFileUrl,
   selectLoop,
   selectLoopRange,
   selectPan,
@@ -40,9 +40,9 @@ type Props = { children: ReactNode }
 const VideoProvider = (props: Props) => {
   const { children } = props
 
-  const file = useAppSelector(selectFile)
-  const loading = useAppSelector(selectLoading)
-  const error = useAppSelector(selectError)
+  const fileName = useAppSelector(selectFileName)
+  const filePath = useAppSelector(selectFilePath)
+  const fileUrl = useAppSelector(selectFileUrl)
 
   const loopRange = useAppSelector(selectLoopRange)
   const savedAutoplay = useAppSelector(selectAutoplay)
@@ -66,9 +66,9 @@ const VideoProvider = (props: Props) => {
   const [playbackRate, setPlaybackRate] = useState(1)
   const [playlistFile, setPlaylistFile] = useState<PlaylistFile>()
   const [size, setSize] = useState<{ height: number; width: number }>()
-  const [videoStatus, setVideoStatus] = useState<
-    'loading' | 'loaded' | 'error'
-  >('loading')
+  const [status, setStatus] = useState<'loading' | 'loaded' | 'error'>(
+    'loading',
+  )
   const [storedVolume, setStoredVolume] = useState(savedVolume)
   const [volume, setVolume] = useState(0)
   const [zoom, setZoom] = useState(1)
@@ -81,16 +81,6 @@ const VideoProvider = (props: Props) => {
     () => (loopRange ? loopRange[0] : undefined),
     [loopRange],
   )
-
-  const status = useMemo(() => {
-    if (loading) {
-      return 'loading'
-    }
-    if (error) {
-      return 'error'
-    }
-    return videoStatus
-  }, [error, loading, videoStatus])
 
   const message = useMemo(() => {
     switch (status) {
@@ -272,7 +262,7 @@ const VideoProvider = (props: Props) => {
   const previousTrack = useCallback(() => {
     const path = playlistFile?.previous.path
     if (path) {
-      dispatch(load(path, false))
+      dispatch(load(path))
       triggerAction('previousTrack')
     }
   }, [dispatch, playlistFile?.previous.path, triggerAction])
@@ -280,7 +270,7 @@ const VideoProvider = (props: Props) => {
   const nextTrack = useCallback(() => {
     const path = playlistFile?.next.path
     if (path) {
-      dispatch(load(path, false))
+      dispatch(load(path))
       triggerAction('nextTrack')
     }
   }, [dispatch, playlistFile?.next.path, triggerAction])
@@ -296,15 +286,15 @@ const VideoProvider = (props: Props) => {
       return
     }
 
-    const handleLoadStart = () => setVideoStatus('loading')
+    const handleLoadStart = () => setStatus('loading')
     const handleLoadedMetadata = async () => {
       setSize({
         height: video.videoHeight,
         width: video.videoWidth,
       })
-      setVideoStatus('loaded')
+      setStatus('loaded')
     }
-    const handleError = () => setVideoStatus('error')
+    const handleError = () => setStatus('error')
     const handleEnterPictureInPicture = () => setPictureInPicture(true)
     const handleLeavePictureInPicture = () => setPictureInPicture(false)
     video.addEventListener('loadedstart', handleLoadStart)
@@ -328,10 +318,6 @@ const VideoProvider = (props: Props) => {
   }, [])
 
   useEffect(() => {
-    if (loading) {
-      return
-    }
-
     if (initialized) {
       return
     }
@@ -353,7 +339,6 @@ const VideoProvider = (props: Props) => {
     video.volume = savedVolume
     panner.pan.value = savedPan
   }, [
-    loading,
     initialized,
     savedAutoplay,
     savedCurrentTime,
@@ -447,18 +432,18 @@ const VideoProvider = (props: Props) => {
 
   useEffect(() => {
     ;(async () => {
-      if (!file?.path) {
+      if (!filePath) {
         return
       }
 
       const playlistFile = await (async () => {
         try {
-          const directory = await window.electronAPI.getParentEntry(file.path)
+          const directory = await window.electronAPI.getParentEntry(filePath)
           const entries = (await window.electronAPI.getEntries(directory.path))
             .filter((entry) => isMediaFile(entry.path))
             .sort((a, b) => a.name.localeCompare(b.name))
 
-          if (!entries.find((entry) => entry.path === file.path)) {
+          if (!entries.find((entry) => entry.path === filePath)) {
             return undefined
           }
 
@@ -466,7 +451,7 @@ const VideoProvider = (props: Props) => {
             return undefined
           }
 
-          const index = entries.findIndex((entry) => entry.path === file.path)
+          const index = entries.findIndex((entry) => entry.path === filePath)
           const previousIndex = index === 0 ? entries.length - 1 : index - 1
           const previous = entries[previousIndex]
           const nextIndex = index === entries.length - 1 ? 0 : index + 1
@@ -480,7 +465,7 @@ const VideoProvider = (props: Props) => {
 
       setPlaylistFile(playlistFile)
     })()
-  }, [file?.path])
+  }, [filePath])
 
   const value = {
     actionCode,
@@ -491,7 +476,9 @@ const VideoProvider = (props: Props) => {
     changeVolume,
     currentTime,
     duration,
-    file,
+    fileName,
+    filePath,
+    fileUrl,
     fullscreen,
     loop,
     loopRange,

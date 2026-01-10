@@ -22,7 +22,8 @@ const Player = () => {
   const { setVisible, visible } = useTrafficLight()
 
   const {
-    file,
+    fileName,
+    fileUrl,
     fullscreen,
     message,
     ref,
@@ -222,7 +223,7 @@ const Player = () => {
         {/* biome-ignore lint/a11y/useMediaCaption: false positive */}
         <video
           ref={ref}
-          src={file?.url}
+          src={fileUrl}
           style={{
             background: 'black',
             display: status === 'loaded' ? 'block' : 'none',
@@ -269,7 +270,7 @@ const Player = () => {
           <Box sx={{ pointerEvents: 'auto' }}>
             <TitleBar
               onMouseEnter={handleMouseEnterBar}
-              title={file?.name ?? ''}
+              title={fileName ?? ''}
             />
           </Box>
         </Fade>

@@ -31,7 +31,9 @@ const VideoContext = createContext<
       changeVolume: (value: number) => void
       currentTime: number
       duration: number
-      file: File | undefined
+      fileName: string | undefined
+      filePath: string | undefined
+      fileUrl: string | undefined
       fullscreen: boolean
       loop: boolean
       loopRange: [number, number] | undefined

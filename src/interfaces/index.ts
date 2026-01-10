@@ -9,11 +9,13 @@ export type ApplicationMenuOperations = {
 }
 
 export type ElectronOperations = {
+  basename: (path: string) => string | undefined
   getCursorPosition: () => Promise<{ x: number; y: number }>
   getEntries: (directoryPath: string) => Promise<Entry[]>
   getEntry: (path: string) => Promise<Entry>
   getParentEntry: (path: string) => Promise<Entry>
   getPathForFile: (file: globalThis.File) => string
+  pathToFileURL: (path: string) => string | undefined
 }
 
 export type MessageOperations = {

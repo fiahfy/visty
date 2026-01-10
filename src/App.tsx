@@ -20,7 +20,7 @@ const App = () => {
 
   const {
     changePlaybackRate,
-    file,
+    fileName,
     loop,
     nextTrack,
     partialLoop,
@@ -38,7 +38,7 @@ const App = () => {
     zoomOut,
   } = useVideo()
 
-  useTitle(file?.name ?? '')
+  useTitle(fileName ?? '')
 
   useEffect(() => {
     const removeListener = window.messageAPI.onMessage((message) => {

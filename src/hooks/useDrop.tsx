@@ -37,7 +37,7 @@ const useDrop = () => {
         return
       }
       const path = window.electronAPI.getPathForFile(file)
-      dispatch(load(path, false))
+      dispatch(load(path))
     },
     [dispatch],
   )

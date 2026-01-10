@@ -14,6 +14,7 @@ const applicationMenuOperations = {
 }
 
 const electronOperations = {
+  basename: (path: string) => ipcRenderer.sendSync('basename', path),
   getCursorPosition: () => ipcRenderer.invoke('getCursorPosition'),
   getEntries: (directoryPath: string) =>
     ipcRenderer.invoke('getEntries', directoryPath),
@@ -21,6 +22,7 @@ const electronOperations = {
   getParentEntry: (filePath: string) =>
     ipcRenderer.invoke('getParentEntry', filePath),
   getPathForFile: (file: File) => webUtils.getPathForFile(file),
+  pathToFileURL: (path: string) => ipcRenderer.sendSync('pathToFileURL', path),
 }
 
 const messageOperations = {
